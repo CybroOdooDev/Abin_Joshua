@@ -1,0 +1,129 @@
+.o_kanban_view {
+    @include transparent-bg;
+
+    .o_kanban_renderer {
+        @include transparent-bg;
+        border-top: 1px solid $glass-border !important;
+
+        .o_kanban_record {
+            @include glass-effect($glass-bg-light, $blur-medium);
+            border-radius: $radius-md;
+            margin-bottom: 10px !important;
+            --KanbanRecord-background: transparent !important;
+            --bs-card-bg: transparent !important;
+            border: 1px solid $glass-border !important;
+
+            > div:not(.o_dropdown_kanban),
+            .oe_module_vignette {
+                background-color: transparent !important;
+                border: none !important;
+            }
+
+            .o_kanban_record_title,
+            h4, h5, h6 {
+                color: $text-white !important;
+            }
+
+            .oe_module_name,
+            .oe_module_desc,
+            .text-muted {
+                color: $text-muted !important;
+                span {
+                    color: $text-muted !important;
+                }
+            }
+
+            .btn-secondary {
+                @include glass-effect($glass-bg-light, $blur-light);
+                color: $text-white !important;
+
+                &:hover {
+                    @include glass-effect($hover-bg, $blur-medium);
+                    color: $text-white !important;
+                }
+            }
+        }
+
+        .o_kanban_quick_create {
+            @include transparent-bg;
+            backdrop-filter: blur($blur-light) saturate(180%) !important;
+            border: 3px solid $glass-border;
+            border-radius: $radius-xl;
+        }
+    }
+
+    .o_kanban_group {
+        @include transparent-bg;
+
+        .o_kanban_record {
+            @include glass-effect($glass-bg-light, $blur-medium);
+            border: 1px solid $glass-border !important;
+            margin-bottom: 5px;
+
+            &:hover {
+                @include glass-effect($glass-bg-light, $blur-heavy);
+                transform: translateY(-2px);
+                box-shadow: $shadow-medium;
+            }
+        }
+    }
+
+    .o_kanban_ungrouped {
+        .o_kanban_record {
+            @include glass-effect($glass-bg-light, $blur-light);
+            border: 1px solid $glass-border !important;
+
+            &:hover {
+                @include glass-effect($hover-bg, $blur-light);
+            }
+        }
+    }
+
+    // Reset ghost records (used for grid alignment) to be invisible (using higher specificity)
+    .o_kanban_record.o_kanban_ghost,
+    .o_kanban_renderer .o_kanban_record.o_kanban_ghost {
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        -webkit-backdrop-filter: none !important;
+        padding: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        height: 0 !important;
+        min-height: 0 !important;
+    }
+}
+
+/* ============================================================
+   Dashboard Kanban (Sales Teams) — Bottom Progress Block Fix
+   .o_kanban_primary_bottom.bottom_block has gray-200 bg in core,
+   which makes white text invisible. Override to dark glass.
+   ============================================================ */
+.o_kanban_dashboard .o_kanban_renderer {
+    .o_kanban_record {
+        // Text inside dashboard cards
+        *, div, span, a, strong, small, p, label {
+            color: $text-white !important;
+        }
+
+        // Bottom "Invoicing / progress" stripe
+        .o_kanban_primary_bottom.bottom_block {
+            background-color: rgba(15, 20, 28, 0.55) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+            border-radius: 0 0 $radius-md $radius-md !important;
+
+            *, span, div, a, strong {
+                color: $text-white !important;
+            }
+        }
+
+        // Progress bar label text
+        .o_kanban_primary_bottom {
+            *, span, div, a, strong {
+                color: $text-white !important;
+            }
+        }
+    }
+}

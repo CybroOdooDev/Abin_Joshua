@@ -1,0 +1,146 @@
+.o_main_navbar {
+    @include transparent-bg;
+    border-bottom: transparent !important;
+    position: relative;
+    z-index: 1000;
+
+    --NavBar-entry-backgroundColor: transparent !important;
+    --NavBar-entry-backgroundColor--hover: rgba(255, 255, 255, 0.15) !important;
+    --NavBar-entry-backgroundColor--active: transparent !important;
+    --NavBar-entry-backgroundColor--focus: transparent !important;
+
+    .o_navbar {
+        @include transparent-bg;
+        border: none !important;
+        border-radius: 0 !important;
+        margin: 0;
+        padding: 6px 12px;
+    }
+
+    // App home grid icon
+    .o_menu_toggle,
+    .o_home_menu_toggle {
+        color: $text-white !important;
+        background: transparent !important;
+        border-radius: $radius-sm !important;
+        padding: 4px 8px !important;
+        transition: $transition-base;
+
+        &:hover {
+            background: $hover-bg !important;
+            border-radius: $radius-sm !important;
+        }
+    }
+
+    // App label — plain white text
+    .o_menu_brand {
+        color: $text-white !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        background: transparent !important;
+        background-color: transparent !important;
+        border: none !important;
+        border-radius: 0 !important;
+        padding: 4px 10px !important;
+        letter-spacing: 0.2px;
+        transition: $transition-base;
+
+        &:hover {
+            color: rgba(255, 255, 255, 0.8) !important;
+            background: transparent !important;
+            background-color: transparent !important;
+        }
+    }
+
+    // Main navigation menu items
+    .o_menu_sections {
+        // Prevent outer container wrappers from drawing a secondary hover shade
+        .o-dropdown,
+        li,
+        div {
+            background: transparent !important;
+            background-color: transparent !important;
+            box-shadow: none !important;
+            border: none !important;
+
+            &:hover {
+                background: transparent !important;
+                background-color: transparent !important;
+            }
+        }
+
+        // Only the actual interactive link/button gets the single hover background
+        .o_nav_entry,
+        .dropdown-toggle,
+        .o-dropdown-toggle,
+        a,
+        button {
+            color: rgba(255, 255, 255, 0.85) !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            background-image: none !important;
+            border-radius: $radius-sm !important;
+            padding: 5px 12px !important;
+            font-size: 13.5px;
+            border: none !important;
+            box-shadow: none !important;
+            transition: $transition-base;
+
+            &:hover,
+            &:focus {
+                background: $hover-bg !important;
+                background-color: $hover-bg !important;
+                color: $text-white !important;
+            }
+
+            &:active,
+            &.active,
+            &.o_active,
+            &.show,
+            &[aria-expanded="true"] {
+                background: transparent !important;
+                background-color: transparent !important;
+                color: $text-white !important;
+                font-weight: 600 !important;
+            }
+        }
+    }
+
+    // Right-side systray — single hover shade
+    .o_menu_systray {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+
+        li,
+        .o-dropdown,
+        div {
+            background: transparent !important;
+            background-color: transparent !important;
+
+            &:hover {
+                background: transparent !important;
+                background-color: transparent !important;
+            }
+        }
+
+        .o_nav_entry,
+        .dropdown-toggle,
+        .o-dropdown-toggle,
+        a,
+        button {
+            color: $text-white !important;
+            background: transparent !important;
+            background-color: transparent !important;
+            border-radius: $radius-sm !important;
+            padding: 5px 8px !important;
+            transition: $transition-base;
+
+            &:hover {
+                background: $hover-bg !important;
+                background-color: $hover-bg !important;
+                border-radius: $radius-sm !important;
+            }
+        }
+    }
+}
