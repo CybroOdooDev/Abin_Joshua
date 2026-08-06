@@ -1,0 +1,2 @@
+id,name,model_id,group_id/id,operation
+access_x_library_book_user,Library Book User,x_library.book,base.group_user,crud

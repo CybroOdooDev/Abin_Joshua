@@ -1,0 +1,24 @@
+<odoo>
+
+    <!-- Step A: define the field itself -->
+    <record id="field_x_loyalty_points" model="ir.model.fields">
+        <field name="name">x_loyalty_points</field>
+        <field name="field_description">Loyalty Points</field>
+        <field name="model_id" ref="base.model_res_partner"/>
+        <field name="ttype">integer</field>
+    </record>
+
+    <!-- Step B: show it on the form view -->
+    <record id="view_partner_form_loyalty" model="ir.ui.view">
+        <field name="name">res.partner.form.loyalty</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='email']" position="after">
+                <label for="x_loyalty_points" string="Loyalty Points"/>
+                <field name="x_loyalty_points" string="Loyalty Points"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
