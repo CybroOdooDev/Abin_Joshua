@@ -24,6 +24,7 @@ Credits
 * Developer: (V17) Junaidul Ansar M , Contact: odoo@cybrosys.com
              (V18) Raveena Vijayan V , Contact: odoo@cybrosys.com
              (V19) Henna Mehjabin, Contact: odoo@cybrosys.com
+             (V20) Abin Joshua Hermon, Contact: odoo@cybrosys.com
 
 Contacts
 --------
