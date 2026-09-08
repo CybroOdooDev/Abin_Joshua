@@ -18,7 +18,11 @@
 #    (AGPL v3) along with this program.
 #    If not, see <http://www.gnu.org/licenses/>.
 #
-#############################################################################
+import logging
+
+_logger = logging.getLogger(__name__)
+
+
 def post_init_hook(env):
 
     env.cr.execute("""
@@ -156,20 +160,24 @@ def post_init_hook(env):
         END;
         $$ LANGUAGE plpgsql;
     """)
-    env.cr.execute("""
-        CREATE OR REPLACE FUNCTION trigger_on_table_creation()
-        RETURNS EVENT_TRIGGER AS $$
-        BEGIN
-            PERFORM add_update_trigger_to_new_tables();
-        END;
-        $$ LANGUAGE plpgsql;
-    """)
-    env.cr.execute("""
-        CREATE EVENT TRIGGER auto_add_delete_triggers
-        ON ddl_command_end
-        WHEN TAG IN ('CREATE TABLE')
-        EXECUTE FUNCTION trigger_on_table_creation();
-    """)
+    try:
+        with env.cr.savepoint():
+            env.cr.execute("""
+                CREATE OR REPLACE FUNCTION trigger_on_table_creation()
+                RETURNS EVENT_TRIGGER AS $$
+                BEGIN
+                    PERFORM add_update_trigger_to_new_tables();
+                END;
+                $$ LANGUAGE plpgsql;
+            """)
+            env.cr.execute("""
+                CREATE EVENT TRIGGER auto_add_delete_triggers
+                ON ddl_command_end
+                WHEN TAG IN ('CREATE TABLE')
+                EXECUTE FUNCTION trigger_on_table_creation();
+            """)
+    except Exception:
+        _logger.info("Database user lacks superuser privileges; event trigger skipped. Table triggers will be maintained via registry hook.")
     env.cr.execute("""
     CREATE OR REPLACE FUNCTION handle_log_reinsert()
     RETURNS TRIGGER AS $$
@@ -243,9 +251,13 @@ def post_init_hook(env):
     """)
 
 def uninstall_hook(env):
-    env.cr.execute("""
-        DROP EVENT TRIGGER IF EXISTS auto_add_delete_triggers;
-    """)
+    try:
+        with env.cr.savepoint():
+            env.cr.execute("""
+                DROP EVENT TRIGGER IF EXISTS auto_add_delete_triggers;
+            """)
+    except Exception:
+        pass
     env.cr.execute("""
         DROP TRIGGER IF EXISTS after_delete_trigger ON undo_redo;
     """)

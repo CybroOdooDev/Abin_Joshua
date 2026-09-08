@@ -49,3 +49,12 @@ class UndoRedo(models.TransientModel):
             order='id DESC',
         )
         return undo_record.ids
+
+    def _register_hook(self):
+        super()._register_hook()
+        try:
+            with self.env.cr.savepoint():
+                self.env.cr.execute("SELECT add_update_trigger_to_new_tables();")
+        except Exception:
+            pass
+

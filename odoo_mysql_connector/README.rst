@@ -23,7 +23,7 @@ Credits
 -------
 * Developers: (V17) Unnimaya C O,
               (V18) Manasa TP,
-              (V19) Aysha Shalin
+              (V19) Aysha Shalin,
               (V20) Abin Joshua Hermon
   Contact: odoo@cybrosys.com
 

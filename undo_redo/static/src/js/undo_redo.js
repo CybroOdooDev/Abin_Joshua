@@ -3,54 +3,87 @@
 import { FormController } from '@web/views/form/form_controller';
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
-const { useState, onWillStart } = owl;
+import { proxy, effect, onMounted, onWillDestroy, onWillStart } from "@odoo/owl";
 
 patch(FormController.prototype, {
-// Setup function initializes services and state
-     setup() {
-            super.setup();
-            this.orm = useService('orm')
-            this.state = useState({
-                ...this.state,
-                undo: [],
-                redo: [],
-            })
-            onWillStart(async () => {
-                await this.setData();
-            })
-     },
-// Fetch undo and redo IDs for the current record
-     async setData(){
+    setup() {
+        super.setup();
+        this.orm = useService('orm');
+        this.state = proxy({
+            ...(this.state || {}),
+            undo: [],
+            redo: [],
+        });
+
+        onWillStart(async () => {
+            await this.setData();
+        });
+
+        let disposeUndoEffect = () => {};
+        onMounted(() => {
+            disposeUndoEffect = effect(() => {
+                const resId = this.model?.root?.resId;
+                const resModel = this.model?.root?.resModel;
+                if (resId && resModel) {
+                    this.setData();
+                } else {
+                    this.state.undo = [];
+                    this.state.redo = [];
+                }
+            });
+        });
+        onWillDestroy(disposeUndoEffect);
+    },
+
+    async setData() {
         this.state.undo = await this.getData('undo');
         this.state.redo = await this.getData('redo');
-     },
-// Perform undo by deleting the most recent undo record
+    },
+
     async undo() {
-        this.state.count = await this.orm.call("undo.redo", "unlink", [this.state.undo[0]]);
+        if (!this.state.undo.length) {
+            return;
+        }
+        await this.orm.call("undo.redo", "unlink", [this.state.undo[0]]);
         await this.setData();
-        await this.env.searchModel._notify();
+        if (this.model) {
+            await this.model.load();
+        }
+        this.env.searchModel?._notify?.();
     },
-// Perform redo by deleting the most recent redo record
+
     async redo() {
-        this.state.count = await this.orm.call("undo.redo", "unlink", [this.state.redo[0]]);
+        if (!this.state.redo.length) {
+            return;
+        }
+        await this.orm.call("undo.redo", "unlink", [this.state.redo[0]]);
         await this.setData();
-        await this.env.searchModel._notify();
+        if (this.model) {
+            await this.model.load();
+        }
+        this.env.searchModel?._notify?.();
     },
-    getData(mode){
-        return this.orm.call("undo.redo", "get_data",[this.props.resModel, this.props.resId, mode]);
+
+    async getData(mode) {
+        const resModel = this.model?.root?.resModel || this.props.resModel;
+        const resId = this.model?.root?.resId || this.props.resId;
+        if (!resModel || !resId) {
+            return [];
+        }
+        return await this.orm.call("undo.redo", "get_data", [resModel, resId, mode]);
     },
-// Override save to refresh undo/redo data after save
+
     async save(params = {}) {
-        const result = await super.save(params)
+        const result = await super.save(...arguments);
         await this.setData();
         return result;
     },
-// Hook to refresh data if the user tries to leave without saving
-    beforeUnload() {
-        const result = super.beforeUnload();
+
+    async beforeUnload(ev) {
+        const result = super.beforeUnload ? await super.beforeUnload(...arguments) : undefined;
         if (!result) {
-            this.setData();
+            await this.setData();
         }
         return result;
-    }
+    },
 });

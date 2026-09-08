@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'Undo and Redo',
-    'version': '19.5.1.0.1',
+    'version': '19.5.1.0.0',
     'category': 'Tools',
     'summary': 'Module for undo and redo in Odoo',
     'description': """This module adds global undo and
@@ -35,7 +35,7 @@
     'website': 'https://www.cybrosys.com',
     'depends': ['web'],
     'data': [
-        'security/ir.model.access.csv',
+        'security/ir.access.csv',
     ],
     'assets': {
         'web.assets_backend': [
