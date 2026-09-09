@@ -24,6 +24,7 @@ Credits
 * Developers: (V17) Shyamgeeth PP,
               (V18) Aysha Shalin,
               (V19) Rahna Rasheed,
+              (V20) Abin Joshua Hermon,
   Contact : odoo@cybrosys.com
 
 Contacts

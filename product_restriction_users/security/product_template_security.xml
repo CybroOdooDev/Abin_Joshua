@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Access Rule for Internal Users -->
+        <record id="product_template_rule_internal_user" model="ir.access">
+            <field name="name">Restrict Products From Users</field>
+            <field name="model_id" ref="product.model_product_template"/>
+            <field name="group_id" ref="base.group_user"/>
+            <field name="operation">crud</field>
+            <field name="domain">['|', ('is_product', '=', True), ('restrict_user_ids', 'in', user.id)]</field>
+        </record>
+
+        <!-- Access Rule for Admin / Access Rights Manager -->
+        <record id="product_template_rule_admin" model="ir.access">
+            <field name="name">Products For Admin</field>
+            <field name="model_id" ref="product.model_product_template"/>
+            <field name="group_id" ref="base.group_erp_manager"/>
+            <field name="operation">crud</field>
+            <field name="domain">[(1, '=', 1)]</field>
+        </record>
+    </data>
+</odoo>

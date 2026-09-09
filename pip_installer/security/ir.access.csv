@@ -1,3 +1,0 @@
-id,name,model_id,group_id/id,operation,domain
-access_pip_install,access.pip.install,pip.install,base.group_user,crud,
-access_import_message,access.import.message,import.message,base.group_user,crud,

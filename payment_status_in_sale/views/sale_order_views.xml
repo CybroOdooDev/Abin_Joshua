@@ -75,4 +75,21 @@
             </xpath>
         </field>
     </record>
+    <!-- Inherited sale order dashboard list view (Orders). -->
+    <record id="sale_order_list_with_dashboard" model="ir.ui.view">
+        <field name="name">sale.order.list.dashboard.inherit.payment.status.in.sale</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_list_with_dashboard"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_status']" position="after">
+                <field name="payment_status" optional="show"
+                       decoration-success="payment_status in ['Paid', 'Reversed']"
+                       decoration-danger="payment_status == 'Not Paid'"
+                       decoration-info="payment_status == 'In Payment'"
+                       decoration-bf="payment_status == 'No invoice'"
+                       decoration-warning="payment_status == 'Partially Paid'"
+                       widget="badge"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>
