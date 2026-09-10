@@ -19,7 +19,7 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 ################################################################################
-from odoo import Command, fields, models
+from odoo import fields, models
 
 
 class ResUsers(models.Model):
@@ -33,6 +33,9 @@ class ResUsers(models.Model):
         help='choose Product and Product category depends upon your need')
     allowed_product_ids = fields.Many2many(
         comodel_name='product.template',
+        relation='product_template_res_users_rel',
+        column1='res_users_id',
+        column2='product_template_id',
         string="Products", store=True,
         help='Show to allow the products for assigned users')
     allowed_product_category_ids = fields.Many2many(
@@ -43,56 +46,13 @@ class ResUsers(models.Model):
                               help='Check the user is admin or not')
 
     def write(self, vals):
-        """Write the values of restrict user ids """
-        res = super(ResUsers, self).write(vals)
-        for user in self:
-            if user.restricted_type == 'product':
-                products = self.env['product.template'].sudo(). \
-                    search([('restrict_user_ids', 'in', user.id)])
-                if user.allowed_product_ids:
-                    for product in products:
-                        product.is_product = True
-                    for product in self.env['product.template'].sudo(). \
-                            search([('restrict_user_ids', 'not in',
-                                     [rec.id for rec in products])]):
-                        product.is_product = False
-                else:
-                    for product in self.env['product.template'].sudo().search(
-                            []):
-                        product.is_product = True
-                for user_product in self.allowed_product_ids:
-                    user_product.sudo().write({
-                        'restrict_user_ids': [(4, user.id)]
-                    })
-            else:
-                products = self.env['product.template'].sudo().search([])
-                if user.allowed_product_category_ids:
-                    products.is_product = False
-                    products_categ = self.env['product.template']. \
-                        search([('categ_id', 'in', [int(categ.id) for categ in
-                                                    user.allowed_product_category_ids])])
-                    for pro in products:
-                        if pro not in products_categ:
-                            pro.sudo().write({'restrict_user_ids': [
-                                Command.unlink(user.id)]})
-
-                    for product in products_categ:
-                        product.is_product = False
-                        product.sudo().write({
-                            'restrict_user_ids': [(4, user.id)]
-                        })
-                else:
-                    products.is_product = True
-                    for product in products:
-                        if user in product.restrict_user_ids:
-                            product.sudo().write(
-                                {'restrict_user_ids': [
-                                    Command.unlink(user.id)]})
+        """Clear access caches when product restrictions are changed."""
+        res = super().write(vals)
+        if {'restricted_type', 'allowed_product_ids', 'allowed_product_category_ids'} & set(vals):
+            self.env['ir.access']._clear_caches()
         return res
 
     def _compute_is_admin(self):
-        """ Compute the value of is_admin based on the user id admin or not"""
-        for admin in self:
-            admin.is_admin = False
-            if admin.has_group('base.group_erp_manager'):
-                admin.is_admin = True
+        """ Compute the value of is_admin based on whether the user is admin or not"""
+        for user in self:
+            user.is_admin = user.has_group('base.group_erp_manager')

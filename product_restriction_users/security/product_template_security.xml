@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-        <!-- Access Rule for Internal Users -->
+        <!-- Global Restriction for Internal Users -->
         <record id="product_template_rule_internal_user" model="ir.access">
             <field name="name">Restrict Products From Users</field>
             <field name="model_id" ref="product.model_product_template"/>
-            <field name="group_id" ref="base.group_user"/>
+            <field name="group_id" eval="False"/>
             <field name="operation">crud</field>
-            <field name="domain">['|', ('is_product', '=', True), ('restrict_user_ids', 'in', user.id)]</field>
+            <field name="domain">[(1, '=', 1)] if user.has_group('base.group_erp_manager') or (user.restricted_type == 'product' and not user.allowed_product_ids) or (user.restricted_type == 'category' and not user.allowed_product_category_ids) else ([('id', 'in', user.allowed_product_ids.ids)] if user.restricted_type == 'product' else [('categ_id', 'child_of', user.allowed_product_category_ids.ids)])</field>
         </record>
 
         <!-- Access Rule for Admin / Access Rights Manager -->
@@ -17,6 +17,7 @@
             <field name="group_id" ref="base.group_erp_manager"/>
             <field name="operation">crud</field>
             <field name="domain">[(1, '=', 1)]</field>
+            <field name="active" eval="False"/>
         </record>
     </data>
 </odoo>
