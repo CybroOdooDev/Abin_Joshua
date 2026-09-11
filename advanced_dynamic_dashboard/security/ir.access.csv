@@ -1,0 +1,5 @@
+id,name,model_id,group_id/id,operation,domain
+access_dashboard_block,access.dashboard.block,dashboard.block,base.group_user,crud,
+access_dashboard_menu,access.dashboard.menu,dashboard.menu,base.group_user,crud,
+access_dashboard_theme,access.dashboard.theme,dashboard.theme,base.group_user,crud,
+access_dashboard_mail,access.dashboard.mail,dashboard.mail,base.group_user,crud,
