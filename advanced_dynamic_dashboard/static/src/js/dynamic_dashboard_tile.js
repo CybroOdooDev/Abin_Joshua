@@ -1,7 +1,7 @@
 /** @odoo-module **/
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
 import { _t } from "@web/core/l10n/translation";
-const { Component, xml } = owl;
+import { Component, xml } from "@odoo/owl";
 
 export class DynamicDashboardTile extends Component {
     // Setup function of the class DynamicDashboardTile
@@ -55,7 +55,7 @@ export class DynamicDashboardTile extends Component {
 }
 DynamicDashboardTile.template = xml `
     <div class="resize-drag tile"
-        t-on-dblclick="getRecords"
+        t-on-dblclick="(ev) => this.getRecords(ev)"
         t-att-data-id="this.props.widget.id"
         t-att-data-x="this.props.widget.data_x"
         t-att-data-y="this.props.widget.data_y"
@@ -76,12 +76,12 @@ DynamicDashboardTile.template = xml `
                  class="tile-container__status-container">
                 <h2 t-att-style="this.props.widget.text_color"
                     class="status-container__title">
-                    <t t-esc="this.props.widget.name"/>
+                    <t t-out="this.props.widget.name"/>
                 </h2>
                 <div class="status-container__figures d-flex flex-wrap align-items-baseline">
                     <h3 class="mb-0 mb-md-1 mb-lg-0 mr-1"
                         t-att-style="this.props.widget.val_color">
-                        <t t-esc="this.props.widget.value"/>
+                        <t t-out="this.props.widget.value"/>
                     </h3>
                 </div>
             </div>

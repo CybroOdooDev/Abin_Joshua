@@ -20,76 +20,70 @@
 #
 #############################################################################
 from odoo import models
+from odoo.tools import SQL
 
-def get_sql(from_string, where_string, from_params , where_params):
-    """Fetch all params and compine from and where params"""
-    return from_string, where_string, from_params + where_params
 
 def get_query(self, args, operation, field, start_date=None, end_date=None,
               group_by=False, apply_ir_rules=False):
     """ Dashboard block Query Creation """
-    # Use _search instead of _where_calc
     query = self._search(
-        domain=args,  # 'args' is the domain
+        domain=args,
         offset=0,
         limit=None,
         order=None,
-        active_test=True,  # Matches your old active_test=True
-        bypass_access=not apply_ir_rules  # If apply_ir_rules=True, don't bypass (apply rules); else bypass
+        active_test=True,
+        bypass_access=not apply_ir_rules,
     )
 
-    # The rest of your code remains the same...
-    if operation and field:
-        data = 'COALESCE(%s(%s.%s),0) AS value' % (
-            operation.upper(), self._table, field.name)
-        join = ''
-        group_by_str = ''
+    join_sql = None
+    group_by_sql = None
+
+    if operation:
+        op_str = operation.upper()
+        if op_str not in ('SUM', 'AVG', 'COUNT', 'MAX', 'MIN'):
+            op_str = 'COUNT'
+        field_name = field.name if field else 'id'
+        select_value = SQL("COALESCE(%s(%s), 0) AS value", SQL(op_str), SQL.identifier(self._table, field_name))
+
         if group_by:
-            if group_by.ttype == 'many2one':
-                relation_model = group_by.relation.replace('.', '_')
-                join = ' INNER JOIN %s on "%s".id = "%s".%s' % (
-                    relation_model, relation_model, self._table, group_by.name)
-                rec_name = self.env[group_by.relation]._rec_name_fallback()
-                data = data + ',"%s".%s AS %s' % (
-                    relation_model, rec_name, group_by.name)
-                group_by_str = ' Group by "%s".%s' % (relation_model, rec_name)
+            if group_by.ttype == 'many2one' and group_by.relation in self.env:
+                rel_model = self.env[group_by.relation]
+                rel_table = rel_model._table
+                rec_name = rel_model._rec_name_fallback()
+                join_sql = SQL("INNER JOIN %s ON %s = %s",
+                               SQL.identifier(rel_table),
+                               SQL.identifier(rel_table, 'id'),
+                               SQL.identifier(self._table, group_by.name))
+                select_sql = SQL("%s, %s AS %s",
+                                 select_value,
+                                 SQL.identifier(rel_table, rec_name),
+                                 SQL.identifier(group_by.name))
+                group_by_sql = SQL("GROUP BY %s", SQL.identifier(rel_table, rec_name))
             else:
-                data = data + ',"%s".%s' % (self._table, group_by.name)
-                group_by_str = ' Group by "%s".%s' % (
-                    self._table, str(group_by.name))
+                select_sql = SQL("%s, %s AS %s",
+                                 select_value,
+                                 SQL.identifier(self._table, group_by.name),
+                                 SQL.identifier(group_by.name))
+                group_by_sql = SQL("GROUP BY %s", SQL.identifier(self._table, str(group_by.name)))
+        else:
+            select_sql = select_value
     else:
-        data = '"%s".id' % (self._table)
-    # from_clause, where_clause, where_clause_params = query.get_sql()
-    from_string, from_params = query.from_clause
-    where_string, where_params = query.where_clause
-    from_clause, where_clause, where_clause_params= get_sql(from_string, where_string, from_params , where_params)
+        select_sql = SQL("%s AS id", SQL.identifier(self._table, 'id'))
 
-
-    where_str = where_clause and (" WHERE %s" % where_clause) or ''
-    extra_where = []
     if start_date and start_date != 'null':
-        extra_where.append(f'"{self._table}"."create_date" >= \'{start_date}\'')
+        query.add_where(SQL('%s >= %s', SQL.identifier(self._table, 'create_date'), start_date))
     if end_date and end_date != 'null':
-        extra_where.append(f'"{self._table}"."create_date" <= \'{end_date}\'')
-    if extra_where:
-        if where_str:
-            where_str += " AND " + " AND ".join(extra_where)
-        else:
-            where_str = " WHERE " + " AND ".join(extra_where)
+        query.add_where(SQL('%s <= %s', SQL.identifier(self._table, 'create_date'), end_date))
 
-    query_str = 'SELECT %s FROM ' % data + from_clause + join + where_str + group_by_str
+    from_clause = SQL("%s %s", query.from_clause, join_sql) if join_sql else query.from_clause
+    where_clause = SQL("WHERE %s", query.where_clause) if query._where_clauses else SQL("")
 
-    def format_param(x):
-        """Format the input as a string, handling tuples and single values appropriately."""
-        if not isinstance(x, tuple):
-            return "'" + str(x) + "'"
-        elif isinstance(x, tuple) and len(x) == 1:
-            return "(" + str(x[0]) + ")"
-        else:
-            return str(x)
-
-    exact_query = query_str % tuple(map(format_param, where_clause_params))
-    return exact_query
+    final_query = SQL("SELECT %s FROM %s %s %s",
+                      select_sql,
+                      from_clause,
+                      where_clause,
+                      group_by_sql or SQL(""))
+    return final_query
 
 
 models.BaseModel.get_query = get_query

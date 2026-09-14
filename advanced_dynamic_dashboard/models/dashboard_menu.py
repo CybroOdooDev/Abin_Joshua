@@ -27,7 +27,7 @@ class DashboardMenu(models.Model):
     _name = "dashboard.menu"
     _description = "Dashboard Menu"
 
-    name = fields.Char(string="Name", ondelete='cascade',
+    name = fields.Char(string="Name",
                        help="Enter a name for the dashboard menu")
     menu_id = fields.Many2one('ir.ui.menu', string="Parent Menu",
                               help="Parent Menu Location of New Dashboard",

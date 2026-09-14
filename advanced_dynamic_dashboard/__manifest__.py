@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': "Advanced Dynamic Dashboard",
-    'version': '19.5.1.0.0',
+    'version': '1.0.0',
     'category': 'Productivity',
     'summary': """Create Configurable Dashboards Easily""",
     'description': """Create Configurable Advanced Dynamic Dashboard to get the 
@@ -43,6 +43,7 @@
     ],
     'assets': {
         'web.assets_backend': [
+            'advanced_dynamic_dashboard/static/lib/font-awesome/css/font-awesome.min.css',
             'advanced_dynamic_dashboard/static/src/css/**/*.css',
             'advanced_dynamic_dashboard/static/src/scss/**/*.scss',
             'advanced_dynamic_dashboard/static/src/js/**/*.js',

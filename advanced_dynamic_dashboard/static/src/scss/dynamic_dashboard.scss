@@ -103,7 +103,7 @@ text-shadow: 0px 0px 5px #9388ff;
     margin: -0.5em 0 2em 0;
   }
 
-  .btn-search_edit, {
+  .btn-search_edit {
     color: #313131;
     border: none;
     background-color: #979797 !important;
@@ -119,12 +119,12 @@ text-shadow: 0px 0px 5px #9388ff;
     color: #1f1f1f !important;
   }
 
-  div.navbar {
+  div.navbar.navbar-style {
     color: #909090;
     background-color: #2A2A2A !important;
   }
 
-  .navbar-collapse {
+  .navbar-style .navbar-collapse {
     margin-bottom: 12px !important;
   }
 
@@ -195,7 +195,7 @@ text-shadow: 0px 0px 5px #9388ff;
 .search-clear{
     margin-left: -80px;
 }
-label input{
+.o_advanced_dynamic_dashboard label input{
     appearance: none;
 }
 .mode{

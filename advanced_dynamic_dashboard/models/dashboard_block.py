@@ -84,7 +84,7 @@ class DashboardBlock(models.Model):
                              help="Added model_id model")
     edit_mode = fields.Boolean(string="Edit Mode",
                                help="Enable to edit chart and tile",
-                               default=False, invisible=True)
+                               default=False)
 
     @api.onchange('model_id')
     def _onchange_model_id(self):
@@ -105,13 +105,19 @@ class DashboardBlock(models.Model):
                     isinstance(filter_item, tuple) and filter_item[
                 0] == 'create_date')]
             rec.filter = repr(filter_list)
+            icon_name = (rec.fa_icon or 'fa-bar-chart').strip()
+            if not icon_name.startswith('fa '):
+                if not icon_name.startswith('fa-'):
+                    icon_name = f'fa fa-{icon_name}'
+                else:
+                    icon_name = f'fa {icon_name}'
             vals = {'id': rec.id, 'name': rec.name, 'type': rec.type,
-                    'graph_type': rec.graph_type, 'icon': rec.fa_icon,
+                    'graph_type': rec.graph_type, 'icon': icon_name,
                     'model_name': rec.model_name,
-                    'color': f'background-color: {rec.tile_color};' if rec.tile_color else '#1f6abb;',
-                    'text_color': f'color: {rec.text_color};' if rec.text_color else '#FFFFFF;',
-                    'val_color': f'color: {rec.val_color};' if rec.val_color else '#FFFFFF;',
-                    'icon_color': f'color: {rec.tile_color};' if rec.tile_color else '#1f6abb;',
+                    'color': f'background-color: {rec.tile_color or "#1f6abb"};',
+                    'text_color': f'color: {rec.text_color or "#FFFFFF"};',
+                    'val_color': f'color: {rec.val_color or "#FFFFFF"};',
+                    'icon_color': f'color: {rec.fa_color or rec.tile_color or "#1f6abb"};',
                     'height': rec.height,
                     'width': rec.width,
                     'translate_x': rec.translate_x,
@@ -152,14 +158,17 @@ class DashboardBlock(models.Model):
                                                                         end_date))
                     records = self._cr.dictfetchall()
                     magnitude = 0
-                    total = records[0].get('value')
-                    while abs(total) >= 1000:
+                    total = (records[0].get('value') or 0) if records else 0
+                    while abs(total) >= 1000 and magnitude < 5:
                         magnitude += 1
                         total /= 1000.0
                     val = '%.2f%s' % (
                         total, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
-                    records[0]['value'] = val
-                    vals.update(records[0])
+                    if records:
+                        records[0]['value'] = val
+                        vals.update(records[0])
+                    else:
+                        vals.update({'value': val})
             block_id.append(vals)
         for block in block_id:
             if 'x_axis' in block and isinstance(block['x_axis'], list) and all(

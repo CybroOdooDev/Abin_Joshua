@@ -3,23 +3,13 @@ import { loadJS } from '@web/core/assets';
 import { getColor } from "@web/core/colors/colors";
 import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-const { Component, xml, onWillStart, onMounted, signal } = owl;
-
-function useRef(name) {
-    const ref = signal.ref();
-    Object.defineProperty(ref, 'el', {
-        get() {
-            return ref();
-        },
-    });
-    return ref;
-}
+import { Component, xml, onWillStart, onMounted, signal } from "@odoo/owl";
 
 export class DynamicDashboardChart extends Component {
     // Setup function of the class DynamicDashboardChart
     setup() {
         this.doAction = this.props.doAction.doAction;
-        this.chartRef = useRef("chart");
+        this.chartRef = signal.ref();
         this.dialog = this.props.dialog;
         onWillStart(async () => {
             await loadJS("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js")
@@ -154,7 +144,7 @@ export class DynamicDashboardChart extends Component {
                 data.push(value);
             }
             new Chart(
-                this.chartRef.el,
+                this.chartRef(),
                     {
                         type: this.props.widget.graph_type || 'bar',
                         data: {
@@ -212,7 +202,7 @@ DynamicDashboardChart.template = xml`
                     class="fa fa-times block_delete chart-setting"/>
             </div>
             <h3 class="chart_title">
-                <t t-esc="this.props.widget.name"/>
+                <t t-out="this.props.widget.name"/>
             </h3>
             <div class="row-class">
                 <div class="col-md-12 chart_canvas" id="chart_canvas"

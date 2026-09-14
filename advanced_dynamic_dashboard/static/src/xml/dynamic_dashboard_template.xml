@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
     <!--DASHBOARD VIEW WITH NAVIGATION-BAR, INTERACTJS TEMPLATE-->
     <t t-name="owl.AdvancedDynamicDashboard" owl="1">
-        <div class="container" style="min-height:-webkit-fill-available;">
+        <div class="container o_advanced_dynamic_dashboard" style="min-height:-webkit-fill-available;">
             <div class="navbar navbar-expand-md navbar-light mb-4 navbar-style border-bottom"
                  role="navigation" style="margin-top:0.5rem">
                 <button class="navbar-toggler" id="dropdownNavbar" type="button"
@@ -82,14 +82,14 @@
                 <div class="search-group" style="margin-right: 30px;padding-top:20px;">
                     <!-- Search Bar -->
                     <div class="navbar-items btn-group search-box">
-                        <input class="form-control mr-sm-2 search-input-chart" type="text" placeholder="Search" t-on-change="input_change" id="search-input-chart" aria-label="Search"/>
-                        <span id="searchclear" t-on-click="clearSearch">
+                        <input class="form-control mr-sm-2 search-input-chart" type="text" placeholder="Search" t-on-change="(ev) => this.input_change(ev)" id="search-input-chart" aria-label="Search"/>
+                        <span id="searchclear" t-on-click="(ev) => this.clearSearch(ev)">
                             <i class="fa fa-times search-clear"
                               style="margin-left:-25px;margin-top:9px;"/>
                         </span>
                     </div>
                     <button class="btn btn-outline-success my-2 my-sm-0"
-                            t-on-click="clickSearch"
+                            t-on-click="(ev) => this.clickSearch(ev)"
                             style="margin-left:10px;"
                             type="button">Search
                     </button>
@@ -100,25 +100,25 @@
                     <label for="start-date" class="date-label"
                            style="color: black;">Start Date:</label>
                             <input type="date" id="start-date" name="start-date"
-                                   t-on-change="dateFilter"
+                                   t-on-change="(ev) => this.dateFilter(ev)"
                                    style="color: black; border: 1px solid #4e4e4e; background-color: white; padding: 5px 10px; border-radius: 5px;"/>
                             <label for="end-date" class="date-label"
                                    style="color: black;">End Date:</label>
                             <input type="date" id="end-date" name="end-date"
-                                   t-on-change="dateFilter"
+                                   t-on-change="(ev) => this.dateFilter(ev)"
                                    style="color: black; border: 1px solid #4e4e4e; background-color: white; padding: 5px 10px; border-radius: 5px;"/>
                 </div>
                 <div class="o-dropdown dropdown theme">
                     <select class="form-select"
                             t-ref="this.ThemeSelector"
-                            t-on-change="onChangeTheme">
+                            t-on-change="(ev) => this.onChangeTheme(ev)">
                         <option value="0">Select Theme</option>
                     </select>
                 </div>
-                <div class="dashboard_pdf" t-on-click="printPdf">
+                <div class="dashboard_pdf" t-on-click="(ev) => this.printPdf(ev)">
                     <i class="bi bi-filetype-pdf" style="font-size:24px;"/>
                 </div>
-                <div class="dashboard_mail" t-on-click="sendMail">
+                <div class="dashboard_mail" t-on-click="(ev) => this.sendMail(ev)">
                     <i class="bi bi-envelope-fill" style="font-size:24px;"/>
                 </div>
             </div>

@@ -1,47 +1,64 @@
-.. image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
+.. |license| image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
+    :alt: Community Edition
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |edition| |maintainer|
 
 Advanced Dynamic Dashboard
 ==========================
-* Dynamically Arrange the dashboard to get the information that are relevant to your business, department, or a specific process or need.
+
+Advanced Dynamic Dashboard allows you to dynamically build, customize, and arrange dashboard blocks, tiles, and charts to monitor information that is relevant to your business, department, or specific processes.
+
+Key Features
+------------
+
+* Create and customize dynamic tiles with aggregate values (Sum, Average, Count).
+* Build various chart types (Bar, Line, Pie, Doughnut, Radar, Polar Area).
+* Drag and resize dashboard elements interactively.
+* Filter dashboard blocks globally by Date range (Start Date and End Date).
+* Filter records using dynamic domain builders.
+* Export dashboard to PDF and share via email.
+* Customizable themes and appearance colors.
+
+Installation
+------------
+No external dependencies.
 
 Configuration
-=============
-- No configuration needed
-
-License
-=======
-Affero General Public License v3.0 (AGPL v3)
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+-------------
+No additional configuration is required.
 
 Company
 -------
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-Credits
+License
 -------
-* Developers: (V19) Abhijith CK,
-              (V17) Arjun S,
-              (V16) Robin, Afra MP
-* Contact: odoo@cybrosys.com
+Affero General Public License, Version 3 (AGPL v3).
+(http://www.gnu.org/licenses/agpl-3.0-standalone.html)
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
-* Website : http://www.cybrosys.com
-
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
+* Website : https://cybrosys.com
 
 Maintainer
 ==========
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
-This module is maintained by Cybrosys Technologies.
-For support and more information, please visit https://www.cybrosys.com
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__
+
+This module is maintained by Cybrosys Technologies.
+
+For support and more information, please visit `Our Website <https://cybrosys.com/>`__

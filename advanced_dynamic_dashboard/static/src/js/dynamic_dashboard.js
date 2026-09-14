@@ -4,24 +4,14 @@ import { loadJS } from '@web/core/assets';
 import { DynamicDashboardTile } from './dynamic_dashboard_tile';
 import { DynamicDashboardChart } from './dynamic_dashboard_chart';
 import { useService } from "@web/core/utils/hooks";
-const { Component, mount, onWillStart, onMounted, signal } = owl;
+import { Component, signal, mount, onWillStart, onMounted } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
-
-function useRef(name) {
-    const ref = signal.ref();
-    Object.defineProperty(ref, 'el', {
-        get() {
-            return ref();
-        },
-    });
-    return ref;
-}
 
 
 export class AdvancedDynamicDashboard extends Component {
     // Setup function to run when the template of the class AdvancedDynamicDashboard renders
     setup() {
-        this.ThemeSelector = useRef('ThemeSelector');
+        this.ThemeSelector = signal.ref();
         this.action = useService("action");
         this.orm = useService("orm");
         this.dialog = useService("dialog");
@@ -38,7 +28,7 @@ export class AdvancedDynamicDashboard extends Component {
 
     onChangeTheme() {
         /* Function for changing color of the theme of the dashboard */
-        document.getElementsByClassName("container")[0].setAttribute('style', this.ThemeSelector.el.value + 'min-height:-webkit-fill-available;')
+        document.querySelector(".o_advanced_dynamic_dashboard")?.setAttribute('style', (this.ThemeSelector()?.value || "") + 'min-height:-webkit-fill-available;')
     }
 
     ResizeDrag() {
@@ -106,7 +96,7 @@ export class AdvancedDynamicDashboard extends Component {
                 const options = document.createElement("option");
                 options.value = ev.style;
                 options.text = ev.name;
-                self.ThemeSelector.el.append(options)
+                self.ThemeSelector()?.append(options)
             });
         })
         await this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId]).then(function (response) {
@@ -173,7 +163,7 @@ export class AdvancedDynamicDashboard extends Component {
         const currentMode = document.getElementsByClassName("mode")[0].getAttribute("mode");
         if (currentMode == "light") {
             document.getElementsByClassName('theme')[0].setAttribute('style', 'display: none;')
-            document.getElementsByClassName("container")[0].setAttribute('style', 'background-color: #383E45;min-height:-webkit-fill-available !important;')
+            document.querySelector(".o_advanced_dynamic_dashboard")?.setAttribute('style', 'background-color: #383E45;min-height:-webkit-fill-available !important;')
             document.getElementsByClassName("mode")[0].setAttribute("mode", "dark")
             document.getElementsByClassName("bi-moon-stars-fill")[0].setAttribute('class', 'bi bi-cloud-sun-fill view-mode-icon')
             document.getElementsByClassName("bi-cloud-sun-fill")[0].setAttribute('style', 'color:black;margin-left:10px;')
@@ -205,7 +195,7 @@ export class AdvancedDynamicDashboard extends Component {
         }
         else {
             document.getElementsByClassName('theme')[0].setAttribute('style', 'display: block;')
-            document.getElementsByClassName("container")[0].setAttribute('style', this.ThemeSelector.el.value + 'min-height:-webkit-fill-available;')
+            document.querySelector(".o_advanced_dynamic_dashboard")?.setAttribute('style', (this.ThemeSelector()?.value || "") + 'min-height:-webkit-fill-available;')
             document.getElementsByClassName("mode")[0].setAttribute("mode", "light")
             document.getElementsByClassName("bi-cloud-sun-fill")[0].setAttribute('class', 'bi bi-moon-stars-fill view-mode-icon')
             document.getElementsByClassName("view-mode-icon")[0].setAttribute('style', 'color:black;margin-left:10px !important;')
