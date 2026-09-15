@@ -11,8 +11,8 @@ export function digitizeBillControllerPatch() {
     return {
         setup() {
             super.setup(...arguments);
-            this.actionService = this.actionService || useService("action");
-            this.orm = this.orm || useService("orm");
+            this.actionService = useService("action");
+            this.orm = useService("orm");
             this.onClickDigitize = this.onClickDigitize.bind(this);
             if (this.state) {
                 this.state.button_state = false;

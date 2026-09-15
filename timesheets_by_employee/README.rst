@@ -1,14 +1,39 @@
-.. image:: https://img.shields.io/badge/license-LGPL--3-green.svg
-    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
+    :alt: Community Edition
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |edition| |maintainer|
 
 Timesheet PDF Report
 ====================
-This module allows to print the timesheet of selected employee.
+
+This module allows generating and printing detailed timesheet PDF reports for selected employees over customizable date ranges.
+
+Key Features
+------------
+
+* Print detailed timesheet PDF reports filtered by employee and date range.
+* View recorded hours grouped by project, task, and date.
+* Clear summaries of billable and total hours worked.
+
+Installation
+------------
+No external dependencies.
 
 Configuration
-=============
-* No additional configurations needed
+-------------
+No additional configuration is required. Access via Timesheets -> Reporting.
 
 Company
 -------
@@ -17,38 +42,19 @@ Company
 License
 -------
 Lesser General Public License, Version 3 (LGPL v3).
-(https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
-
-Credits
--------
-* Developer:	Kavya Raveendran
-                (V14) Muhammed P
-                (V15) Abhishek E T
-                (V16) Sumith Sivan
-                (V17) Ajith V
-                (V18) Jumana Jabin MP
-                (V19) Afra MP
-                (V20) Abin Joshua Hermon
-Contact: odoo@cybrosys.com
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
-
 Maintainer
 ==========
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
+
 This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
-
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

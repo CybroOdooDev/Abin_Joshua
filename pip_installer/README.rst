@@ -1,51 +1,60 @@
-.. image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-   :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
-   :alt: License: AGPL-3
+.. |license| image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
+    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
+    :alt: License: AGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
+    :alt: Community Edition
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |edition| |maintainer|
 
 Pip Installer
 =============
-* Pip Installer Module for Odoo 19
+
+Allows administrators to execute Python pip package management operations and inspect packages directly from the Odoo backend.
+
+Key Features
+------------
+
+* Search, inspect, install, upgrade, and uninstall Python packages directly from Odoo.
+* View currently installed Python packages and their versions.
+* Simplifies environment management without needing direct terminal/SSH access.
 
 Installation
-============
-    - www.odoo.com/documentation/19.0/setup/install.html
-    - Install our custom addon
+------------
+No external dependencies.
 
-License
--------
-Affero General Public License v3.0 (AGPL v3)
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+Configuration
+-------------
+Accessible to administrators under Settings -> Technical -> Pip Installer.
 
 Company
 -------
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-Credits
+License
 -------
-* Developer : (V17) Ashok P K,
-              (V18) Javid A,
-              (V19) Anjali V P,
-              (V20) Abin Joshua Hermon
-  Contact: odoo@cybrosys.com
+Affero General Public License, Version 3 (AGPL v3).
+(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
-
 Maintainer
 ==========
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
+
 This module is maintained by Cybrosys Technologies.
 
-For support and more information, please visit https://www.cybrosys.com
-
-Further information
-===================
-HTML Description: `<static/description/index.html>`__
+For support and more information, please visit `Our Website <https://cybrosys.com/>`__

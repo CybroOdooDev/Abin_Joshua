@@ -1,49 +1,60 @@
-.. image:: https://img.shields.io/badge/license-LGPL--3-green.svg
-    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
 
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
+    :alt: Community Edition
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |edition| |maintainer|
+
 LocationLink POS
-==================
-* The "LocationLink POS" module helps you to enhance the management of products within the POS system by categorizing them according to their physical location.
+================
+
+The LocationLink POS module helps to enhance the management of products within the POS system by categorizing and filtering them according to their physical inventory location.
+
+Key Features
+------------
+
+* Categorize and display POS products based on their physical stock location.
+* Filter and view products available in specific warehouse locations.
+* Improve stock visibility and picking efficiency for POS cashiers.
 
 Installation
-============
-    - www.odoo.com/documentation/16.0/setup/install.html
-    - Install our custom addon
+------------
+No external dependencies.
 
-License
--------
-General Public License, Version 3 (LGPL v3).
-(https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
-
+Configuration
+-------------
+Configure location settings on the Point of Sale configuration form.
 
 Company
 -------
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-Credits
+License
 -------
-* Developer: (V19) Muhammed Jaseem C K, Abhinav V
-             (V17) Jaseem sadiq K,
-             (V20) Abin Joshua Hermon,
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
-
 Maintainer
 ==========
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
+
+
 This module is maintained by Cybrosys Technologies.
 
-For support and more information, please visit https://www.cybrosys.com
-
-Further information
-===================
-HTML Description: `<static/description/index.html>`__
+For support and more information, please visit `Our Website <https://cybrosys.com/>`__

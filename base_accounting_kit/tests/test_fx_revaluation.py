@@ -22,7 +22,7 @@ class TestFxRevaluation(AccountKitCommon):
         cls.env['res.currency.rate'].create([
             {'currency_id': cls.foreign.id, 'name': '2020-01-01',
              'rate': 2.0, 'company_id': company.id},
-            {'currency_id': cls.foreign.id, 'name': '2020-06-01',
+            {'currency_id': cls.foreign.id, 'name': '2020-05-31',
              'rate': 4.0, 'company_id': company.id},
         ])
 
@@ -40,7 +40,7 @@ class TestFxRevaluation(AccountKitCommon):
     def test_revaluation_books_unrealized_loss_and_reverses(self):
         """A foreign receivable that lost value books a loss + a reversal."""
         # 100 FXX invoice at rate 2.0 => 50 in company currency.
-        self.init_invoice('out_invoice', partner=self.partner_a,
+        inv = self.init_invoice('out_invoice', partner=self.partner_a,
                           invoice_date='2020-01-01', amounts=[100.0],
                           taxes=[], currency=self.foreign, post=True)
         action = self._wizard().action_revaluate()

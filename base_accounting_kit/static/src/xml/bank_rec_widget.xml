@@ -2,9 +2,9 @@
     <t t-name="base_accounting_kit.CustomKanbanView" t-inherit="web.KanbanView">
         <xpath expr="//Layout" position="inside">
             <div class="h-100 form_view_class">
-                <View t-if="state.selectedStLineId"
-                      t-props="prepareFormPropsBankReconcile"
-                      t-key="state.selectedStLineId"/>
+                <View t-if="this.state.selectedStLineId"
+                      t-props="this.prepareFormPropsBankReconcile"
+                      t-key="this.state.selectedStLineId"/>
             </div>
         </xpath>
     </t>

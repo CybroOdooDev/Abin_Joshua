@@ -230,10 +230,10 @@
                             <div class="row">
                                 <div class="col-10">
                                     <i class="fa fa-clock-o"/>
-                                    <t t-out="record.date_from.value"/>-
-                                    <t t-out="record.date_to.value"/>
+                                    <field name="date_from"/>-
+                                    <field name="date_to"/>
                                 </div>
-                                <div class="col-xs-2">
+                                <div class="col-2">
                                     <span class="float-right">
                                         <field name="creating_user_id" widget="many2one_avatar_user"/>
                                     </span>

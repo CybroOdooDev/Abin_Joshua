@@ -353,10 +353,10 @@ class FinancialReport(models.TransientModel):
                     # new_r_name = new_r_name.replace(" ", "-") + "-"
                     vals = {
                         'account': account.id,
-                        'a_id': account.code + re.sub('[^0-9a-zA-Z]+', 'acnt',
+                        'a_id': (account.code or "") + re.sub('[^0-9a-zA-Z]+', 'acnt',
                                                       account.name) + str(
                             account.id),
-                        'name': account.code + '-' + account.name,
+                        'name': ((account.code + '-') if account.code else '') + account.name,
                         'balance': value['balance'] * int(report.sign) or 0.0,
                         'type': 'account',
                         'parent': r_name + str(report.id),

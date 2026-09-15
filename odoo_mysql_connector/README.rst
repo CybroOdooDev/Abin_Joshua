@@ -1,14 +1,40 @@
-.. image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
+.. |license| image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
     :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 
-Odoo Mysql Connector
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
+    :alt: Community Edition
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |edition| |maintainer|
+
+Odoo MySQL Connector
 ====================
-This module will help you to import the data from Mysql database.
+
+This module allows you to connect an external MySQL database to Odoo and import data and tables directly into Odoo records.
+
+Key Features
+------------
+
+* Connect Odoo with external MySQL database instances.
+* Configure host, database, user, and password credentials securely.
+* Test database connection with a single click.
+* Import data and tables from MySQL into Odoo records.
+
+Installation
+------------
+Requires python package mysql-connector-python (pip install mysql-connector-python).
 
 Configuration
-=============
-Install python-barcode (pip install mysql-connector-python)
+-------------
+Configure MySQL connection credentials under Settings / MySQL Connector.
 
 Company
 -------
@@ -19,32 +45,17 @@ License
 Affero General Public License, Version 3 (AGPL v3).
 (https://www.gnu.org/licenses/agpl-3.0-standalone.html)
 
-Credits
--------
-* Developers: (V17) Unnimaya C O,
-              (V18) Manasa TP,
-              (V19) Aysha Shalin,
-              (V20) Abin Joshua Hermon
-  Contact: odoo@cybrosys.com
-
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
-
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
 
 Maintainer
 ==========
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
+
 This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
-
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

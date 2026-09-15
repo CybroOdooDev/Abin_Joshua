@@ -1,16 +1,39 @@
-.. image:: https://img.shields.io/badge/license-LGPL--3-green.svg
-    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
-    :alt: License: lGPL-3
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
+    :alt: Community Edition
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |edition| |maintainer|
 
 Product Sales By Location
 =========================
-This app allows our user to set a location on sale order line.
-Whatever location is selected on sale order lines, the product will be delivered from the selected location.
-Delivery orders will be created based on selected location on sale order lines.
+
+Allows users to set specific stock delivery locations on sale order lines, creating delivery orders routed from the selected locations.
+
+Key Features
+------------
+
+* Specify a source stock location directly on each sale order line.
+* Automatically generates delivery orders (stock pickings) routed from the selected locations.
+* Supports multi-location fulfillment for orders with varied product sourcing.
+
+Installation
+------------
+No external dependencies.
 
 Configuration
-=============
-* No additional configuration needed.
+-------------
+No additional configuration is required. Ensure multi-locations are enabled under Inventory settings.
 
 Company
 -------
@@ -18,35 +41,20 @@ Company
 
 License
 -------
-General Public License, Version 3 (LGPL v3).
-(https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
-
-Credits
--------
-* Developer: (V16): Dhanya Babu,
-             (V17): Gayathri V
-             (V18): Manasa T P,
-             (V19): Rahna R,
-             (V20): Abin Joshua Hermon,
-Contact:odoo@cybrosys.com
+Lesser General Public License, Version 3 (LGPL v3).
+(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
-
 Maintainer
 ==========
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
-This module is maintained by Cybrosys Technologies.
-For support and more information, please visit `Our Website <https://cybrosys.com/>`__
 
-Further information
-===================
-HTML Description: `<static/description/index.html>`__
+This module is maintained by Cybrosys Technologies.
+
+For support and more information, please visit `Our Website <https://cybrosys.com/>`__

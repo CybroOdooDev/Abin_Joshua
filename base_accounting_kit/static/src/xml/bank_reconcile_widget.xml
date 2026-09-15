@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <templates id="template" xml:space="preserve">
     <t t-name="base_accounting_kit.bank_reconcile_widget_lines_widget">
-        <t t-set="data" t-value="getRenderValues()"/>
+        <t t-set="data" t-value="this.getRenderValues()"/>
         <div class="o_list_renderer table-responsive">
             <table class="table table-sm position-relative mb-0 o_list_table_ungrouped table-striped o_bank_reconcile_lines_widget_line">
                 <thead>
@@ -17,7 +17,7 @@
                         <t t-foreach="data.default_lines_widget" t-as="line"
                            t-key="line.id">
                             <tr class="o_data_row"
-                                t-on-click="mountStatementLine"
+                                t-on-click="this.mountStatementLine"
                                 t-att-data-id="line.id">
                                 <t t-set="account"
                                    t-value="line.account_code+' '+line.account_name"/>
@@ -62,7 +62,7 @@
                     </t>
                     <t t-if="data.default_move_line">
                         <tr class="o_data_row statement_row"
-                            t-on-click="mountStatementLine"
+                            t-on-click="this.mountStatementLine"
                             t-att-data-id="data.default_move_line.id">
                                 <t t-set="amount_residual"
                                    t-value="data.default_move_line.currency_symbol+' '+data.default_move_line.amount_residual"/>
@@ -74,7 +74,7 @@
                                 <br/>
                                 <span style="font-size: 12px; font-style: italic;font-weight: normal;color: #01666b;cursor: pointer;"
                                       t-att-data-id="data.default_move_line.numeric_move_id"
-                                      t-on-click="onclickLink">
+                                      t-on-click="this.onclickLink">
                                     <t t-out="data.default_move_line.move_name"/>
                                 </span>
                                 :
@@ -103,11 +103,11 @@
                                  <td t-out="amount_residual"
                                      style="font-weight: bolder;"/>
                             </t>
-                            <t t-if="props.record.data.bank_state!='reconciled'">
+                            <t t-if="this.props.record.data.bank_state!='reconciled'">
                                 <td class="o_list_remove_record">
                                     <button class="btn fa fa-trash-o"
                                             style="margin-top: -4px;"
-                                            t-on-click="removeRecord"/>
+                                            t-on-click="this.removeRecord"/>
                                 </td>
                             </t>
                         </tr>
@@ -117,8 +117,8 @@
         </div>
     </t>
     <t t-name="base_accounting_kit.FormListView">
-        <t t-if="props.record.id">
-            <View t-props="bankReconcileListViewProps"/>
+        <t t-if="this.props.record.id">
+            <View t-props="this.bankReconcileListViewProps"/>
         </t>
     </t>
 </templates>

@@ -115,10 +115,11 @@ class BudgetLines(models.Model):
             date_from = self.env.context.get(
                 'wizard_date_from') or line.date_from
             if line.analytic_account_id.id:
-                query = """
+                plan_column = line.analytic_account_id.plan_id._column_name() or 'account_id'
+                query = f"""
                     SELECT SUM(amount)
                     FROM account_analytic_line
-                    WHERE account_id = %s
+                    WHERE {plan_column} = %s
                         AND date BETWEEN %s AND %s
                         AND general_account_id = ANY(%s)
                 """

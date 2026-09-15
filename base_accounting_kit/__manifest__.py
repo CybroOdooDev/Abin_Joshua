@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'Odoo 19 Accounting for Community : Financial Report, PDC, Assets, Bank Reconciliation, Lock Dates',
-    'version': '19.5.3.3.1',
+    'version': '1.4',
     'category': 'Accounting',
     'live_test_url': 'https://kit.easyinstance.com/web/login?redirect=/odoo/accounting',
     'summary': """Brings full accounting features back to Odoo 19 Community: financial reports (P&L, Balance Sheet,

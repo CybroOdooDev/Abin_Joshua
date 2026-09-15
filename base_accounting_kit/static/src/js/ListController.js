@@ -2,7 +2,7 @@
 import { registry } from '@web/core/registry';
 import { ListController } from "@web/views/list/list_controller";
 import { listView } from "@web/views/list/list_view";
-import { useState } from "@odoo/owl";
+import { proxy } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 export class AccountMoveLineListController extends ListController {
      constructor() {
@@ -11,7 +11,7 @@ export class AccountMoveLineListController extends ListController {
      }
      setup(){
          super.setup();
-         this.state = useState({ selectedRecordId: null ,
+         this.state = proxy({ selectedRecordId: null ,
                                  selectedRecordIds: [],});
          this.action = useService("action")
          this.orm = useService("orm")

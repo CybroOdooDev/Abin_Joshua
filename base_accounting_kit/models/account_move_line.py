@@ -192,7 +192,9 @@ class AccountInvoiceLine(models.Model):
             # parameters so the legacy raw-SQL report parsers keep working.
             from_sql = query.from_clause
             where_sql = query.where_clause
-            tables = from_sql.code
-            where_clause = where_sql.code
-            where_clause_params = list(from_sql.params) + list(where_sql.params)
+            from_code, from_params, _ = from_sql._sql_tuple
+            where_code, where_params, _ = where_sql._sql_tuple
+            tables = from_code
+            where_clause = where_code
+            where_clause_params = list(from_params) + list(where_params)
         return tables, where_clause, where_clause_params

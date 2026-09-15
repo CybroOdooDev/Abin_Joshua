@@ -1,50 +1,61 @@
-.. image:: https://img.shields.io/badge/license-LGPL--3-green.svg
-    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
-    :alt: License: LGPL-3
+.. |license| image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
+    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
+    :alt: License: AGPL-3
+
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
+    :alt: Community Edition
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |edition| |maintainer|
 
 Bill Digitization
 =================
-This module creates bill from scanned bill document.
+
+This module automatically creates vendor bills in Odoo from scanned bill documents using OCR technology.
+
+Key Features
+------------
+
+* Automatically extract bill information from scanned documents and images using OCR.
+* Automatically populate vendor bill fields such as Partner, Invoice Date, and Line Items.
+* Streamline invoice processing and reduce manual data entry errors.
+* Supports multiple image and document formats.
+
+Installation
+------------
+Requires Python packages pytesseract (pip install pytesseract), Pillow (pip install Pillow), and system package tesseract-ocr (sudo apt install tesseract-ocr).
 
 Configuration
-=============
-* Install the python packages PIL (pip3 install PIL),pytesseract (pip3 install pytesseract),tesseract-ocr (sudo apt-get install tesseract-ocr)
+-------------
+No additional configuration is required. Ensure Tesseract OCR is installed on the host system.
 
 Company
 -------
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
-Credits
+License
 -------
-* Developer: (V17) Dhanya Babu,
-             (V18) Nivedhya T ,
-             (V19) Ahammed Harshad P ,
-
-Contact: odoo@cybrosys.com
+Affero General Public License, Version 3 (AGPL v3).
+(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-License
--------
-General Public License, Version 3 (LGPL v3).
-( https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
-
-Bug Tracker
------------
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
-
 Maintainer
 ==========
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
+
 This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
-
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

@@ -6,12 +6,12 @@ import { kanbanView } from "@web/views/kanban/kanban_view";
 import { KanbanController } from "@web/views/kanban/kanban_controller";
 import { KanbanRenderer } from "@web/views/kanban/kanban_renderer";
 import { KanbanRecord } from "@web/views/kanban/kanban_record";
-import { useState } from "@odoo/owl";
+import { proxy } from "@odoo/owl";
 
 class CustomKanbanController extends KanbanController {
     setup(){
         super.setup()
-        this.state = useState({
+        this.state = proxy({
             selectedStLineId: null,
             linesWidgetData: null,
             moveLineData: null,
@@ -104,7 +104,7 @@ export class BankCustomKanbanRenderer extends KanbanRenderer {
 export class BankReconcileKanbanRecord extends KanbanRecord {
     setup(){
         super.setup();
-        this.state=useState({
+        this.state=proxy({
             Statement_record:{}
         })
     }

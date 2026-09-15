@@ -1,16 +1,40 @@
-.. image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
+.. |license| image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
     :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
+    :target: https://www.odoo.com
+    :alt: Odoo 20.0
+
+.. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
+    :alt: Community Edition
+
+.. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
+    :target: https://cybrosys.com
+    :alt: Maintainer: Cybrosys Techno Solutions
+
+|license| |odoo| |edition| |maintainer|
+
 Project & Project Task Sequence Number
 ======================================
-This module helps generate unique sequence numbers for projects and project
-tasks. When creating a new project or task, the sequence number will be
-automatically generated based on the configured prefix and hierarchy.
+
+This module generates unique, customizable sequence numbers for projects and project tasks automatically upon creation.
+
+Key Features
+------------
+
+* Automatically generates unique sequence numbers for projects and tasks.
+* Configurable prefix, suffix, and sequence padding.
+* Hierarchical numbering support for subtasks.
+* Display sequence numbers across kanban, list, and form views.
+
+Installation
+------------
+No external dependencies.
 
 Configuration
-=============
-No configuration
+-------------
+No additional configuration is required.
 
 Company
 -------
@@ -18,36 +42,20 @@ Company
 
 License
 -------
-Affero General Public License, v3.0 (AGPL v3).
+Affero General Public License, Version 3 (AGPL v3).
 (https://www.gnu.org/licenses/agpl-3.0-standalone.html)
-
-Credits
-=======
-Developers: (V16) Sajna ,
-            (V17) Fathima Mazlin AM,
-            (V18) Ayana R,
-            (V19) Ayana R,
-            (V19) Abin Joshua Hermon
-Contact: odoo@cybrosys.com
 
 Contacts
 --------
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
-Bug Tracker
-===========
-Bugs are tracked on GitHub Issues. In case of trouble, please check there if your issue has already been reported.
-
 Maintainer
 ==========
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
+
 This module is maintained by Cybrosys Technologies.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
-
-Further information
-===================
-HTML Description: `<static/description/index.html>`__

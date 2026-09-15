@@ -2,26 +2,23 @@
     :target: http://www.gnu.org/licenses/lgpl-3.0-standalone.html
     :alt: License: LGPL-3
 
-.. |odoo| image:: https://img.shields.io/badge/Odoo-19.0-875A7B.svg
+.. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
     :target: https://www.odoo.com
-    :alt: Odoo 19.0
+    :alt: Odoo 20.0
 
 .. |edition| image:: https://img.shields.io/badge/Edition-Community-1ABC9C.svg
     :alt: Community Edition
-
-.. |python| image:: https://img.shields.io/badge/Python-3.11-3776AB.svg
-    :alt: Python 3.11
 
 .. |maintainer| image:: https://img.shields.io/badge/maintainer-Cybrosys-875A7B.svg
     :target: https://cybrosys.com
     :alt: Maintainer: Cybrosys Techno Solutions
 
-|license| |odoo| |edition| |python| |maintainer|
+|license| |odoo| |edition| |maintainer|
 
-Odoo 19 Accounting for Community
+Odoo 20 Accounting for Community
 ================================
 
-Odoo 19 Full Accounting Kit brings full accounting features to Odoo 19
+Odoo 20 Full Accounting Kit brings full accounting features to Odoo 20
 Community Edition. It adds advanced financial reports, complete asset
 management, payment follow-ups, bank tools and much more — without any
 Enterprise licence or per-user fees.
