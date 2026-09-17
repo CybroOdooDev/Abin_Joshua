@@ -1,0 +1,45 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cybrosys Technologies Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#############################################################################
+{
+    'name': 'Restrict Customers In POS',
+    'version': '19.5.1.0.0',
+    'category': 'Point of Sale',
+    'summary': 'Helps to manage customers in point of sale.',
+    'description': """Which will set restriction for customers in
+     point of sale. When you create customers through POS which will be
+     visible. Otherwise we need to enable the Available In POS boolean from
+     the customers""",
+    'author': 'Cybrosys Techno Solutions',
+    'company': 'Cybrosys Techno Solutions',
+    'maintainer': 'Cybrosys Techno Solutions',
+    'website': 'https://www.cybrosys.com',
+    'depends': ['point_of_sale'],
+    'data': [
+        'views/res_partner_views.xml'
+    ],
+    'assets': {
+        'point_of_sale._assets_pos': [
+            'pos_customer_restrict/static/src/xml/Screens/PartnerListScreen.xml'
+        ],
+    },
+    'images': ['static/description/banner.jpg'],
+    'license': 'AGPL-3',
+    'installable': True,
+    'auto_install': False,
+    'application': False,
+}

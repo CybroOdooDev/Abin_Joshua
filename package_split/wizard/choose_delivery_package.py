@@ -1,0 +1,64 @@
+# -*- coding: utf-8 -*-
+#############################################################################
+#
+#    Cybrosys Technologies Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#############################################################################
+from odoo import models
+
+
+class ChooseDeliveryPackage(models.TransientModel):
+    """This model extends the 'choose.delivery.package' wizard to modify the
+    behavior of putting products into packages during the delivery process.
+    It customizes the package creation and updates the package type and
+    shipping weight for each package based on the chosen delivery package type
+     and shipping weight."""
+    _inherit = 'stock.put.in.pack'
+
+    def action_put_in_pack(self):
+
+        """Override the action_put_in_pack method to modify the behavior of
+        putting products into packages during the delivery process.
+        This method customizes the package creation and updates the package
+        type and shipping weight for each package.
+        :return: True if the action is successful"""
+        move_lines = self.move_line_ids
+        if self.env.context.get('all_move_line_ids'):
+            move_lines |= self.env['stock.move.line'].browse(
+                self.env.context['all_move_line_ids'])
+        quantity_move_line_ids = move_lines.filtered(
+            lambda ml:
+            ml.uom_id.compare(ml.quantity, 0.0) > 0 and
+            not ml.result_package_id
+        )
+        move_line_ids = quantity_move_line_ids.filtered(lambda ml: ml.picked)
+        if not move_line_ids:
+            move_line_ids = quantity_move_line_ids
+        if self.env.context.get('move_lines_to_pack_ids', False):
+            move_line_ids = move_line_ids.filtered(lambda ml: ml.id in self.env.context['move_lines_to_pack_ids'])
+        move_line_ids.with_context(
+            **self._get_put_in_pack_context()
+        ).action_put_in_pack(
+            package_id=self.result_package_id.id,
+            package_type_id=self.package_type_id.id,
+        )
+        delivery_packages = move_line_ids.result_package_id
+        # Loop through each package and write shipping weight and package type
+        # on 'stock_quant_package' if needed
+        for package in delivery_packages:
+            if self.package_type_id:
+                package.write(
+                    {'package_type_id': self.package_type_id.id})
+            if self.shipping_weight:
+                package.write({'shipping_weight': self.shipping_weight})
