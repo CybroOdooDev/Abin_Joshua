@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': 'Hide Filters GroupBy',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Extra Tools',
     'summary': 'Hide Filters GroupBy Helps You to Hide Filter And'
                ' GroupBy Option.',

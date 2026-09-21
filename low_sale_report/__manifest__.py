@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': "Low Sales Report",
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Sales',
     'summary': 'The tool to control poorly performing product',
     'description': 'Efficiently manage and analyze low sales with this module,'

@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': 'Lunch Orders - PDF',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Human Resources',
     'summary': "Custom report for Lunch module",
     'description': "Create custom PDF Report for Lunch with required filters",

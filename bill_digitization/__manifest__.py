@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': 'Bill Digitization',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Accounting',
     'summary': """Converting traditional paper-based bills into digital 
      formats.""",

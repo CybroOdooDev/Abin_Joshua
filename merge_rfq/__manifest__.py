@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': 'Merge RFQ',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Purchases',
     'summary': """This module merege two or more RFQ by cancelling or deleting
         the others in RFQ and RFQ sent state.""",

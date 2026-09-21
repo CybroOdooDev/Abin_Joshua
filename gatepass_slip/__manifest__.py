@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': 'Delivery Gate Pass',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Warehouse',
     'summary': """Generating Gate pass slip in delivery orders""",
     'description': """This module facilitates the creation of gate pass slips 

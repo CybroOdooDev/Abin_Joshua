@@ -67,14 +67,15 @@ class ProductProduct(models.Model):
 
     def action_scrap_orders(self):
         """ Returns Scrap Orders """
-        return {
-            'type': 'ir.actions.act_window',
-            'name': 'Scrap Orders',
-            'view_mode': 'list,form',
-            'res_model': 'stock.scrap',
-            'domain': [('product_id', '=', self.id)],
-            'context': "{'create': False}"
+        action = self.env['ir.actions.actions']._for_xml_id('stock.stock_scrapped_moves_action')
+        action['name'] = 'Scrap Orders'
+        action['domain'] = [('product_id', '=', self.id), ('is_scrap', '=', True)]
+        action['context'] = {
+            'default_product_id': self.id,
+            'default_is_scrap': True,
+            'create': False,
         }
+        return action
 
     def action_bom(self):
         """ Returns Boms """
