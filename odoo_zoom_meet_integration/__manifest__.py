@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': "Odoo Zoom Meet Integration",
-    'version': '19.5.1.0.1',
+    'version': '20.0.1.0.1',
     "category": 'Extra Tools',
     'summary': """Integrates odoo calender module with Zoom.""",
     'description': """Integrates odoo calender module with Zoom and helps to 

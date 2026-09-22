@@ -17,7 +17,7 @@
 #############################################################################
 {
     "name": "Odoo ICalender",
-    "version": "19.5.1.0.0",
+    "version": "20.0.1.0.0",
     "category": 'Productivity',
     "summary": """Generates ICalendar file & sends to the recipients""",
     "description": """This module provides iCalendar support.Users can send 

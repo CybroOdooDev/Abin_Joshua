@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': "Odoo Mysql Connector",
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Extra Tools',
     'summary': """This module will help you to import the data from Mysql 
      database.""",
