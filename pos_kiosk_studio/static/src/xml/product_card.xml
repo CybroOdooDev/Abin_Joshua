@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<templates xml:space="preserve">
+
+    <t t-inherit="pos_self_order.ProductCard"
+       t-inherit-mode="extension">
+
+        <!-- Just add a class, DO NOT replace -->
+        <xpath expr="//article[contains(@class, 'self_order_product_card')]//img"
+               position="attributes">
+            <attribute name="class" add="kiosk-product-img" separator=" "/>
+        </xpath>
+
+    </t>
+
+</templates>

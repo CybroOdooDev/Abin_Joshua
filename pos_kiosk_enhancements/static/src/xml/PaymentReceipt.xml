@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="pos_kiosk_enhancements.PaymentReceiptExtension"
+       t-inherit="agr_kiosk_pay.PaymentReceipt"
+       t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class,'pos-receipt')]" position="replace">
+            <div class="pos-receipt"
+                 style="font-family: monospace; width:300px; padding:18px; font-size:13px; font-weight:550;">
+                <t t-if="data.company.logo">
+                    <div style="
+                        text-align:center;
+                        margin-bottom:10px;
+                    ">
+                        <img
+                            t-att-src="'data:image/png;base64,' + data.company.logo"
+                            style="
+                                max-width:120px;
+                                max-height:80px;
+                            "
+                        />
+                    </div>
+                </t>
+                <!-- PAY AT COUNTER RECEIPT -->
+                <t t-if="data.order.is_pay_at_counter">
+                    <div style="text-align:center;">
+                        <div style="font-weight:bold;font-size:16px;">
+                            <t t-esc="data.company.name"/>
+                        </div>
+                        <t t-if="data.company.vat">
+                            <div>
+                                <t t-esc="data.company.vat"/>
+                            </div>
+                        </t>
+                        <t t-if="data.company.address">
+                            <t t-set="addrLines"
+                                   t-value="data.company.address.split('\n')"/>
+                            <t t-foreach="addrLines.slice(1)"
+                               t-as="line"
+                               t-key="line">
+                                <div>
+                                    <t t-esc="line"/>
+                                </div>
+                            </t>
+                        </t>
+                    </div>
+                    <br/>
+                    <div style="text-align:center;font-weight:bold;">
+                        PAYMENT PENDING
+                    </div>
+                    <div style="text-align:center;font-weight:bold;margin-top:6px;">
+                        PAGO EN MOSTRADOR
+                    </div>
+                    <br/>
+                    <div style="font-size:20px; font-weight:bold;margin-left:10px; margin-right:10px;">
+                        ORDER:
+                        <t t-esc="data.order.name"/>
+                    </div>
+                    <div>
+                        Date:
+                        <t t-esc="new Date().toLocaleDateString()"/>
+                    </div>
+                    <div>
+                        Hour:
+                        <t t-esc="new Date().toLocaleTimeString()"/>
+                    </div>
+                    <div style="border-top:1px dashed #000;margin:8px 0;"></div>
+                    <table style="width:100%;">
+                        <thead>
+                            <tr style="font-weight:550;">
+                                <th style="width:40%; text-align:left; font-weight:550;">Description</th>
+                                <th style="width:10%; text-align:center; font-weight:550;">Unid</th>
+                                <th style="width:25%; text-align:right; font-weight:550;">Price</th>
+                                <th style="width:25%; text-align:right; font-weight:550;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tbody>
+                                <t t-foreach="data.order.lines" t-as="line" t-key="line.name">
+                                    <!-- Parent Product -->
+                                    <tr>
+                                        <td>
+                                            <t t-esc="line.name"/>
+                                        </td>
+
+                                        <td style="text-align:center;">
+                                            <t t-esc="line.qty"/>
+                                        </td>
+
+                                        <td style="text-align:right;">
+                                            <t t-esc="((line.price || 0) / (line.qty || 1)).toFixed(2)"/>€
+                                        </td>
+
+                                        <td style="text-align:right;">
+                                            <t t-esc="(line.price || 0).toFixed(2)"/>€
+                                        </td>
+                                    </tr>
+                                    <!-- Combo Components -->
+                                    <t t-if="line.components and line.components.length">
+                                        <t t-foreach="line.components" t-as="comp" t-key="comp.name">
+                                            <tr>
+                                                <td style="
+                                                    padding-left:18px;
+                                                    color:#555;
+                                                    font-size:11px;
+                                                ">
+                                                    ↳ <t t-esc="comp.name"/>
+                                                </td>
+                                                <td style="
+                                                    text-align:center;
+                                                    color:#555;
+                                                    font-size:11px;
+                                                ">
+                                                    <t t-esc="comp.totalQty || comp.paidQty || comp.freeQty || 1"/>
+                                                </td>
+                                                <td style="text-align:right;color:#555;font-size:11px;">
+                                                    <t t-if="comp.show_price">
+                                                        <t t-esc="(comp.unitPrice || 0).toFixed(2)"/>€
+                                                    </t>
+                                                </td>
+
+                                                <td style="text-align:right;color:#555;font-size:11px;">
+                                                    <t t-if="comp.show_price">
+                                                        <t t-esc="comp.price.toFixed(2)"/>€
+                                                    </t>
+                                                    <t t-elif="comp.is_free">
+                                                        ---
+                                                    </t>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </t>
+                                </t>
+                            </tbody>
+                        </tbody>
+                    </table>
+                    <div style="border-top:1px dashed #000;margin:8px 0;"></div>
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                    ">
+                        <span>BASE IMPONIBLE</span>
+                        <span>
+                            <t t-esc="(data.order.untaxed || 0).toFixed(2)"/>€
+                        </span>
+                    </div>
+                    <br/>
+                    <t t-if="data.tax_details and data.tax_details.length">
+                        <t t-foreach="data.tax_details"
+                           t-as="taxLine"
+                           t-key="taxLine.tax.id">
+                            <div style="
+                                display:flex;
+                                justify-content:space-between;
+                            ">
+                                <span>
+                                    IVA <t t-esc="taxLine.tax.amount"/>%
+                                </span>
+                                <span>
+                                    <t t-esc="taxLine.amount.toFixed(2)"/>€
+                                </span>
+                            </div>
+                        </t>
+                    </t>
+                    <br/>
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                    ">
+                        <span>TOTAL IVA</span>
+                        <span>
+                            <t t-esc="(data.order.tax || 0).toFixed(2)"/>€
+                        </span>
+                    </div>
+                    <div style="border-top:1px dashed #000;margin:8px 0;"></div>
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        font-weight:bold;
+                    ">
+                        <span>TOTAL</span>
+                        <span>
+                            <t t-esc="(data.order.total || 0).toFixed(2)"/>€
+                        </span>
+                    </div>
+                    <br/>
+                    <div style="text-align:center;">
+                        Selected Method:
+                    </div>
+                    <div style="text-align:center;font-weight:bold;">
+                        PAY AT THE COUNTER
+                    </div>
+                    <br/>
+                    <div style="text-align:center;">
+                        <!-- BOTH -->
+                        <t t-if="data.config_flags.show_both">
+                            <t t-if="data.qr_base64">
+                                <img
+                                        t-att-src="'data:image/png;base64,' + data.qr_base64"
+                                        style="width:130px;height:130px;"
+                                />
+                            </t>
+                                <t t-if="data.barcode_base64">
+                                <div style="margin-top:10px;">
+                                    <img
+                                            t-att-src="'data:image/png;base64,' + data.barcode_base64"
+                                            style="width:260px;height:100px;"
+                                    />
+                                </div>
+                            </t>
+                        </t>
+                        <!-- QR ONLY -->
+                        <t t-elif="data.config_flags.show_qr">
+                            <t t-if="data.qr_base64">
+                                <img
+                                        t-att-src="'data:image/png;base64,' + data.qr_base64"
+                                        style="width:130px;height:130px;"
+                                />
+                            </t>
+                        </t>
+                        <!-- BARCODE ONLY -->
+                        <t t-elif="data.config_flags.show_barcode">
+                            <t t-if="data.barcode_base64">
+                                <img
+                                        t-att-src="'data:image/png;base64,' + data.barcode_base64"
+                                        style="width:260px;height:100px; image-rendering: crisp-edges;"
+                                />
+                            </t>
+                        </t>
+                        <div style="margin-top:5px;">
+                            <t t-esc="data.order.identifierDisplay"/>
+                        </div>
+                    </div>
+                    <div style="border-top:1px dashed #000;margin:10px 0;"></div>
+                    <div style="text-align:center;font-weight:bold;">
+                        THIS DOCUMENT DOES NOT CONSTITUTE PAYMENT
+                    </div>
+
+                    <br/>
+
+                    <div style="text-align:center;">
+                        PLEASE PRESENT THIS RECEIPT AT THE CASHIER
+                    </div>
+
+                    <br/>
+                    <div style="text-align:center;font-size:11px;">
+                        Thank you for your order.
+                    </div>
+                </t>
+                <t t-else="">
+                    <div style="text-align:center;">
+                        <div style="font-weight:bold;font-size:16px;">
+                            <t t-esc="data.company.name"/>
+                        </div>
+                        <t t-if="data.company.vat">
+                            <div>
+                                <t t-esc="data.company.vat"/>
+                            </div>
+                        </t>
+                        <t t-if="data.company.address">
+                            <t t-set="addrLines"
+                               t-value="data.company.address.split('\n')"/>
+                            <t t-foreach="addrLines.slice(1)"
+                               t-as="line"
+                               t-key="line">
+                                <div>
+                                    <t t-esc="line"/>
+                                </div>
+                            </t>
+                        </t>
+                    </div>
+                    <br/>
+                    <!-- INVOICE HEADER -->
+                    <div style="
+                        text-align:center;
+                        font-weight:bold;
+                    ">
+                        SIMPLIFIED INVOICE
+                    </div>
+                    <div style="font-size:20px; font-weight:bold;">
+                        ORDER:
+                        <t t-esc="data.order.name"/>
+                    </div>
+                    <div>
+                        Series:
+                        <t t-esc="data.pos.name"/>
+                    </div>
+                    <div>
+                        Number:
+                        <t t-esc="data.order.reference"/>
+                    </div>
+                    <br/>
+                    <div>
+                        Date:
+                        <t t-esc="new Date().toLocaleDateString()"/>
+                    </div>
+                    <div>
+                        Hour:
+                        <t t-esc="new Date().toLocaleTimeString()"/>
+                    </div>
+                    <div style="
+                        border-top:1px dashed #000;
+                        margin:8px 0;
+                    "></div>
+                    <!-- PRODUCTS -->
+                    <table style="
+                        width:100%;
+                        font-size:13px;
+                        table-layout:fixed;
+                        border-collapse:collapse;
+                    ">
+                        <thead>
+                            <tr>
+                                <th style="width:40%; text-align:left;">Description</th>
+                                <th style="width:10%; text-align:center;">Unid</th>
+                                <th style="width:25%; text-align:right;">Price</th>
+                                <th style="width:25%; text-align:right;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="data.order.lines"
+                               t-as="line"
+                               t-key="line.name">
+                                <!-- PARENT PRODUCT -->
+                                <tr>
+                                    <td>
+                                        <t t-esc="line.name"/>
+                                    </td>
+
+                                    <td style="text-align:center;">
+                                        <t t-esc="line.qty"/>
+                                    </td>
+
+                                    <td style="text-align:right;">
+                                        <t t-esc="((line.price || 0) / (line.qty || 1)).toFixed(2)"/>€
+                                    </td>
+
+                                    <td style="text-align:right;">
+                                        <t t-esc="(line.price || 0).toFixed(2)"/>€
+                                    </td>
+                                </tr>
+                                <!-- COMBO CHILDREN -->
+                                <t t-if="line.components and line.components.length">
+                                    <t t-foreach="line.components"
+                                       t-as="comp"
+                                       t-key="comp.name">
+                                        <tr>
+                                            <td style="
+                                                padding-left:18px;
+                                                color:#555;
+                                                font-size:11px;
+                                                white-space:nowrap;
+                                            ">
+                                                ↳ <t t-esc="comp.name"/>
+                                            </td>
+                                            <td style="
+                                                text-align:center;
+                                                color:#555;
+                                                font-size:11px;
+                                            ">
+                                                <t t-esc="comp.totalQty || comp.paidQty || comp.freeQty || 1"/>
+                                            </td>
+                                            <td style="text-align:right;color:#555;font-size:11px;">
+                                                <t t-if="comp.show_price">
+                                                    <t t-esc="(comp.unitPrice || 0).toFixed(2)"/>€
+                                                </t>
+                                            </td>
+
+                                            <td style="text-align:right;color:#555;font-size:11px;">
+                                                <t t-if="comp.show_price">
+                                                    <t t-esc="comp.price.toFixed(2)"/>€
+                                                </t>
+                                                <t t-elif="comp.is_free">
+                                                    ---
+                                                </t>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </t>
+                        </tbody>
+                    </table>
+                    <div style="border-top:1px dashed #000;margin:8px 0;"></div>
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                    ">
+                        <span>BASE IMPONIBLE</span>
+                        <span>
+                            <t t-esc="(data.order.untaxed || 0).toFixed(2)"/>€
+                        </span>
+                    </div>
+                    <br/>
+                    <t t-if="data.tax_details and data.tax_details.length">
+                        <t t-foreach="data.tax_details"
+                           t-as="taxLine"
+                           t-key="taxLine.tax.id">
+                            <div style="
+                                display:flex;
+                                justify-content:space-between;
+                            ">
+                                <span>
+                                    IVA <t t-esc="taxLine.tax.amount"/>%
+                                </span>
+                                <span>
+                                    <t t-esc="taxLine.amount.toFixed(2)"/>€
+                                </span>
+                            </div>
+                        </t>
+                    </t>
+                    <br/>
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                    ">
+                        <span>TOTAL IVA</span>
+                        <span>
+                            <t t-esc="(data.order.tax || 0).toFixed(2)"/>€
+                        </span>
+                    </div>
+                    <div style="border-top:1px dashed #000;margin:8px 0;"></div>
+                    <div style="
+                        display:flex;
+                        justify-content:space-between;
+                        font-weight:bold;
+                    ">
+                        <span>TOTAL</span>
+                        <span>
+                            <t t-esc="(data.order.total || 0).toFixed(2)"/>€
+                        </span>
+                    </div>
+                    <div style="border-top:1px dashed #000;margin:8px 0;"></div>
+                    <br/>
+                    <!-- PAYMENT -->
+                    <div>
+                        Payment Method:
+                        <t t-esc="data.order.payment_method"/>
+                    </div>
+                    <div>
+                        Status: PAID
+                    </div>
+                    <br/>
+                    <div style="
+                        text-align:center;
+                        font-size:11px;
+                    ">
+                        Thank you for your visit
+                    </div>
+                </t>
+            </div>
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="pos_kiosk_studio.StudioSidebar">
+        <div class="kiosk-studio-sidebar shadow bg-white"
+             style="position:fixed;top:80px;right:20px;width:320px;z-index:9998;border-radius:8px;max-height:85vh;display:flex;flex-direction:column;">
+
+            <!-- HEADER -->
+            <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                <h4 class="m-0">Kiosk Studio</h4>
+                <button class="btn btn-sm btn-light" t-on-click="closeSidebar">✕</button>
+            </div>
+
+            <!-- MODE SWITCHER -->
+            <div class="d-flex border-bottom">
+                <button class="btn btn-sm flex-fill py-2 rounded-0"
+                        t-att-class="!state.isDragMode ? 'btn-primary' : 'btn-light'"
+                        t-on-click="exitDragMode">
+                    Edit
+                </button>
+                <button class="btn btn-sm flex-fill py-2 rounded-0"
+                        t-att-class="state.isDragMode ? 'btn-primary' : 'btn-light'"
+                        t-on-click="toggleDragMode">
+                    Drag
+                </button>
+            </div>
+
+            <!-- DRAG MODE PANEL -->
+            <t t-if="state.isDragMode">
+                <div class="p-3 d-flex flex-column gap-2">
+                    <div class="alert alert-info p-2 mb-0" style="font-size:0.85em;">
+                        Drag any element on the page to reposition it.
+                        Changes are saved automatically.
+                    </div>
+                    <t t-if="state.lastMovedElement">
+                        <button class="btn btn-sm btn-outline-danger w-100"
+                                t-on-click="resetLastPosition">
+                            ↺ Reset Last Moved Element
+                        </button>
+                    </t>
+                    <button class="btn btn-sm btn-outline-danger w-100"
+                            t-on-click="resetAllPositions">
+                        ↺ Reset All Positions
+                    </button>
+                </div>
+            </t>
+
+            <!-- ELEMENT INSPECTOR MODE -->
+            <t t-elif="selectedElement">
+                <div class="p-3 border-bottom">
+                    <h5 class="m-0">Element Inspector</h5>
+                </div>
+                <div class="p-3">
+
+                    <!-- Background Color -->
+                    <div class="mb-3">
+                        <label class="form-label">Background</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="color"
+                                   t-model="state.elementBgColor"
+                                   class="form-control form-control-color"
+                                   style="flex:1;"/>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    title="Reset background"
+                                    t-on-click="resetBg">↺</button>
+                        </div>
+                    </div>
+
+                    <!-- Text Color -->
+                    <div class="mb-3">
+                        <label class="form-label">Text Color</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="color"
+                                   t-model="state.elementTextColor"
+                                   class="form-control form-control-color"
+                                   style="flex:1;"/>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    title="Reset text color"
+                                    t-on-click="resetText">↺</button>
+                        </div>
+                    </div>
+
+                    <!-- Font Style -->
+                    <div class="mb-3">
+                        <label class="form-label">Font Style</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <select t-model="state.elementFontFamily"
+                                    class="form-control"
+                                    style="flex:1;">
+                                <t t-foreach="availableFonts" t-as="font" t-key="font.value">
+                                    <option t-att-value="font.value"
+                                            t-att-style="'font-family:' + font.value">
+                                        <t t-esc="font.label"/>
+                                    </option>
+                                </t>
+                            </select>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    title="Reset font"
+                                    t-on-click="resetFont">↺</button>
+                        </div>
+                    </div>
+
+                    <!-- Border Radius -->
+                    <div class="mb-3">
+                        <label class="form-label">Border Radius</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <input type="text"
+                                   t-model="state.elementRadius"
+                                   class="form-control"
+                                   style="flex:1;"/>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    title="Reset border radius"
+                                    t-on-click="resetRadius">↺</button>
+                        </div>
+                    </div>
+
+                    <!-- Emoji -->
+                    <div class="mb-3">
+                        <label class="form-label">Emoji</label>
+                        <div class="d-flex gap-2 align-items-center">
+                            <div class="form-control d-flex align-items-center justify-content-between"
+                                 style="flex:1;cursor:pointer;min-height:38px;"
+                                 t-on-click="toggleEmojiPicker">
+                                <span style="font-size:1.4em;">
+                                    <t t-if="state.elementEmoji">
+                                        <t t-esc="state.elementEmoji"/>
+                                    </t>
+                                    <t t-else="">
+                                        <span class="text-muted" style="font-size:0.75em;">Pick emoji…</span>
+                                    </t>
+                                </span>
+                                <span class="text-muted" style="font-size:0.75em;">▾</span>
+                            </div>
+                            <button class="btn btn-sm btn-outline-secondary"
+                                    title="Remove emoji"
+                                    t-on-click="removeEmoji">✕</button>
+                        </div>
+                        <t t-if="state.showEmojiPicker">
+                            <div class="mt-2 p-2 border rounded"
+                                 style="background:#fafafa;max-height:200px;overflow-y:auto;">
+                                <t t-foreach="emojiGroups" t-as="group" t-key="group.label">
+                                    <div class="text-muted mb-1" style="font-size:0.7em;font-weight:600;letter-spacing:.05em;">
+                                        <t t-esc="group.label"/>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1 mb-2">
+                                        <t t-foreach="group.emojis" t-as="emoji" t-key="emoji">
+                                            <button class="btn btn-sm btn-light p-1"
+                                                    style="font-size:1.3em;line-height:1;min-width:2em;"
+                                                    t-att-data-emoji="emoji"
+                                                    t-on-click="onEmojiClick">
+                                                <t t-esc="emoji"/>
+                                            </button>
+                                        </t>
+                                    </div>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="d-flex gap-2 mt-3">
+                        <button class="btn btn-primary w-100" t-on-click="applyElementStyles">Apply</button>
+                        <button class="btn btn-danger w-100" t-on-click="resetElementStyles">Reset All</button>
+                    </div>
+                </div>
+            </t>
+
+            <!-- THEME MODE -->
+            <t t-else="">
+                <div class="p-3 overflow-auto" style="flex-grow:1">
+                    <!-- BUTTON COLORS -->
+                    <div class="mb-3">
+                        <label class="form-label">Primary Button</label>
+                        <input type="color" t-model="state.primaryColor" class="form-control form-control-color w-100"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Secondary Button</label>
+                        <input type="color" t-model="state.secondaryColor" class="form-control form-control-color w-100"/>
+                    </div>
+
+                    <!-- BACKGROUND COLOR -->
+                    <div class="mb-3">
+                        <label class="form-label">Background Color</label>
+                        <input type="color" t-model="state.backgroundColor" class="form-control form-control-color w-100"/>
+                    </div>
+
+                    <!-- FONT STYLE -->
+                    <div class="mb-3">
+                        <label class="form-label">Font Style</label>
+                        <select t-model="state.fontFamily" class="form-control w-100">
+                            <t t-foreach="availableFonts" t-as="font" t-key="font.value">
+                                <option t-att-value="font.value"
+                                        t-att-style="'font-family:' + font.value">
+                                    <t t-esc="font.label"/>
+                                </option>
+                            </t>
+                        </select>
+                    </div>
+
+                    <!-- BACKGROUND IMAGE -->
+                    <div class="mb-3">
+                        <label class="form-label">Background Image</label>
+                        <div style="position:relative;">
+                            <input type="file" accept="image/*" class="form-control" t-on-change="onImageChange"/>
+                            <t t-if="state.backgroundImageName">
+                                <div style="position:absolute;inset:0;background:#fff;border:1px solid #ced4da;border-radius:4px;display:flex;align-items:center;gap:6px;padding:0 10px;font-size:0.875rem;pointer-events:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
+                                    <span>📎</span>
+                                    <span t-esc="state.backgroundImageName"
+                                          style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"/>
+                                </div>
+                            </t>
+                        </div>
+                        <t t-if="state.backgroundImage">
+                            <div class="mt-2 text-center">
+                                <img t-att-src="state.backgroundImage" style="max-width:100%;border-radius:6px;"/>
+                            </div>
+                            <button class="btn btn-sm btn-danger mt-2 w-100" t-on-click="resetBackgroundImage">
+                                Reset Background Image
+                            </button>
+                        </t>
+                    </div>
+
+                    <!-- NAVBAR -->
+                    <h5 class="mt-4 border-bottom pb-1">Navbar</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Navbar Background</label>
+                        <input type="color" t-model="state.navbarColor" class="form-control form-control-color w-100"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Navbar Text</label>
+                        <input type="color" t-model="state.navbarTextColor" class="form-control form-control-color w-100"/>
+                    </div>
+                    <div class="mb-3 d-flex align-items-center justify-content-between">
+                        <label class="form-label m-0">Show Categories</label>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox" role="switch"
+                                   t-att-checked="state.showCategories"
+                                   t-on-change="toggleCategories"/>
+                        </div>
+                    </div>
+                    <div class="mb-3 d-flex align-items-center justify-content-between">
+                        <label class="form-label m-0">Show Category Titles</label>
+                        <div class="form-check form-switch m-0">
+                            <input class="form-check-input" type="checkbox"
+                                   t-att-checked="state.showCategoryHeaders"
+                                   t-on-change="(ev) => state.showCategoryHeaders = ev.target.checked"/>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Product Category Position</label>
+                        <select class="form-control" t-model="state.categoryPosition" t-on-change="setCategoryPosition">
+                            <option value="top">Top</option>
+                            <option value="left">Left</option>
+                            <option value="right">Right</option>
+                            <option value="bottom">Bottom</option>
+                        </select>
+                    </div>
+
+                    <!-- PRODUCT CARD -->
+                    <h5 class="mt-4 border-bottom pb-1">Product Card</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Product Background</label>
+                        <input type="color" t-model="state.productBgColor" class="form-control form-control-color w-100"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Product Text</label>
+                        <input type="color" t-model="state.productTextColor" class="form-control form-control-color w-100"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Radius</label>
+                        <input type="text" t-model="state.productRadius" class="form-control"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Image Size</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="range" class="form-range flex-grow-1"
+                                   min="30" max="100" step="5"
+                                   t-model.number="state.imgSize"
+                                   t-on-input="onImgSizeInput"/>
+                            <span class="text-muted" style="min-width:42px;text-align:right;">
+                                <t t-esc="state.imgSize"/>%
+                            </span>
+                        </div>
+                        <div class="form-text">Resize all product images. 100% = full width.</div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Image Padding</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="range" class="form-range flex-grow-1"
+                                   min="0" max="25" step="1"
+                                   t-model.number="state.imgPadding"
+                                   t-on-input="onImgPaddingInput"/>
+                            <span class="text-muted" style="min-width:42px;text-align:right;">
+                                <t t-esc="state.imgPadding"/>%
+                            </span>
+                        </div>
+                        <div class="form-text">Add space around product images for alignment.</div>
+                    </div>
+
+                    <!-- CART -->
+                    <h5 class="mt-4 border-bottom pb-1">Cart</h5>
+                    <div class="mb-3">
+                        <label class="form-label">Cart Background</label>
+                        <input type="color" t-model="state.cartBgColor" class="form-control form-control-color w-100"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Cart Text</label>
+                        <input type="color" t-model="state.cartTextColor" class="form-control form-control-color w-100"/>
+                    </div>
+
+                    <!-- ACTIONS -->
+                    <div class="d-flex gap-2 mt-4">
+                        <button class="btn btn-primary w-100" t-on-click="applyTheme">Apply</button>
+                        <button class="btn btn-secondary w-100" t-on-click="resetTheme">Reset</button>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

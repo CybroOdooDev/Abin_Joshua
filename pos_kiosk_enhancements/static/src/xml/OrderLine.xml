@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<t t-name="pos_kiosk_enhancements.OrderlineInfo"
+   t-inherit="point_of_sale.Orderline"
+   t-inherit-mode="extension">
+    <!-- Replace qty -->
+    <xpath expr="//li[contains(@class,'price-per-unit')]/em"
+           position="replace">
+        <em t-esc="line.display_qty || line.qty"
+            class="qty fst-normal fw-bolder me-1"/>
+    </xpath>
+    <!-- Replace unit price -->
+    <xpath expr="//li[contains(@class,'price-per-unit')]//t[@t-esc='line.unitPrice']"
+           position="replace">
+        <t t-esc="line.display_unit_price ?? line.unitPrice"/>
+    </xpath>
+    <!-- Keep free/paid info -->
+    <xpath expr="//ul[contains(@class,'info-list')]"
+           position="inside">
+        <li t-if="line.selected_qty  and line.display_qty != 1">
+            Selected:
+            <strong><t t-esc="line.selected_qty"/></strong>
+            |
+            Free:
+            <strong><t t-esc="line.free_qty"/></strong>
+            |
+            Paid:
+            <strong><t t-esc="line.paid_qty"/></strong>
+        </li>
+    </xpath>
+</t>

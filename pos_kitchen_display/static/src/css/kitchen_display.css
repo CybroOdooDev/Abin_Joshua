@@ -1,0 +1,498 @@
+/* ===============================
+MAIN LAYOUT
+================================= */
+.kds-container {
+display: flex;
+flex-direction: column;
+height: 100vh;
+width: 100%;
+background: #f3f3f3;
+}
+
+/* ===============================
+TOP BAR
+================================= */
+.kds-topbar {
+display: flex;
+justify-content: space-between;
+padding: 14px;
+background: #2b2b2b;
+}
+
+.kds-close {
+background: transparent;
+border: 1px solid #666;
+color: #ccc;
+padding: 10px 18px;
+border-radius: 8px;
+font-size: 16px;
+}
+
+.kds-close:hover {
+border-color: #ccc;
+color: #fff;
+}
+
+.kds-finish-all {
+background: #28a745;
+color: white;
+border: none;
+padding: 10px 18px;
+border-radius: 8px;
+font-size: 16px;
+}
+
+/* ===============================
+STAGE TABS (BIG TOUCH)
+================================= */
+.kds-stages {
+display: flex;
+gap: 14px;
+padding: 16px;
+background: #f5f5f5;
+border-bottom: 1px solid #ddd;
+}
+
+.kds-stage-tab {
+padding: 14px 28px;
+cursor: pointer;
+border-radius: 10px;
+background: white;
+font-weight: 600;
+font-size: 18px;
+}
+
+.kds-stage-tab.active {
+background: #007bff;
+color: white;
+}
+
+/* ===============================
+ORDERS GRID
+================================= */
+.kds-orders {
+flex: 1;
+overflow-y: auto;
+}
+
+.kds-orders-grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+gap: 24px;
+padding: 20px;
+align-content: start;
+align-items: start;
+}
+
+.kds-card {
+    background: white;
+    border-radius: 16px;
+    padding: 18px 16px;
+    border: 1px solid #ddd;
+    min-height: 140px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: 0.2s;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.kds-card:hover {
+transform: scale(1.02);
+}
+
+/* STATES */
+.kds-card.warning {
+background: #fff3cd;
+}
+
+.kds-card.late {
+background: #f8d7da;
+}
+
+/* ===============================
+HEADER
+================================= */
+.kds-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+.kds-header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ORDER TYPE BADGE */
+.kds-badge {
+padding: 6px 12px;
+border-radius: 8px;
+font-size: 13px;
+font-weight: bold;
+color: white;
+}
+
+.kds-badge.takeaway {
+background: #ff9800;
+}
+
+.kds-badge.dinein {
+background: #28a745;
+}
+.kds-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+    margin-bottom: 12px;
+    gap: 10px;
+}
+.waiter-div{
+    font-size : 15px;
+}
+.kds-diners {
+font-weight: 600;
+color: #000;
+}
+
+.kds-stage-badge {
+padding: 6px 12px;
+border-radius: 8px;
+font-size: 12px;
+font-weight: 700;
+color: white;
+}
+
+/* ===============================
+PRODUCT LINES
+================================= */
+.kds-line {
+margin-top: 10px;
+font-size: 18px;
+padding: 8px 0;
+}
+
+.kds-product {
+font-size: 18px;
+padding: 6px 0;
+}
+
+.kds-note {
+font-size: 14px;
+color: #d9534f;
+margin-top: 4px;
+font-style: italic;
+}
+
+/* CANCELLED */
+.kds-cancelled {
+color: #d9534f;
+text-decoration: line-through;
+opacity: 0.7;
+}
+
+/* ===============================
+BUTTONS (TOUCH FRIENDLY)
+================================= */
+.kds-next,
+.kds-next-cat,
+.kds-reset,
+.kds-finish,
+.kds-accept-all {
+background: transparent;
+border: none;
+padding: 10px 14px;
+border-radius: 8px;
+font-size: 18px;
+cursor: pointer;
+margin-left: 6px;
+}
+
+/* HOVER STATES */
+.kds-next:hover,
+.kds-next-cat:hover {
+background: #e8f0fe;
+color: #007bff;
+}
+
+.kds-reset:hover {
+background: #f0f0f0;
+}
+
+.kds-finish:hover {
+background: #e6f4ea;
+color: #28a745;
+}
+.kds-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+/* ACCEPT BUTTON */
+.kds-accept-all {
+    background: #007bff;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+/* ===============================
+COMBO GROUPS
+================================= */
+.kds-combo-group {
+border: 1px solid #e0e0e0;
+border-radius: 10px;
+margin-bottom: 10px;
+padding: 10px;
+}
+
+.kds-combo-header {
+    font-weight: 600;
+    font-size: 14px;
+    color: #444;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 6px;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ===============================
+FAMILY LABEL
+================================= */
+.kds-family-label {
+font-size: 12px;
+font-weight: 600;
+text-transform: uppercase;
+color: #888;
+margin: 6px 0 4px;
+}
+/* ===============================
+REMINDER BELL
+================================= */
+.kds-bell {
+    margin-left: 6px;
+    font-size: 18px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transform-origin: top center;
+    animation: kds-bell-ring 1.4s ease-in-out infinite;
+    filter: drop-shadow(0 0 0px #ffc107);
+}
+
+/* Realistic bell: fast swing burst, pause, repeat */
+@keyframes kds-bell-ring {
+    0%   { transform: rotate(0deg);   filter: drop-shadow(0 0 0px  #ffc107); }
+    4%   { transform: rotate(18deg);  filter: drop-shadow(0 0 6px  #ffc107); }
+    8%   { transform: rotate(-16deg); filter: drop-shadow(0 0 10px #ffc107); }
+    12%  { transform: rotate(14deg);  filter: drop-shadow(0 0 8px  #ffc107); }
+    16%  { transform: rotate(-10deg); filter: drop-shadow(0 0 6px  #ffc107); }
+    20%  { transform: rotate(6deg);   filter: drop-shadow(0 0 3px  #ffc107); }
+    24%  { transform: rotate(0deg);   filter: drop-shadow(0 0 0px  #ffc107); }
+    /* silent pause until next burst */
+    100% { transform: rotate(0deg);   filter: drop-shadow(0 0 0px  #ffc107); }
+}
+
+/* ===============================
+TIMER TEXT
+================================= */
+.kds-timer {
+font-weight: bold;
+font-size: 16px;
+}
+/* Notify Waiter button */
+.kds-notify-waiter {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 12px;
+    border: none;
+    border-radius: 6px;
+    background-color: #f59e0b;   /* amber */
+    color: #fff;
+    font-weight: 600;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.kds-notify-waiter:hover {
+    background-color: #d97706;
+    transform: scale(1.03);
+}
+
+.kds-notify-waiter:active {
+    transform: scale(0.97);
+}
+
+/* Confirmed state */
+.kds-notify-waiter.notified {
+    background-color: #10b981;
+    cursor: default;
+    pointer-events: none;
+}
+/*reminder popup stack*/
+.kds-reminder-stack {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.kds-reminder-popup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 12px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+    min-width: 280px;
+    max-width: 360px;
+    pointer-events: all;
+    animation: kds-reminder-in 0.25s ease;
+}
+
+@keyframes kds-reminder-in {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.kds-reminder-icon {
+    font-size: 28px;
+    flex-shrink: 0;
+}
+
+.kds-reminder-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 14px;
+    color: #333;
+}
+
+.kds-reminder-body strong {
+    font-size: 15px;
+    color: #7a5700;
+}
+
+.kds-reminder-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: #888;
+    cursor: pointer;
+    padding: 0 4px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.kds-reminder-close:hover {
+    color: #333;
+}
+/* ===============================
+COMBO CARD (NEW DESIGN)
+================================= */
+
+.kds-combo-card {
+    border: 1px solid #e3e3e3;
+    border-radius: 14px;
+    padding: 10px;
+    margin-bottom: 12px;
+    background: #fafafa;
+}
+
+/* Parent row */
+.kds-combo-parent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 600;
+    font-size: 16px;
+    padding-bottom: 6px;
+}
+
+/* Actions */
+.kds-combo-actions button {
+    background: #e8f0fe;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 8px;
+    cursor: pointer;
+}
+
+/* Inner box */
+.kds-combo-body {
+    background: white;
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid #eee;
+}
+
+/* Category */
+.kds-combo-family {
+    margin-bottom: 8px;
+}
+
+.kds-combo-family-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #888;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+/* Child lines */
+.kds-combo-line {
+    font-size: 15px;
+    padding-left: 6px;
+}
+.kds-free-tag {
+    margin-right: 6px;
+    margin-left: 6px;
+    padding: 2px 6px;
+    color:  #28a745;
+    font-size: 15px;
+    font-weight: 600;
+}
+.kds-header-right {
+    display: flex;
+    gap: 20px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.kds-table-tag,
+.kds-order-number {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.kds-floor-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 10px;
+    border-radius: 8px;
+    background: #eef2f7;
+    color: #555;
+    font-size: 15px;
+    font-weight: 600;
+}

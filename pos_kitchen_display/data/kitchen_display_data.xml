@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="stage_to_cook" model="kitchen.display.stage">
+            <field name="name">To Cook</field>
+        </record>
+        <record id="stage_ready" model="kitchen.display.stage">
+            <field name="name">Ready</field>
+        </record>
+        <record id="stage_completed" model="kitchen.display.stage">
+            <field name="name">Completed</field>
+        </record>
+    </data>
+</odoo>

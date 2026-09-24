@@ -1,0 +1,317 @@
+.o-kiosk-closed-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: all;
+}
+
+.o-kiosk-closed-content {
+    background: rgba(0,0,0,0.8);
+    padding: 40px 60px;
+    border-radius: 12px;
+}
+
+.o-kiosk-closed-content h1 {
+    color: white;
+    font-size: 36px;
+    font-weight: 600;
+    text-align: center;
+    margin: 0;
+}
+
+.pos-scan-payment {
+    width: 420px;
+    padding: 0;
+    background: white;
+    border-radius: 18px;
+    overflow: hidden;
+    font-family: Inter, sans-serif;
+}
+
+.psp-header {
+    background: #f7f8fa;
+    padding: 18px;
+    text-align: center;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.psp-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #495057;
+}
+
+.psp-ref {
+    font-size: 22px;
+    font-weight: 700;
+    color: #3b5bdb;
+    margin-top: 4px;
+}
+
+.psp-body {
+    padding: 20px;
+}
+
+.psp-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+
+.psp-row .label {
+    color: #868e96;
+}
+
+.psp-row .value {
+    font-weight: 500;
+}
+
+.psp-total-box {
+    margin-top: 20px;
+    padding: 18px;
+    background: #f1f3f5;
+    border-radius: 14px;
+    text-align: center;
+}
+
+.total-label {
+    font-size: 14px;
+    color: #868e96;
+}
+
+.total-value {
+    font-size: 36px;
+    font-weight: 800;
+    color: #12b886;
+}
+
+.psp-actions {
+    display: flex;
+    gap: 12px;
+    padding: 20px;
+}
+
+.pay-btn {
+    flex: 1;
+    height: 56px;
+    border: none;
+    border-radius: 14px;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+}
+
+.pay-btn.cash {
+    background: #12b886;
+}
+
+.pay-btn.card {
+    background: #4263eb;
+}
+
+.psp-footer {
+    padding: 0 20px 20px;
+}
+
+.cancel-btn {
+    width: 100%;
+    height: 42px;
+    border: none;
+    background: #e9ecef;
+    border-radius: 12px;
+    font-size: 14px;
+}
+
+/* Quantity container */
+.o_kiosk_qty_control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+/* Quantity buttons */
+.o_kiosk_btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background-color: #f1f3f5;
+    font-size: 18px;
+    font-weight: 600;
+    color: #444;
+    transition: all 0.2s ease;
+}
+
+.o_kiosk_btn:hover {
+    background-color: #e0e3e7;
+}
+
+.o_kiosk_btn:active {
+    transform: scale(0.95);
+}
+
+.o_kiosk_qty_value {
+    min-width: 24px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* ✅ Next button wrapper - fixed to screen, works on all OS */
+.o_kiosk_next_wrapper {
+    position: fixed;
+    bottom: 40px;
+    right: 40px;
+    z-index: 9999;
+}
+
+/* ✅ Next button - single definition, no margins */
+.o_kiosk_next_btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 12px 23px;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+.o_kiosk_next_btn:hover {
+    background-color: #218838;
+}
+
+.o_kiosk_next_btn .arrow {
+    font-size: 16px;
+}
+
+/* Free limit banner */
+.o_kiosk_free_limit_banner {
+    display: inline-block;
+    margin: -8px auto 20px auto;
+    padding: 12px 22px;
+    border-radius: 10px;
+    background: #fff3bf;
+    color: #5c3c00;
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+    border: 1px solid #ffe066;
+}
+
+.o_kiosk_free_limit_banner strong {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.o-kiosk-subcategory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 20px;
+    padding: 8px 4px 24px;
+}
+
+.o-kiosk-subcategory-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 14px;
+    padding: 12px 8px 10px;
+    background: white;
+    border: 2px solid transparent;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.1s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+    user-select: none;
+}
+
+.o-kiosk-subcategory-tile:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 16px rgba(0, 123, 255, 0.18);
+    transform: translateY(-2px);
+}
+
+.o-kiosk-subcategory-tile:active {
+    transform: scale(0.97);
+}
+
+/* Square image container — same ratio as nav bar items */
+.o-kiosk-subcategory-img-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 100%;   /* 1:1 ratio */
+    margin-bottom: 10px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #dde1e7;
+}
+
+.o-kiosk-subcategory-img-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    background: #4e5d78;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    text-align: center;
+    padding: 4px;
+}
+
+.o-kiosk-subcategory-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.o-kiosk-subcategory-name {
+    font-size: 14px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0;
+    color: #2b2b2b;
+    line-height: 1.3;
+    word-break: break-word;
+}
+
+/* ── Breadcrumb in product heading ──────────────────── */
+.o-kiosk-breadcrumb-parent {
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.75em;
+    opacity: 0.8;
+    transition: opacity 0.1s;
+}
+
+.o-kiosk-breadcrumb-parent:hover {
+    opacity: 1;
+    text-decoration: underline;
+}
+
+.o-kiosk-breadcrumb-sep {
+    color: #888;
+    font-size: 0.75em;
+    margin: 0 4px;
+}

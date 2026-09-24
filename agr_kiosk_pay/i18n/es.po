@@ -1,0 +1,234 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* agr_kiosk_pay
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-12 07:26+0000\n"
+"PO-Revision-Date: 2026-03-12 07:26+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: agr_kiosk_pay
+#: model:ir.model.fields,field_description:agr_kiosk_pay.field_pos_config__cashbox_code
+msgid "CashSecurity Cashbox Code"
+msgstr "Código de caja de CashSecurity"
+
+#. module: agr_kiosk_pay
+#: model_terms:ir.ui.view,arch_db:agr_kiosk_pay.pos_config_view_form_agr_kiosk
+msgid "CashSecurity Connector Kiosk URL"
+msgstr "URL del quiosco del conector CashSecurity"
+
+#. module: agr_kiosk_pay
+#: model_terms:ir.ui.view,arch_db:agr_kiosk_pay.pos_config_view_form_agr_kiosk
+msgid "CashSecurity Connector URL for Kiosk"
+msgstr "URL del conector CashSecurity para quiosco"
+
+#. module: agr_kiosk_pay
+#: model_terms:ir.ui.view,arch_db:agr_kiosk_pay.pos_config_view_form_agr_kiosk
+msgid "CashSecurity Dojo"
+msgstr "Dojo de seguridad en efectivo"
+
+#. module: agr_kiosk_pay
+#: model:ir.model.fields,field_description:agr_kiosk_pay.field_pos_config__dojo_terminal_id
+#: model_terms:ir.ui.view,arch_db:agr_kiosk_pay.pos_config_view_form_agr_kiosk
+msgid "CashSecurity Dojo Terminal ID"
+msgstr "Identificación de terminal de CashSecurity Dojo"
+
+#. module: agr_kiosk_pay
+#: model:ir.model.fields,help:agr_kiosk_pay.field_pos_config__dojo_terminal_id
+msgid "CashSecurity Dojo Terminal ID for Kiosk"
+msgstr "Identificación de terminal CashSecurity Dojo para quiosco"
+
+#. module: agr_kiosk_pay
+#: model_terms:ir.ui.view,arch_db:agr_kiosk_pay.pos_config_view_form_agr_kiosk
+msgid "CashSecurity Kiosk"
+msgstr "Quiosco de CashSecurity"
+
+#. module: agr_kiosk_pay
+#: model:ir.model.fields,field_description:agr_kiosk_pay.field_pos_config__cash_security_url
+msgid "CashSecurity URL"
+msgstr "URL de CashSecurity"
+
+#. module: agr_kiosk_pay
+#: model:ir.model.fields,help:agr_kiosk_pay.field_pos_config__cash_security_url
+msgid "CashSecurity URL for Kiosk"
+msgstr "URL de CashSecurity para quiosco"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/js/kiosk_payment_popup.js:0
+#, python-format
+msgid "Connection Error: Is the Cashbox software running on this machine?"
+msgstr "Error de conexión: ¿El software Cashbox se está ejecutando en esta máquina?"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/js/kiosk_payment_popup.js:0
+#, python-format
+msgid "Could not load POS configuration."
+msgstr "No se pudo cargar la configuración del POS."
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/kiosk_payment_popup.xml:0
+#, python-format
+msgid "Go Back"
+msgstr "Volver"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/js/kiosk_payment_popup.js:0
+#: code:addons/agr_kiosk_pay/static/src/js/kiosk_payment_popup.js:0
+#, python-format
+msgid "How would you like to pay?"
+msgstr "¿Cómo desea pagar?"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Item"
+msgstr "Artículo"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/kiosk_payment_popup.xml:0
+#, python-format
+msgid "No payment methods available."
+msgstr "No hay métodos de pago disponibles."
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/js/kiosk_payment_popup.js:0
+#, python-format
+msgid "Order has no server ID after sync."
+msgstr "El pedido no tiene ID de servidor después de la sincronización."
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Order:"
+msgstr "Orden:"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/js/number_page.js:0
+#, python-format
+msgid "Pay"
+msgstr "Pagar"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/js/kiosk_payment_popup.js:0
+#, python-format
+msgid "Payment Received!"
+msgstr "¡Pago recibido!"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/js/kiosk_payment_popup.js:0
+#, python-format
+msgid "Payment was received but the order could not be confirmed: "
+msgstr "Se recibió el pago pero no se pudo confirmar el pedido:"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Payment:"
+msgstr "Pago:"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/js/kiosk_payment_popup.js:0
+#, python-format
+msgid "Please configure the Dojo Terminal ID!"
+msgstr "¡Por favor configure el ID del terminal Dojo!"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/kiosk_payment_popup.xml:0
+#, python-format
+msgid "Please contact a staff member for assistance."
+msgstr "Comuníquese con un miembro del personal para obtener ayuda."
+
+#. module: agr_kiosk_pay
+#: model:ir.model,name:agr_kiosk_pay.model_pos_config
+msgid "Point of Sale Configuration"
+msgstr "Configuración del TPV"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Price"
+msgstr "Precio"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/kiosk_payment_popup.xml:0
+#, python-format
+msgid "Processing payment..."
+msgstr "Procesando pago..."
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Qty"
+msgstr "Cantidad"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "RECEIPT"
+msgstr "RECIBO"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Tax"
+msgstr "Impuesto"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Thank you for your order!"
+msgstr "¡Gracias por su pedido!"
+
+#. module: agr_kiosk_pay
+#: model_terms:ir.ui.view,arch_db:agr_kiosk_pay.pos_config_view_form_agr_kiosk
+msgid ""
+"The Terminal ID is to connect the CashSecurity Dojo from the Kiosk of POS"
+msgstr ""
+"El ID del terminal es para conectar CashSecurity Dojo desde el quiosco del POS"
+
+#. module: agr_kiosk_pay
+#: model_terms:ir.ui.view,arch_db:agr_kiosk_pay.pos_config_view_form_agr_kiosk
+msgid "The URL is to connect the CashSecurity from the Kiosk of POS"
+msgstr "La URL es para conectar CashSecurity desde el Kiosco del POS"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Total"
+msgstr "Total"
+
+#. module: agr_kiosk_pay
+#. odoo-javascript
+#: code:addons/agr_kiosk_pay/static/src/js/kiosk_payment_popup.js:0
+#, python-format
+msgid "Transaction failed."
+msgstr "La transacción falló."

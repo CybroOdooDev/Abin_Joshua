@@ -1,0 +1,405 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* pos_kiosk_studio
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-03-23 10:39+0000\n"
+"PO-Revision-Date: 2026-03-23 10:39+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Add space around product images for alignment."
+msgstr "Agregue espacio alrededor de las imágenes del producto para alinearlas."
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Apply"
+msgstr "Aplicar"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Background"
+msgstr "Fondo"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Background Color"
+msgstr "Color de fondo"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Background Image"
+msgstr "Imagen de fondo"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Border Radius"
+msgstr "Radio del borde"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Bottom"
+msgstr "Abajo"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Cart"
+msgstr "Carro"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Cart Background"
+msgstr "Fondo del carrito"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Cart Text"
+msgstr "Texto del carrito"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Drag"
+msgstr "Arrastrar"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid ""
+"Drag any element on the page to reposition it.\n"
+"                        Changes are saved automatically."
+msgstr ""
+"Arrastra cualquier elemento de la página para reposicionarlo.\n"
+"Los cambios se guardan automáticamente."
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Edit"
+msgstr "Editar"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/self_order_index_template.xml:0
+#, python-format
+msgid "Edit Theme"
+msgstr "Editar tema"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Element Inspector"
+msgstr "Inspector de elementos"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Emoji"
+msgstr "emojis"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Font Style"
+msgstr "Estilo de fuente"
+
+#. module: pos_kiosk_studio
+#: model:ir.model,name:pos_kiosk_studio.model_ir_http
+msgid "HTTP Routing"
+msgstr "Enrutamiento HTTP "
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Image Padding"
+msgstr "Tamaño de imagen"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Image Size"
+msgstr ""
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Kiosk Studio"
+msgstr "Estudio de quiosco"
+
+#. module: pos_kiosk_studio
+#: model:ir.model.fields,field_description:pos_kiosk_studio.field_res_users__kiosk_ui_prefs
+msgid "Kiosk UI Preferences"
+msgstr "Preferencias de la interfaz de usuario del quiosco"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Left"
+msgstr "Izquierda"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Navbar"
+msgstr "Barra de navegación"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Navbar Background"
+msgstr "Fondo de la barra de navegación"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Navbar Text"
+msgstr "Texto navable"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Pick emoji…"
+msgstr "Elige emojis..."
+
+#. module: pos_kiosk_studio
+#: model:ir.model,name:pos_kiosk_studio.model_pos_config
+msgid "Point of Sale Configuration"
+msgstr "Configuración del TPV"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Primary Button"
+msgstr "Botón principal"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Product Background"
+msgstr "Antecedentes del producto"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Product Card"
+msgstr "Tarjeta de producto"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Product Category Position"
+msgstr "Posición de categoría de producto"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Product Text"
+msgstr "Texto del producto"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Radius"
+msgstr "Radio"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Remove emoji"
+msgstr "Quitar emojis"
+
+#. module: pos_kiosk_studio
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Reset"
+msgstr "Reiniciar"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Reset All"
+msgstr "Restablecer todo"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Reset Background Image"
+msgstr "Restablecer imagen de fondo"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Reset background"
+msgstr "Restablecer fondo"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Reset border radius"
+msgstr "Restablecer el radio del borde"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Reset font"
+msgstr "Restablecer fuente"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Reset text color"
+msgstr "Restablecer color del texto"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Resize all product images. 100% = full width."
+msgstr "Cambiar el tamaño de todas las imágenes de productos. 100% = ancho completo."
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Right"
+msgstr "Derecha"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Secondary Button"
+msgstr "Botón secundario"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Show Categories"
+msgstr "Mostrar categorías"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Show Category Titles"
+msgstr "Mostrar títulos de categorías"
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Text Color"
+msgstr "Color del texto"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "Top"
+msgstr "Arriba"
+
+#. module: pos_kiosk_studio
+#: model:ir.model,name:pos_kiosk_studio.model_res_users
+msgid "User"
+msgstr "Usuario"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "bottom"
+msgstr "abajo"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "left"
+msgstr "izquierda"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "right"
+msgstr "derecha"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "top"
+msgstr "arriba"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "↺ Reset All Positions"
+msgstr "↺ Restablecer todas las posiciones"
+
+#. module: pos_kiosk_studio
+#. odoo-javascript
+#: code:addons/pos_kiosk_studio/static/src/xml/studio_sidebar.xml:0
+#, python-format
+msgid "↺ Reset Last Moved Element"
+msgstr "↺ Restablecer el último elemento movido"

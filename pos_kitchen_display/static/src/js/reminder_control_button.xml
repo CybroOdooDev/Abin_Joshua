@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="pos_kitchen_display.KitchenReminderButton">
+        <button class="control-button btn btn-light rounded-0 fw-bolder"
+                t-on-click="() => this.click()">
+            🔔 Remind Kitchen
+        </button>
+    </t>
+</templates>

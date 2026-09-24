@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="pos_kiosk_enhancement.OrderReceiptExtension"
+       t-inherit="point_of_sale.OrderReceipt"
+       t-inherit-mode="extension">
+
+        <!-- Add heading above ReceiptHeader -->
+        <xpath expr="//ReceiptHeader" position="before">
+
+            <div style="
+                text-align:center;
+                font-weight:bold;
+                font-size:16px;
+                margin-bottom:8px;
+            ">
+                SIMPLIFIED INVOICE
+            </div>
+
+            <div style="
+                text-align:center;
+                margin-bottom:12px;
+            ">
+                Ticket Number:
+                <strong>
+                    <t t-esc="props.data.name"/>
+                </strong>
+            </div>
+
+        </xpath>
+
+        <!-- Replace payment lines -->
+        <xpath expr="//div[@class='paymentlines']" position="replace">
+
+            <t t-foreach="props.data.paymentlines"
+               t-as="line"
+               t-key="line_index">
+
+                <div class="payment-info">
+
+                    <div>
+                        Payment Method:
+                        <span class="pos-receipt-right-align">
+                            <t t-esc="line.name"/>
+                        </span>
+                    </div>
+
+                    <div>
+                        Amount Received:
+                        <span class="pos-receipt-right-align">
+                            <t t-esc="props.formatCurrency(line.amount)"/>
+                        </span>
+                    </div>
+
+                </div>
+
+            </t>
+
+        </xpath>
+
+        <!-- Replace change line -->
+        <xpath expr="//div[contains(@class, 'receipt-change')]"
+               position="replace">
+
+            <div class="pos-receipt-amount receipt-change mt-2">
+
+                Change:
+
+                <span
+                    t-esc="props.formatCurrency(props.data.change)"
+                    class="pos-receipt-right-align"
+                />
+
+            </div>
+
+        </xpath>
+
+        <!-- Display Customer Details if present -->
+        <xpath expr="//ReceiptHeader" position="after">
+            <t t-if="props.data.partner">
+                <div class="pos-receipt-customer" style="margin: 8px 0; font-size: 13px;">
+                    <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+                    <div>
+                        <strong>Customer: </strong>
+                        <t t-esc="props.data.partner.name"/>
+                    </div>
+                    <div t-if="props.data.partner.vat">
+                        <strong>VAT: </strong>
+                        <t t-esc="props.data.partner.vat"/>
+                    </div>
+                    <div t-if="props.data.partner.phone">
+                        <strong>Tel: </strong>
+                        <t t-esc="props.data.partner.phone"/>
+                    </div>
+                    <div t-if="props.data.partner.email">
+                        <strong>Email: </strong>
+                        <t t-esc="props.data.partner.email"/>
+                    </div>
+                    <div t-if="props.data.partner.street or props.data.partner.city">
+                        <strong>Address: </strong>
+                        <t t-if="props.data.partner.street"><t t-esc="props.data.partner.street"/>, </t>
+                        <t t-if="props.data.partner.city"><t t-esc="props.data.partner.city"/></t>
+                    </div>
+                    <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+                </div>
+            </t>
+        </xpath>
+
+    </t>
+
+</templates>

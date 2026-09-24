@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-inherit="pos_self_order.selfOrderIndex"
+       t-inherit-mode="extension">
+        <!-- Insert button inside root container -->
+        <xpath expr="//MainComponentsContainer" position="before">
+            <t t-if="isAdmin">
+                <button class="btn btn-primary kiosk-edit-btn"
+                        t-on-click="toggleStudio"
+                        style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+                    Edit Theme
+                </button>
+            </t>
+            <StudioSidebar t-if="state.showStudio"
+               closeStudio="() => state.showStudio = false"/>
+        </xpath>
+        <xpath expr="//MainComponentsContainer"
+               position="attributes">
+            <attribute name="class"
+                       add="kiosk-editable-root"
+                       separator=" " />
+        </xpath>
+    </t>
+</templates>

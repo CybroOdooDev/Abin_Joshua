@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+
+    <t t-inherit="pos_self_order.ComboPage" t-inherit-mode="extension">
+
+        <xpath expr="//span[contains(@class, 'rounded-pill')]" position="attributes">
+
+            <attribute name="t-on-click">
+                () => this.onStepClick(combo_id, combo_id_index)
+            </attribute>
+
+            <attribute name="style">
+                cursor: pointer;
+            </attribute>
+
+        </xpath>
+
+    </t>
+
+</templates>

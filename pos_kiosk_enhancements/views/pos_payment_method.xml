@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_payment_method_form_inherit_cashsecurity"
+            model="ir.ui.view">
+        <field name="name">
+            pos.payment.method.form.inherit.cashsecurity
+        </field>
+        <field name="model">pos.payment.method</field>
+        <field name="inherit_id" ref="point_of_sale.pos_payment_method_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//sheet/group" position="inside">
+                <group string="CashSecurity Configuration for Kiosk and Scan">
+                    <field name="is_cashsecurity_payment"/>
+                    <field name="is_dojo_payment"
+                           invisible="not is_cashsecurity_payment"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

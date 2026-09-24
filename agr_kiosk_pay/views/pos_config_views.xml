@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!--
+        This view extension adds an AGR Kiosk section to the POS configuration form.
+        Admins can see which payment methods are active and toggle kiosk visibility.
+    -->
+    <record id="pos_config_view_form_agr_kiosk" model="ir.ui.view">
+        <field name="name">pos.config.view.form.agr.kiosk</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <!-- Add AGR Kiosk info tab after the main settings -->
+            <xpath expr="//sheet" position="inside">
+                <div string="CashSecurity Kiosk" name="agr_kiosk">
+                    <group string="CashSecurity Connector Kiosk URL">
+                        <div class="text-muted mb-3" colspan="2">
+                            The URL is to connect the CashSecurity from the Kiosk of POS
+                        </div>
+                        <field
+                                name="cash_security_url"
+                                widget="url"
+                                string="CashSecurity Connector URL for Kiosk"
+                        />
+                    </group>
+                    <group string="CashSecurity Dojo">
+                        <div class="text-muted mb-3" colspan="2">
+                            The Terminal ID is to connect the CashSecurity Dojo from the Kiosk of POS
+                        </div>
+                        <field
+                                name="dojo_terminal_id"
+                                string="CashSecurity Dojo Terminal ID"
+                        />
+                    </group>
+
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

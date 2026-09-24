@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Cash Journal for Pay at Counter -->
+        <record id="journal_pay_at_counter" model="account.journal">
+            <field name="name">Pay at Counter Cash</field>
+            <field name="code">PAC</field>
+            <field name="type">cash</field>
+            <field name="company_id" ref="base.main_company"/>
+        </record>
+    </data>
+</odoo>

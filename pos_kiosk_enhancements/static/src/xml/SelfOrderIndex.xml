@@ -1,0 +1,12 @@
+<templates xml:space="preserve">
+<t t-inherit="pos_self_order.selfOrderIndex" t-inherit-mode="extension">
+    <xpath expr="//t[@t-name='pos_self_order.selfOrderIndex']/div[1]" position="replace">
+        <div t-if="!selfOrder.pos_session"
+             class="o-kiosk-closed-overlay">
+            <div class="o-kiosk-closed-content">
+                <h1 t-esc="selfOrder.config.kiosk_closed_message"/>
+            </div>
+        </div>
+    </xpath>
+</t>
+</templates>

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-inherit="pos_self_order.OrderWidget" t-inherit-mode="extension">
+        <xpath expr="//button[contains(@class,'cart')]" position="attributes">
+            <attribute name="t-on-click">wrappedAction</attribute>
+        </xpath>
+    </t>
+</templates>

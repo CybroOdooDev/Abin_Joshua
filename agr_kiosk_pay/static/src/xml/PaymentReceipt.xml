@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="agr_kiosk_pay.PaymentReceipt">
+    <div class="pos-receipt"
+         style="font-family: monospace; width: 260px; padding: 10px; font-size:12px;">
+        <!-- Header -->
+        <div style="text-align:center; margin-bottom:8px;">
+            <div style="font-size:16px; font-weight:bold;">RECEIPT</div>
+            <div>Order: <t t-esc="data.order.name"/></div>
+            <div><t t-esc="new Date().toLocaleString()"/></div>
+        </div>
+
+        <div style="border-top:1px dashed #000; margin:6px 0;"></div>
+
+        <!-- Items -->
+        <table style="width:100%; border-collapse:collapse; table-layout:fixed;">
+            <thead>
+                <tr style="border-bottom:1px dashed #000;">
+                    <th style="text-align:left; width:50%;">Item</th>
+                    <th style="text-align:center; width:15%;">Qty</th>
+                    <th style="text-align:right; width:35%;">Price</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <t t-foreach="data.order.lines" t-as="line" t-key="line_index">
+
+                    <!-- Main product row (combo parent or regular product) -->
+                    <tr>
+                        <td style="word-wrap:break-word;">
+                            <t t-esc="line.name"/>
+                        </td>
+                        <td style="text-align:center;">
+                            <t t-esc="line.qty"/>
+                        </td>
+                        <td style="text-align:right;">
+                            <t t-esc="(line.price || 0).toFixed(2)"/>
+                        </td>
+                    </tr>
+
+                    <!-- Component sub-rows (only name, no qty/price) -->
+                    <t t-if="line.components and line.components.length > 0">
+                        <t t-foreach="line.components" t-as="comp" t-key="comp_index">
+                            <tr>
+                                <td colspan="3"
+                                    style="padding-left:12px; color:#555; font-size:11px; word-wrap:break-word;">
+                                    - <t t-esc="comp.name"/>
+                                </td>
+                            </tr>
+                        </t>
+                    </t>
+                </t>
+            </tbody>
+        </table>
+
+        <div style="border-top:1px dashed #000; margin:8px 0;"></div>
+
+        <!-- Totals -->
+        <div style="display:flex; justify-content:space-between;">
+            <span>Tax</span>
+            <span><t t-esc="(data.order.tax || 0).toFixed(2)"/></span>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; font-weight:bold; font-size:13px;">
+            <span>Total</span>
+            <span><t t-esc="(data.order.total || 0).toFixed(2)"/></span>
+        </div>
+
+        <div style="margin-top:6px;">
+            Payment: <t t-esc="data.order.payment_method"/>
+        </div>
+
+        <div style="border-top:1px dashed #000; margin:8px 0;"></div>
+
+        <!-- Footer -->
+        <div style="text-align:center; font-size:11px;">
+            Thank you for your order!
+        </div>
+    </div>
+</t>
+</templates>

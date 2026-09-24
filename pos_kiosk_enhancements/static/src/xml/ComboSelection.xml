@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-inherit="pos_self_order.ComboSelection" t-inherit-mode="extension">
+    <xpath expr="//span[@t-if='line.combo_price']" position="replace">
+        <t t-set="extraInfo" t-value="this._getLineExtraInfo(line.id)"/>
+        <span
+                t-if="extraInfo.show"
+                class="badge rounded-pill fs-4 text-bg-primary">
+            + <t t-out="selfOrder.formatMonetary(extraInfo.extraPrice)"/>
+        </span>
+    </xpath>
+    <xpath expr="//h2[contains(@class, 'attribute_name')]" position="before">
+        <t t-if="this._hasExtraSelection()">
+            <div class="text-center">
+                <div class="o_kiosk_free_limit_banner">
+                    <t t-esc="this.freeLimitMessage"/>
+                </div>
+            </div>
+        </t>
+    </xpath>
+
+    <!-- ✅ Quantity Controls -->
+    <xpath expr="//div[contains(@class, 'product-infos')]" position="inside">
+
+        <t t-if="props.combo.allow_quantity">
+            <t t-set="lineId" t-value="line.id"/>
+            <!-- SAME LOGIC -->
+            <t t-set="state" t-value="props.comboState.lines[lineId]"/>
+            <t t-if="state">
+
+                <div class="o_kiosk_qty_control">
+
+                    <button class="o_kiosk_btn"
+                            t-on-click="(ev) => this.decreaseQty(lineId, ev)">
+                        −
+                    </button>
+
+                    <span class="o_kiosk_qty_value">
+                        <t t-esc="state.qty || 0"/>
+                    </span>
+
+                    <button class="o_kiosk_btn"
+                            t-on-click="(ev) => this.increaseQty(lineId, ev)">
+                        +
+                    </button>
+
+                </div>
+
+            </t>
+
+        </t>
+
+    </xpath>
+    <xpath expr="//div[contains(@class, 'combo-list')]" position="after">
+        <div class="o_kiosk_next_wrapper">
+            <button class="o_kiosk_next_btn" t-on-click="goNextStep">
+                Next
+                <span class="arrow"><i class="fa fa-arrow-right"></i></span>
+            </button>
+        </div>
+    </xpath>
+
+</t>
+
+</templates>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This view extension adds an AGR Kiosk section to the POS configuration form.
+    Admins can see which payment methods are active and toggle kiosk visibility.
+-->
+<odoo>
+    <record id="pos_config_view_form_kiosk_schedule" model="ir.ui.view">
+        <field name="name">pos.config.view.form.kiosk.schedule</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='agr_kiosk']" position="before">
+                <div name="usb_printer_config">
+                    <group string="USB Printer Configuration">
+                        <group>
+                            <field name="printer_name"/>
+                        </group>
+                    </group>
+                </div>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <div name="kiosk_settings">
+                    <group string="Kiosk Operating Hours">
+                        <group>
+                            <field name="kiosk_use_schedule"/>
+                            <field name="kiosk_no_time_limit"/>
+                            <field name="kiosk_closed_message"/>
+                        </group>
+                        <group invisible="kiosk_use_schedule == False">
+                            <field name="kiosk_open_from" widget="float_time"/>
+                            <field name="kiosk_open_to" widget="float_time"/>
+                        </group>
+                    </group>
+                    <group string="Kiosk Ticket Identifier Settings">
+                        <group>
+                            <field name="show_qr"/>
+                            <field name="show_barcode"/>
+                            <field name="show_both"/>
+                        </group>
+                    </group>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-inherit="pos_restaurant.Table" t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class,'table')]" position="inside">
+            <t t-if="isKitchenReady">
+                <span class="position-absolute top-0 end-0 translate-middle badge rounded-pill bg-warning"
+                      style="font-size:20px; z-index:20; padding: 5px 7px; cursor:pointer;"
+                      t-on-click.stop="onMarkServed">
+                    ✓ Ready
+                </span>
+            </t>
+        </xpath>
+    </t>
+</templates>

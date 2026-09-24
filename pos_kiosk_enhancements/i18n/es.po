@@ -1,0 +1,861 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* pos_kiosk_enhancements
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-19 11:23+0000\n"
+"PO-Revision-Date: 2026-06-19 11:23+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: pos_kiosk_enhancements
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.view_kiosk_close_session_form
+msgid ""
+"<strong>\n"
+"                            There are unpaid kiosk orders.\n"
+"                        </strong>"
+msgstr ""
+"<strong>\n"
+"                            Hay pedidos de quiosco pendientes de pago.\n"
+"                        </strong>"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_combo__allow_quantity
+msgid "Allow Quantity (Extras)"
+msgstr "Permitir cantidad (Extras)"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Amount"
+msgstr "importe"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#, python-format
+msgid "Amount Due"
+msgstr "Importe a pagar"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#, python-format
+msgid "Amount Received:"
+msgstr "Importe recibido:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "BASE IMPONIBLE"
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__show_barcode
+msgid "Barcode"
+msgstr "Código de barras"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.view_kiosk_close_session_form
+#, python-format
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: pos_kiosk_enhancements
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.view_kiosk_close_session_form
+msgid "Cancel Draft Orders & Close Session"
+msgstr "Cancelar borradores de pedidos y cerrar sesión"
+
+#. module: pos_kiosk_enhancements
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.view_pos_order_form_inherit_cancel
+msgid "Cancel Order"
+msgstr "Cancelar pedido"
+
+#. module: pos_kiosk_enhancements
+#. odoo-python
+#: code:addons/pos_kiosk_enhancements/models/pos_order.py:0
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.view_pos_order_cancel_view_form
+#, python-format
+msgid "Cancel Orders"
+msgstr "Cancelar pedidos"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.actions.server,name:pos_kiosk_enhancements.action_pos_order_cancel_selected
+msgid "Cancel Selected Orders"
+msgstr "Cancelar pedidos seleccionados"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_payment_method__is_cashsecurity_payment
+msgid "Cash Security"
+msgstr "Seguridad del efectivo"
+
+#. module: pos_kiosk_enhancements
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.view_pos_payment_method_form_inherit_cashsecurity
+msgid "CashSecurity Configuration for Kiosk and Scan"
+msgstr "Configuración de CashSecurity para Kiosco y Escaneo"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/PosScanPaymentPopup.js:0
+#, python-format
+msgid "CashSecurity payment failed."
+msgstr "El pago de CashSecurity ha fallado."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#, python-format
+msgid "Change:"
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.view_pos_order_cancel_view_form
+msgid "Close"
+msgstr "Cerca"
+
+#. module: pos_kiosk_enhancements
+#. odoo-python
+#: code:addons/pos_kiosk_enhancements/models/pos_config.py:0
+#: model:ir.model,name:pos_kiosk_enhancements.model_kiosk_close_session
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.view_kiosk_close_session_form
+#, python-format
+msgid "Close Kiosk Session"
+msgstr "Cerrar sesión del quiosco"
+
+#. module: pos_kiosk_enhancements
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.view_kiosk_close_session_form
+msgid "Close Session Only"
+msgstr "Cerrar solo la sesión"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__kiosk_closed_message
+msgid "Closed Screen Message"
+msgstr "Mensaje de pantalla cerrada"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_line__combo_price
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_order_line__combo_price
+msgid "Combo Price"
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/PosScanPaymentPopup.js:0
+#, python-format
+msgid "Could not load receipt."
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_kiosk_close_session__create_uid
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_cancel__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_kiosk_close_session__create_date
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_cancel__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#, python-format
+msgid "Customer"
+msgstr "Cliente"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Date:"
+msgstr "Fecha:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Description"
+msgstr "Descripción"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_kiosk_close_session__display_name
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_cancel__display_name
+msgid "Display Name"
+msgstr "Nombre para mostrar"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_payment_method__is_dojo_payment
+msgid "Dojo Payment"
+msgstr "Pago con Dojo"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_kiosk_close_session__draft_order_count
+msgid "Draft Order Count"
+msgstr "Recuento de órdenes en borrador"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_kiosk_close_session__draft_order_ids
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__draft_order_ids
+msgid "Draft Orders"
+msgstr "Borradores de órdenes"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_combo__allow_quantity
+msgid "Enable + / - buttons in kiosk"
+msgstr "Habilitar los botones + / - en el quiosco"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_payment_method__is_cashsecurity_payment
+msgid "Enable for cash security payment in scanning popup and kiosk"
+msgstr ""
+"Habilitar el pago de seguridad en efectivo en la ventana emergente de "
+"escaneo y en el quiosco."
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_payment_method__is_dojo_payment
+msgid "Enable for dojo payment"
+msgstr "Habilitar para pagos con Dojo"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_config__kiosk_open_from
+msgid "Example: 10.0 = 10:00 AM"
+msgstr "Ejemplo: 10.0 = 10:00 a. m."
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_config__kiosk_open_to
+msgid "Example: 20.0 = 8:00 PM"
+msgstr "Ejemplo: 20.0 = 8:00 p. m."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/BarcodeScanner.js:0
+#, python-format
+msgid "Failed to fetch order"
+msgstr "No se pudo recuperar el pedido."
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_product_product__free_combo_count
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_product_template__free_combo_count
+msgid "First N combo choices selected by customer will be free"
+msgstr ""
+"Las primeras N opciones de combo seleccionadas por el cliente serán "
+"gratuitas."
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_product_product__free_combo_count
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_product_template__free_combo_count
+msgid "Free Choices Count"
+msgstr "Las elecciones libres cuentan."
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_combo__free_limit
+msgid "Free Limit"
+msgstr "Límite gratuito"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_line__free_qty
+msgid "Free Qty"
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_order_line__free_qty
+msgid "Free Quantity"
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model,name:pos_kiosk_enhancements.model_ir_http
+msgid "HTTP Routing"
+msgstr "Enrutamiento HTTP "
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Hour:"
+msgstr "Hora:"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_kiosk_close_session__id
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_cancel__id
+msgid "ID"
+msgstr "IDENTIFICACIÓN"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "IVA"
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order__kiosk_combo_tax_amount
+msgid "Kiosk Combo Tax Amount"
+msgstr "Importe del impuesto del combo de quiosco"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order__kiosk_tax_breakdown
+msgid "Kiosk Combo Tax Breakdown (JSON)"
+msgstr "Desglose de impuestos del combo de quiosco (JSON)"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__kiosk_open_from
+msgid "Kiosk Open From"
+msgstr "Quiosco abierto desde"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__kiosk_open_to
+msgid "Kiosk Open To"
+msgstr "Quiosco abierto a"
+
+#. module: pos_kiosk_enhancements
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.pos_config_view_form_kiosk_schedule
+msgid "Kiosk Operating Hours"
+msgstr "Horario de atención del quiosco"
+
+#. module: pos_kiosk_enhancements
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.pos_config_view_form_kiosk_schedule
+msgid "Kiosk Ticket Identifier Settings"
+msgstr "Configuración del identificador de tickets del quiosco"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_kiosk_close_session__write_uid
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_cancel__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_kiosk_close_session__write_date
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_cancel__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/ticketScreen.js:0
+#, python-format
+msgid "Maximum Exceeded"
+msgstr "Se ha superado el máximo"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_config__printer_name
+msgid "Name of the USB Printer"
+msgstr "Nombre de la impresora USB"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/ComboSelection.xml:0
+#, python-format
+msgid "Next"
+msgstr "Próxima"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__kiosk_no_time_limit
+msgid "No Time Limit"
+msgstr "Sin límite de tiempo"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/ProductList.xml:0
+#, python-format
+msgid "No products found"
+msgstr "No se encontraron productos."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Number:"
+msgstr "Número:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "ORDER:"
+msgstr "PEDIDO:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#, python-format
+msgid "Ticket Number:"
+msgstr "Numero de ticket:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/BarcodeScanner.js:0
+#, python-format
+msgid "Order already paid"
+msgstr "Pedido ya pagado"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/BarcodeScanner.js:0
+#, python-format
+msgid "Order not found: "
+msgstr "Pedido no encontrado:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#, python-format
+msgid "Order ref"
+msgstr "Referencia del pedido"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_cancel__order_ids
+msgid "Orders"
+msgstr "Pedidos"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "PAGO EN MOSTRADOR"
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "PAY AT THE COUNTER"
+msgstr "PAGAR EN EL MOSTRADOR"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "PAYMENT PENDING"
+msgstr "PENDIENTE DE PAGO"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "PLEASE PRESENT THIS RECEIPT AT THE CASHIER"
+msgstr "POR FAVOR, PRESENTE ESTE RECIBO EN LA CAJA."
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_line__paid_qty
+msgid "Paid Qty"
+msgstr "Cantidad pagada"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_order_line__paid_qty
+msgid "Paid Quantity"
+msgstr "Cantidad pagada"
+
+#. module: pos_kiosk_enhancements
+#: model:account.journal,name:pos_kiosk_enhancements.journal_pay_at_counter
+msgid "Pay at Counter Cash"
+msgstr "Pagar en caja (efectivo)"
+
+#. module: pos_kiosk_enhancements
+#: model:pos.payment.method,name:pos_kiosk_enhancements.pos_payment_method_pay_counter
+msgid "Pay at the Counter"
+msgstr "Pagar en el mostrador"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#, python-format
+msgid "Payment"
+msgstr "Pago"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Payment Method:"
+msgstr "Método de pago:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/PosScanPaymentPopup.js:0
+#, python-format
+msgid "Payment Received!"
+msgstr "¡Pago recibido!"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/PosScanPaymentPopup.js:0
+#, python-format
+msgid "Payment failed: "
+msgstr "El pago ha fallado:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/PosScanPaymentPopup.js:0
+#, python-format
+msgid "Payment method not found."
+msgstr "Método de pago no encontrado."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/PosScanPaymentPopup.js:0
+#, python-format
+msgid "Please configure the Dojo Terminal ID."
+msgstr "Por favor, configure el ID del terminal Dojo."
+
+#. module: pos_kiosk_enhancements
+#. odoo-python
+#: code:addons/pos_kiosk_enhancements/models/pos_config.py:0
+#, python-format
+msgid "Please configure valid kiosk sales hours."
+msgstr "Por favor, configure un horario de ventas válido para el quiosco."
+
+#. module: pos_kiosk_enhancements
+#. odoo-python
+#: code:addons/pos_kiosk_enhancements/models/pos_config.py:0
+#, python-format
+msgid ""
+"Please enable either 'No Time Limit' or 'Use Schedule' to start the Kiosk"
+msgstr ""
+"Por favor, habilite la opción «Sin límite de tiempo» o «Usar horario» para "
+"iniciar el quiosco."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/ComboSelection.js:0
+#, python-format
+msgid "Please select a valid item from ${combo.name}."
+msgstr "Por favor, seleccione un elemento válido de ${combo.name}."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/ComboSelection.js:0
+#, python-format
+msgid "Please select at least one item from ${combo.name}."
+msgstr "Por favor, seleccione al menos un elemento de ${combo.name}."
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model,name:pos_kiosk_enhancements.model_pos_config
+msgid "Point of Sale Configuration"
+msgstr "Configuración del TPV"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model,name:pos_kiosk_enhancements.model_pos_order_line
+msgid "Point of Sale Order Lines"
+msgstr "Líneas de pedido de punto de venta"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model,name:pos_kiosk_enhancements.model_pos_order
+msgid "Point of Sale Orders"
+msgstr "Pedidos de TPV"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model,name:pos_kiosk_enhancements.model_pos_payment_method
+msgid "Point of Sale Payment Methods"
+msgstr "Métodos de pago en el punto de venta "
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model,name:pos_kiosk_enhancements.model_pos_session
+msgid "Point of Sale Session"
+msgstr "Sesión TPV"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_kiosk_close_session__pos_config_id
+msgid "Pos Config"
+msgstr "Configuración del POS"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#, python-format
+msgid "Price"
+msgstr "Precio"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#: model:ir.model,name:pos_kiosk_enhancements.model_product_template
+#, python-format
+msgid "Product"
+msgstr "Producto"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model,name:pos_kiosk_enhancements.model_product_product
+msgid "Product Variant"
+msgstr "Variante de producto"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model,name:pos_kiosk_enhancements.model_pos_combo
+msgid "Product combo choices"
+msgstr "Opciones de la combinación de productos"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__show_qr
+msgid "Qrcode"
+msgstr "Código QR"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#, python-format
+msgid "Qty"
+msgstr "Unid"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/ProductScreen.js:0
+#: code:addons/pos_kiosk_enhancements/static/src/js/order.js:0
+#, python-format
+msgid "Receipt Already Created"
+msgstr "Recibo ya creado"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "SIMPLIFIED INVOICE"
+msgstr "FACTURA SIMPLIFICADA"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/ProductList.xml:0
+#, python-format
+msgid "Search Results"
+msgstr "Resultados de la búsqueda"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#, python-format
+msgid "Select method to complete order"
+msgstr "Seleccione el método para completar el pedido."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Selected Method:"
+msgstr "Método seleccionado:"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_line__selected_qty
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_order_line__selected_qty
+msgid "Selected Qty"
+msgstr "Cantidad seleccionada"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/ComboSelection.js:0
+#, python-format
+msgid "Selected product is not available. Please choose another item."
+msgstr ""
+"El producto seleccionado no está disponible. Por favor, elija otro artículo."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderLine.xml:0
+#, python-format
+msgid "Selected:"
+msgstr "Seleccionada:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Series:"
+msgstr "Serie:"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__show_both
+msgid "Show Both QR and Barcode"
+msgstr "Mostrar tanto el código QR como el código de barras"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Status: PAID"
+msgstr "Estado: PAGADO"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "THIS DOCUMENT DOES NOT CONSTITUTE PAYMENT"
+msgstr "ESTE DOCUMENTO NO CONSTITUYE UN PAGO."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "TOTAL"
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "TOTAL IVA"
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#, python-format
+msgid "Table"
+msgstr "Mesa"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PosScanPaymentPopup.xml:0
+#, python-format
+msgid "Tax"
+msgstr "Impuesto"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Thank you for your order."
+msgstr "Gracias por su pedido."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Thank you for your visit"
+msgstr "Gracias por su visita."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/ticketScreen.js:0
+#, python-format
+msgid ""
+"The requested quantity to be refunded is higher than the ordered quantity. "
+"%s is requested while only %s can be refunded."
+msgstr ""
+"La cantidad solicitada para el reembolso es mayor que la cantidad pedida. "
+"Se solicita %s, pero solo se puede reembolsar %s."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/ProductScreen.js:0
+#: code:addons/pos_kiosk_enhancements/static/src/js/order.js:0
+#, python-format
+msgid ""
+"This order is locked because a receipt has already been created. You cannot "
+"add products or modify existing lines."
+msgstr ""
+"Este pedido está bloqueado debido a que ya se ha generado un recibo. No "
+"puedeagregar productos ni modificar las líneas existentes."
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/PaymentReceipt.js:0
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__printer_name
+#, python-format
+msgid "USB Printer"
+msgstr "Impresora USB"
+
+#. module: pos_kiosk_enhancements
+#: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.pos_config_view_form_kiosk_schedule
+msgid "USB Printer Configuration"
+msgstr "Configuración de impresora USB"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/BarcodeScanner.js:0
+#, python-format
+msgid "Unexpected error"
+msgstr "Error inesperado"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
+#, python-format
+msgid "Unid"
+msgstr ""
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_combo__free_limit
+msgid "Upto this limit we cannot charge the amount"
+msgstr "Hasta este límite, no podemos cobrar el importe."
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__kiosk_use_schedule
+msgid "Use Kiosk Schedule"
+msgstr "Usar el horario del quiosco"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/ComboSelection.js:0
+#: code:addons/pos_kiosk_enhancements/static/src/js/combo_configurator_popup.js:0
+#, python-format
+msgid ""
+"You can choose %s free item(s) from this choice. Extra selections will be "
+"charged."
+msgstr ""
+"Puede elegir hasta %s complementos extras de forma gratuita. Las siguientes "
+"selecciones adicionales se cobrara."
+
+#. module: pos_kiosk_enhancements
+#. odoo-python
+#: code:addons/pos_kiosk_enhancements/models/pos_config.py:0
+#, python-format
+msgid "You can enable either 'No Time Limit' or 'Use Schedule', not both."
+msgstr ""
+"Puede habilitar «Sin límite de tiempo» o «Usar horario», pero no ambos."
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model,name:pos_kiosk_enhancements.model_pos_order_cancel
+msgid "pos.order.cancel"
+msgstr "pos.order.cancel"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderLine.xml:0
+#, python-format
+msgid ""
+"|\n"
+"            Free:"
+msgstr ""
+"|\n"
+"            Gratis:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_self_order_sale/static/src/app/pages/cart_page/cart_page.xml:0
+#, python-format
+msgid "Want to add something ?"
+msgstr "¿Quiere añadir algo?"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderLine.xml:0
+#, python-format
+msgid ""
+"|\n"
+"            Paid:"
+msgstr ""
+"|\n"
+"            Pagada:"

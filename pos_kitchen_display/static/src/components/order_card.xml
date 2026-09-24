@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<t t-name="pos_kitchen_display.OrderCard">
+    <div t-att-class="cardClass">
+        <!-- HEADER -->
+        <div class="kds-header">
+            <div class="kds-header-left">
+                <button class="kds-accept-all" t-on-click="(ev) => this.acceptOrder(ev)">
+                    <t t-if="isLastStageForLines(props.order.lines)">✔ Finish All</t>
+                    <t t-else="">✔ Accept All</t>
+                </button>
+                <t t-if="isLastStageForLines(props.order.lines)">
+                    <button
+                            t-att-class="state.notified ? 'kds-notify-waiter notified' : 'kds-notify-waiter'"
+                            t-on-click="(ev) => this.notifyWaiter(ev)">
+                        <t t-if="state.notified">✅ Notified</t>
+                        <t t-else="">Notify Waiter</t>
+                    </button>
+                </t>
+                <span class="kds-badge"
+                      t-att-class="props.order.order_type === 'takeaway' ? 'takeaway' : 'dinein'">
+                    <t t-if="props.order.order_type === 'takeaway'">Takeaway</t>
+                    <t t-else="">Dine In</t>
+                </span>
+            </div>
+            <div class="kds-header-right">
+                <t t-if="props.order.table_name">
+                    <span class="kds-table-tag">🪑
+                        <t t-esc="props.order.table_name"/>
+                    </span>
+                </t>
+                <t t-if="props.order.floor_name">
+                    <span class="kds-floor-tag">📍
+                        <t t-esc="props.order.floor_name"/>
+                    </span>
+                </t>
+                <span class="kds-order-number">#
+                    <t t-esc="props.order.name"/>
+                </span>
+                <span class="kds-timer">⏱<t t-esc="waitingMinutes"/>'
+                </span>
+            </div>
+        </div>
+        <!-- META -->
+        <div class="kds-meta">
+            <div class="waiter-div">
+                <t t-if="props.order.waiter">
+                    <span>👤
+                        <t t-esc="props.order.waiter"/>
+                    </span>
+                </t>
+            </div>
+            <t t-if="props.order.diners">
+                <span class="kds-diners">🍽
+                    <t t-esc="props.order.diners"/>
+                </span>
+            </t>
+            <span class="kds-stage-badge" t-att-style="stageStyle">
+                <t t-esc="stage?.name"/>
+            </span>
+        </div>
+
+        <!-- LINES -->
+        <div class="kds-lines">
+            <t t-foreach="groupedLines.combos" t-as="combo" t-key="combo.instanceKey">
+                <div class="kds-combo-card">
+
+                    <!-- Parent product -->
+                    <div class="kds-combo-parent">
+                        <span><t t-esc="combo.parentQty"/> x
+                            <t t-esc="combo.name"/>
+                        </span>
+
+                        <div class="kds-combo-actions">
+                            <t t-if="!isFirstStageForLines(combo.allLines)">
+                                <button t-on-click="(ev) => this.moveComboPrev(ev, combo.allLines)">
+                                    ⬅
+                                </button>
+                            </t>
+                            <t t-if="!isLastStageForLines(combo.allLines)">
+                                <button t-on-click="(ev) => this.moveComboNext(ev, combo.allLines)">
+                                    ➡
+                                </button>
+                            </t>
+                            <t t-if="isLastStageForLines(combo.allLines)">
+                                <button t-on-click="(ev) => this.finishCombo(ev, combo.allLines)">
+                                    ✔
+                                </button>
+                            </t>
+                        </div>
+                    </div>
+
+                    <!-- 🔹 Children container -->
+                    <div class="kds-combo-body">
+                        <t t-foreach="combo.families" t-as="familyEntry"
+                           t-key="familyEntry[0]">
+
+                            <div class="kds-combo-family">
+                                <div class="kds-combo-family-title">
+                                    <t t-set="familyReminderCount"
+                                       t-value="Math.max(...familyEntry[1].map(l => l.reminder_count || 0))"/>
+                                    <t t-esc="familyEntry[0]"/>
+                                    <t t-if="familyReminderCount">
+                                        <span class="kds-bell">🔔
+                                            <t t-esc="familyReminderCount"/>
+                                        </span>
+                                    </t>
+                                </div>
+
+                                <t t-foreach="familyEntry[1]" t-as="line" t-key="line.id">
+                                    <div class="kds-combo-line"
+                                         t-att-class="line.is_cancelled ? 'kds-cancelled' : ''">
+                                        <t t-esc="line.qty"/>
+                                        x
+                                        <t t-esc="line.product"/>
+                                        <span t-if="line.free_qty"
+                                              class="kds-free-tag">
+                                            Free:
+                                            <t t-esc="line.free_qty"/>
+                                        </span>
+                                    </div>
+                                </t>
+                            </div>
+
+                        </t>
+
+                    </div>
+                </div>
+            </t>
+
+            <t t-foreach="groupedLines.normals" t-as="familyEntry" t-key="familyEntry[0]">
+                <t t-set="categoryLabel" t-value="familyEntry[0]"/>
+                <t t-set="catLines" t-value="familyEntry[1].lines"/>
+                <t t-set="reminderCount"
+                   t-value="Math.max(...catLines.map(l => l.reminder_count || 0))"/>
+
+                <div class="kds-family-label">
+                    <span>
+                        <t t-esc="categoryLabel"/>
+                    </span>
+                    <t t-if="reminderCount">
+                        <span class="kds-bell">🔔
+                            <t t-esc="reminderCount"/>
+                        </span>
+                    </t>
+                    <t t-if="!isFirstStageForLines(catLines)">
+                        <button class="kds-reset"
+                                t-on-click="(ev) => this.moveCategoryPrev(ev, categoryLabel)">
+                            ⬅
+                        </button>
+                    </t>
+                    <t t-if="!isLastStageForLines(catLines)">
+                        <button class="kds-next-cat"
+                                t-on-click="(ev) => this.moveCategoryNext(ev, categoryLabel)">
+                            ➡
+                        </button>
+                    </t>
+                    <t t-if="isLastStageForLines(catLines)">
+                        <button class="kds-finish"
+                                t-on-click="(ev) => this.finishCategory(ev, categoryLabel)">
+                            ✔
+                        </button>
+                    </t>
+                </div>
+
+                <t t-foreach="catLines" t-as="line" t-key="line.id">
+                    <OrderLine line="line"/>
+                </t>
+            </t>
+
+        </div>
+    </div>
+</t>

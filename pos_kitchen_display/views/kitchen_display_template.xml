@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="kitchen_display_index">
+        &lt;!DOCTYPE html&gt;
+        <html>
+            <head>
+                <title>Kitchen Display</title>
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+                <!-- ✅ MUST be first — defines odoo global before any scripts -->
+                <script type="text/javascript">
+                    var odoo = <t t-out="json.dumps({
+                        'csrf_token': request.csrf_token(None),
+                        'kitchen_display': session_info['kitchen_display'],
+                        '__session_info__': session_info,
+                        'debug': debug,
+                        'cache_buster': str(time.time())
+                    })"/>;
+                </script>
+
+                <!-- ✅ Load ONLY your standalone bundle — nothing else -->
+                <t t-call-assets="pos_kitchen_display.assets_kds"/>
+            </head>
+            <body>
+                <div id="root"></div>
+            </body>
+        </html>
+    </template>
+</odoo>

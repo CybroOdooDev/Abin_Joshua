@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_kiosk_close_session,kiosk.close.session,model_kiosk_close_session,point_of_sale.group_pos_manager,1,1,1,1
+access_kiosk_close_session,kiosk.close.session,model_kiosk_close_session,point_of_sale.group_pos_user,1,1,1,1
+access_pos_order_cancel,pos.order.cancel,model_pos_order_cancel,point_of_sale.group_pos_manager,1,1,1,1
+access_pos_order_cancel,pos.order.cancel,model_pos_order_cancel,point_of_sale.group_pos_user,1,1,1,1

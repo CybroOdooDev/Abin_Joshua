@@ -1,0 +1,504 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* pos_kitchen_display
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-04-29 11:41+0000\n"
+"PO-Revision-Date: 2026-04-29 11:41+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: pos_kitchen_display
+#. odoo-python
+#: code:addons/pos_kitchen_display/models/kitchen_order_line.py:0
+#, python-format
+msgid " 🪑 Table: %s"
+msgstr "🪑 Tabla: %s"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/components/order_card.xml:0
+#, python-format
+msgid "1 x"
+msgstr "1 x"
+
+#. module: pos_kitchen_display
+#: model_terms:ir.ui.view,arch_db:pos_kitchen_display.view_kitchen_display_kanban
+msgid "<span>Average time</span>"
+msgstr "<span>Tiempo promedio</span>"
+
+#. module: pos_kitchen_display
+#: model_terms:ir.ui.view,arch_db:pos_kitchen_display.view_kitchen_display_kanban
+msgid "<span>In progress</span>"
+msgstr "<span>En progreso</span>"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/app/kitchen_app.js:0
+#: code:addons/pos_kitchen_display/static/src/app/kitchen_app.js:0
+#, python-format
+msgid "ALL"
+msgstr "Todo"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/components/order_card.js:0
+#, python-format
+msgid "Accept entire order?"
+msgstr "¿Aceptar el pedido completo?"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__alert_timer
+msgid "Alert timer (min)"
+msgstr "Temporizador de alerta (min)"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__avg_waiting_minutes
+msgid "Avg Wait (min)"
+msgstr "Espera promedio (min)"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/js/kitchen_reminder_popup.xml:0
+#, python-format
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__color
+msgid "Color"
+msgstr "Color"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__combo_name
+msgid "Combo Name"
+msgstr "Nombre del combo"
+
+#. module: pos_kitchen_display
+#: model_terms:ir.ui.view,arch_db:pos_kitchen_display.view_kitchen_display_kanban
+msgid "Configure"
+msgstr "Configurar"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__create_uid
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__create_uid
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__create_uid
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__create_date
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__create_date
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__create_date
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields.selection,name:pos_kitchen_display.selection__kitchen_order__order_type__dine_in
+msgid "Dine In"
+msgstr "Comer en el local"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__display_id
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__display_id
+msgid "Display"
+msgstr "Pantalla"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__display_name
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__display_name
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__display_name
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__display_name
+msgid "Display Name"
+msgstr "Nombre mostrado"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/components/order_line.xml:0
+#, python-format
+msgid "Finish"
+msgstr "Finalizar"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/components/order_card.js:0
+#, python-format
+msgid "Finish entire order?"
+msgstr "¿Finalizar el pedido completo?"
+
+#. module: pos_kitchen_display
+#: model:ir.model,name:pos_kitchen_display.model_ir_http
+msgid "HTTP Routing"
+msgstr "Enrutamiento HTTP "
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__id
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__id
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__id
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__id
+msgid "ID"
+msgstr "IDENTIFICACIÓN"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__in_progress_count
+msgid "In Progress"
+msgstr "En progreso"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__is_cancelled
+msgid "Is Cancelled"
+msgstr "Está cancelado"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__is_reminder
+msgid "Is Reminder"
+msgstr "¿Es un recordatorio?"
+
+#. module: pos_kitchen_display
+#: model:ir.model,name:pos_kitchen_display.model_kitchen_display
+msgid "Kitchen Display"
+msgstr "Pantalla de cocina"
+
+#. module: pos_kitchen_display
+#: model:ir.model,name:pos_kitchen_display.model_kitchen_display_stage
+msgid "Kitchen Display Stage"
+msgstr "Etapa de pantalla de cocina"
+
+#. module: pos_kitchen_display
+#: model:ir.model,name:pos_kitchen_display.model_kitchen_order
+msgid "Kitchen Order"
+msgstr "Pedido de cocina"
+
+#. module: pos_kitchen_display
+#: model:ir.model,name:pos_kitchen_display.model_kitchen_order_line
+msgid "Kitchen Order Line"
+msgstr "Línea de pedido de cocina"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__write_uid
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__write_uid
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__write_uid
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__write_uid
+msgid "Last Updated by"
+msgstr "Última actualización por"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__write_date
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__write_date
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__write_date
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__line_ids
+msgid "Line"
+msgstr "Línea"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__name
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__name
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__note
+msgid "Note"
+msgstr "Nota"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/components/order_card.xml:0
+#, python-format
+msgid "Dine In"
+msgstr "Comer en el local"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/components/order_card.xml:0
+#, python-format
+msgid "Takeaway"
+msgstr "Llevar"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/components/order_card.xml:0
+#, python-format
+msgid "Notify Waiter"
+msgstr "Avisar al camarero"
+
+#. module: pos_kitchen_display
+#: model_terms:ir.ui.view,arch_db:pos_kitchen_display.view_kitchen_display_kanban
+msgid "Open Preparation Display"
+msgstr "Abrir pantalla de preparación"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__order_id
+msgid "Order"
+msgstr "Pedido"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/backend/kitchen_backend_notification.js:0
+#: code:addons/pos_kitchen_display/static/src/js/kitchen_notification.js:0
+#, python-format
+msgid "Order %s is ready!"
+msgstr "¡El pedido %s está listo!"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__order_time
+msgid "Order Time"
+msgstr "Hora del pedido"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__order_type
+msgid "Order Type"
+msgstr "Tipo de pedido"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__pos_order_id
+msgid "POS Order"
+msgstr "Pedido TPV"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__pos_order_line_id
+msgid "POS Order Line"
+msgstr "Línea de pedido TPV"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/js/order_widget.js:0
+#, python-format
+msgid "Pay"
+msgstr "Pagar"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/js/kiosk_confirm_popup.xml:0
+#, python-format
+msgid "Please make sure your order is correct before confirming."
+msgstr "Por favor, asegúrese de que su pedido sea correcto antes de confirmar."
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/js/order_widget.js:0
+#, python-format
+msgid "Please review your order"
+msgstr "Por favor, revise su pedido."
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__pos_ids
+msgid "Point of Sale"
+msgstr "Punto de venta"
+
+#. module: pos_kitchen_display
+#: model:ir.model,name:pos_kitchen_display.model_pos_order
+msgid "Point of Sale Orders"
+msgstr "Pedidos de TPV"
+
+#. module: pos_kitchen_display
+#: model:ir.actions.act_window,name:pos_kitchen_display.action_kitchen_display
+#: model:ir.ui.menu,name:pos_kitchen_display.menu_pos_kitchen_display
+msgid "Preparation Display"
+msgstr "Pantalla de preparación"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/app/kitchen_app.xml:0
+#, python-format
+msgid "Prepare"
+msgstr "Preparar"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__product_id
+msgid "Product"
+msgstr "Producto"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__product_name
+msgid "Product Name"
+msgstr "Nombre del producto"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__qty
+msgid "Quantity"
+msgstr "Cantidad"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__reminder_count
+msgid "Reminder Count"
+msgstr "Recuento de recordatorios"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/app/kitchen_app.xml:0
+#, python-format
+msgid "Reminder —"
+msgstr "Recordatorio -"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/components/order_line.xml:0
+#, python-format
+msgid "Reset"
+msgstr "Reiniciar"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/js/kitchen_reminder_popup.xml:0
+#, python-format
+msgid "Select Categories"
+msgstr "Seleccionar categorías"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/js/kitchen_reminder_popup.xml:0
+#, python-format
+msgid "Send"
+msgstr "Enviar"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display_stage__sequence
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__stage_id
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__stage_id
+msgid "Stage"
+msgstr "Etapa"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__stage_start_time
+msgid "Stage Start Time"
+msgstr "Hora de inicio de etapa"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_display__stage_ids
+#: model_terms:ir.ui.view,arch_db:pos_kitchen_display.view_kitchen_display_view_form
+msgid "Stages"
+msgstr "Etapas"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__start_time
+msgid "Start Time"
+msgstr "Hora de inicio"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/backend/kitchen_backend_notification.js:0
+#: code:addons/pos_kitchen_display/static/src/js/kitchen_notification.js:0
+#, python-format
+msgid "Table %s — Order %s is ready!"
+msgstr "¡Mesa %s — Pedido %s está listo!"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__table_name
+msgid "Table Name"
+msgstr "Nombre de la mesa"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields.selection,name:pos_kitchen_display.selection__kitchen_order__order_type__takeaway
+msgid "Takeaway"
+msgstr "Llevar"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__tracking_number
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__tracking_number
+msgid "Tracking Number"
+msgstr "Número de seguimiento"
+
+#. module: pos_kitchen_display
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order__user_id
+#: model:ir.model.fields,field_description:pos_kitchen_display.field_kitchen_order_line__user_id
+msgid "Waiter"
+msgstr "Camarero"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/app/kitchen_app.xml:0
+#, python-format
+msgid "next"
+msgstr "próximo"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/components/order_card.xml:0
+#, python-format
+msgid "✅ Notified"
+msgstr "✅ Notificado"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/js/kiosk_confirm_popup.xml:0
+#, python-format
+msgid "✓ Confirm"
+msgstr "✓ Confirmar"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/js/table.xml:0
+#, python-format
+msgid "✓ Ready"
+msgstr "✓ Listo"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/components/order_card.xml:0
+#, python-format
+msgid "✔ Accept All"
+msgstr "✔ Aceptar todo"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/app/kitchen_app.xml:0
+#: code:addons/pos_kitchen_display/static/src/components/order_card.xml:0
+#, python-format
+msgid "✔ Finish All"
+msgstr "✔ Finalizar todo"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/app/kitchen_app.xml:0
+#, python-format
+msgid "✖ Close"
+msgstr "✖ Cerrar"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/js/kiosk_confirm_popup.xml:0
+#, python-format
+msgid "✗ Cancel"
+msgstr "✗ Cancelar"
+
+#. module: pos_kitchen_display
+#. odoo-python
+#: code:addons/pos_kitchen_display/models/kitchen_order_line.py:0
+#, python-format
+msgid "🍽️ Order %s is ready!"
+msgstr "🍽️ ¡El pedido %s está listo!"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/backend/kitchen_backend_notification.js:0
+#: code:addons/pos_kitchen_display/static/src/js/kitchen_notification.js:0
+#, python-format
+msgid "🍽️ Order Ready"
+msgstr "🍽️ Pedido listo"
+
+#. module: pos_kitchen_display
+#. odoo-javascript
+#: code:addons/pos_kitchen_display/static/src/js/reminder_control_button.xml:0
+#, python-format
+msgid "🔔 Remind Kitchen"
+msgstr "🔔 Recordatorio de cocina"

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<t t-name="pos_kitchen_display.OrderLine">
+    <div class="kds-line"  t-on-click="nextStage">
+
+        <div class="kds-product" t-att-class="props.line.is_cancelled ? 'kds-cancelled' : ''">
+            <t t-esc="props.line.qty"/> x <t t-esc="props.line.product"/>
+        </div>
+
+        <t t-if="props.line.note">
+            <div class="kds-note">
+                📝 <t t-esc="props.line.note"/>
+            </div>
+        </t>
+
+        <div class="kds-actions">
+            <t t-if="!isFirstStage">
+                <button class="kds-reset" t-on-click="previousStage">Reset</button>
+            </t>
+            <t t-if="isLastStage">
+                <button class="kds-finish" t-on-click="finishOrder">Finish</button>
+            </t>
+        </div>
+
+    </div>
+</t>

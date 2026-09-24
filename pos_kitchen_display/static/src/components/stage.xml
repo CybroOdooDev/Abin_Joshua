@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="pos_kitchen_display.Stage">
+    <div class="kds-orders-grid">
+        <t t-foreach="orders" t-as="order" t-key="order.id">
+            <OrderCard order="order"/>
+        </t>
+    </div>
+</t>
+</templates>

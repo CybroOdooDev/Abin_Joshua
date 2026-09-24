@@ -1,0 +1,255 @@
+/**
+ * AGR Kiosk Payment Method Popup Styles
+ * ======================================
+ * Designed for touch screens — large buttons, clear text,
+ * high contrast, finger-friendly tap targets.
+ */
+
+// ─── Dialog Overrides ────────────────────────────────────────────────────────
+
+.agr-kiosk-payment-dialog {
+    .modal-dialog {
+        max-width: 900px;
+        margin: auto;
+    }
+
+    .modal-title {
+        font-size: 2rem;
+        font-weight: 700;
+        text-align: center;
+        width: 100%;
+        padding: 0.5rem 0;
+        color: #2c3e50;
+    }
+
+    .modal-body {
+        padding: 2rem;
+        min-height: 350px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+
+    .modal-footer {
+        justify-content: center;
+        padding: 1.5rem;
+        border-top: 1px solid #dee2e6;
+    }
+}
+
+// ─── Payment Methods Grid ─────────────────────────────────────────────────────
+
+.agr-kiosk-methods-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+    width: 100%;
+
+    &.agr-kiosk-methods-hidden {
+        visibility: hidden;
+    }
+}
+
+// ─── Individual Payment Method Button ─────────────────────────────────────────
+
+.agr-kiosk-method-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+
+    width: 220px;
+    height: 200px;
+    padding: 1.5rem 1rem;
+
+    border: 3px solid #dee2e6;
+    border-radius: 20px;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+
+    // Touch feedback
+    &:active {
+        transform: scale(0.96);
+    }
+
+    &:hover:not(:disabled) {
+        border-color: #007bff;
+        background: #e8f0fe;
+        box-shadow: 0 8px 20px rgba(0, 123, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    // ── Cash Method ──
+    &.agr-kiosk-method-btn--cash {
+        border-color: #28a745;
+        background: #f0faf2;
+
+        .agr-kiosk-method-icon i { color: #28a745; }
+
+        &:hover:not(:disabled) {
+            background: #d4edda;
+            border-color: #1e7e34;
+            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.25);
+        }
+    }
+
+    // ── Card / Terminal Method ──
+    &.agr-kiosk-method-btn--card {
+        border-color: #007bff;
+        background: #f0f6ff;
+
+        .agr-kiosk-method-icon i { color: #007bff; }
+
+        &:hover:not(:disabled) {
+            background: #cce5ff;
+            border-color: #0056b3;
+            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.25);
+        }
+    }
+
+    // ── CashSecurity Method ──
+    &.agr-kiosk-method-btn--cashsecurity {
+        border-color: #6f42c1;
+        background: #f5f0ff;
+
+        .agr-kiosk-method-icon i { color: #6f42c1; }
+
+        &:hover:not(:disabled) {
+            background: #e2d9f3;
+            border-color: #4e2d8f;
+            box-shadow: 0 8px 20px rgba(111, 66, 193, 0.25);
+        }
+    }
+
+    // ── Selected State ──
+    &.agr-kiosk-method-btn--selected {
+        border-width: 4px;
+        box-shadow: 0 0 0 4px rgba(0, 123, 255, 0.3);
+    }
+}
+
+// ─── Method Icon ──────────────────────────────────────────────────────────────
+
+.agr-kiosk-method-icon {
+    i {
+        color: #6c757d;
+        transition: color 0.2s;
+    }
+}
+
+// ─── Method Name ──────────────────────────────────────────────────────────────
+
+.agr-kiosk-method-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+    text-align: center;
+    line-height: 1.2;
+}
+
+// ─── Method Subtitle ──────────────────────────────────────────────────────────
+
+.agr-kiosk-method-subtitle {
+    font-size: 0.85rem;
+    color: #6c757d;
+    text-align: center;
+}
+
+// ─── Processing Overlay ───────────────────────────────────────────────────────
+
+.agr-kiosk-processing {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 8px;
+    z-index: 10;
+}
+
+.agr-kiosk-processing-inner {
+    text-align: center;
+    color: #007bff;
+
+    i { display: block; }
+}
+
+.agr-kiosk-processing-text {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.agr-kiosk-processing-subtext {
+    font-size: 1rem;
+    color: #6c757d;
+}
+
+// ─── Error Banner ─────────────────────────────────────────────────────────────
+
+.agr-kiosk-error-banner {
+    width: 100%;
+    background: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 1rem;
+    color: #856404;
+    display: flex;
+    align-items: center;
+
+    i { font-size: 1.25rem; }
+}
+
+// ─── No Methods Available ─────────────────────────────────────────────────────
+
+.agr-kiosk-no-methods {
+    text-align: center;
+    color: #6c757d;
+    padding: 2rem;
+
+    i { color: #dc3545; }
+}
+
+.agr-kiosk-no-methods-sub {
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+// ─── Cancel Button ────────────────────────────────────────────────────────────
+
+.agr-kiosk-cancel-btn {
+    font-size: 1.2rem;
+    padding: 0.75rem 2.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+// ─── Responsive: Tablet / Smaller Kiosk Screens ───────────────────────────────
+
+@media (max-width: 600px) {
+    .agr-kiosk-method-btn {
+        width: 160px;
+        height: 160px;
+    }
+
+    .agr-kiosk-payment-dialog .modal-title {
+        font-size: 1.5rem;
+    }
+}
+

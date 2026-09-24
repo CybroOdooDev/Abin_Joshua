@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="your_module.ComboConfiguratorPatch"
+       t-inherit="point_of_sale.ComboConfiguratorPopup"
+       t-inherit-mode="extension">
+        <xpath expr="//label[contains(@class,'combo-line')]"
+               position="inside">
+            <div class="combo-card-footer">
+                <t t-if="getExtraCharge(combo_line) > 0">
+                    <div class="combo-extra-price text-danger fw-bold">
+                        +
+                        <t t-esc="
+                            env.utils.formatCurrency(
+                                getExtraCharge(combo_line)
+                            )
+                        "/>
+                    </div>
+                </t>
+                <!-- Quantity controls only if allow_quantity -->
+                <t t-if="combo.allow_quantity">
+                    <div class="extra-topping-controls">
+                        <button
+                            type="button"
+                            class="btn btn-light btn-sm"
+                            t-on-click.stop="decreaseQty.bind(this, combo_line)"
+                        >
+                            −
+                        </button>
+                        <span class="qty-value">
+                            <t t-esc="getQty(combo_line.id)"/>
+                        </span>
+                        <button
+                            type="button"
+                            class="btn btn-primary btn-sm"
+                            t-on-click.stop="increaseQty.bind(this, combo_line)"
+                        >
+                            +
+                        </button>
+                    </div>
+                </t>
+            </div>
+        </xpath>
+        <!-- Hide Odoo combo price -->
+        <xpath expr="//ProductCard"
+               position="attributes">
+            <attribute name="price">''</attribute>
+        </xpath>
+        <!-- Hide radio only for quantity-enabled combos -->
+        <xpath expr="//input[@type='radio']"
+               position="attributes">
+            <attribute name="t-att-style">
+                combo.allow_quantity ? 'display:none' : ''
+            </attribute>
+        </xpath>
+        <!-- Warning only when free limit exceeded -->
+        <xpath expr="//h3"
+               position="after">
+            <t t-if="shouldShowFreeLimitWarning(combo)">
+                <div class="text-warning small mb-2">
+                    <i class="fa fa-exclamation-triangle me-1"/>
+                    <t t-esc="getLimitExceededMessage(combo)"/>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>

@@ -1,0 +1,277 @@
+:root {
+    --kiosk-primary: #875A7B;
+    --kiosk-secondary: #6c757d;
+    --kiosk-background: #f8f9fa;
+    --kiosk-bg-image: none;
+
+    --kiosk-navbar-bg: #ffffff;
+    --kiosk-navbar-text: #000000;
+
+    --kiosk-cart-bg: #ffffff;
+    --kiosk-cart-text: #000000;
+
+    --kiosk-product-bg: #ffffff;
+    --kiosk-product-text: #000000;
+    --kiosk-product-radius: 0px;
+
+    /* Sidebar category image size — controlled by Studio slider */
+    --kiosk-cat-img-size: 80px;
+
+    /* Sidebar nav width = image + padding on both sides.
+       This is recomputed in JS when catImgSize changes.     */
+    --kiosk-sidebar-width: 110px;
+
+    /* Global product image size & padding — controlled by Studio sliders */
+    --kiosk-img-size: 100%;
+    --kiosk-img-padding: 0%;
+}
+
+body.kiosk-theme {
+    background-color: var(--kiosk-background);
+    background-image: var(--kiosk-bg-image);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    font-family: var(--kiosk-font-family, var(--body-font-family, var(--font-sans-serif, inherit)));
+}
+
+/* BUTTONS */
+body.kiosk-theme .btn-primary {
+    background-color: var(--kiosk-primary);
+    border-color: var(--kiosk-primary);
+}
+body.kiosk-theme .btn-secondary {
+    background-color: var(--kiosk-secondary);
+    border-color: var(--kiosk-secondary);
+}
+
+/* NAVBAR */
+body.kiosk-theme .navbar-container {
+    background-color: var(--kiosk-navbar-bg) !important;
+    color: var(--kiosk-navbar-text) !important;
+}
+body.kiosk-theme .navbar-container *:not([style*="color"]) {
+    color: inherit !important;
+}
+
+/* CART */
+body.kiosk-theme .order-content,
+body.kiosk-theme .order-price {
+    background: var(--kiosk-cart-bg);
+    color: var(--kiosk-cart-text);
+}
+
+/* PRODUCT CARD */
+body.kiosk-theme article.self_order_product_card {
+    background: var(--kiosk-product-bg);
+    border-radius: var(--kiosk-product-radius);
+    padding: 12px;
+}
+body.kiosk-theme article.self_order_product_card * {
+    color: var(--kiosk-product-text);
+}
+
+.kiosk-product-image-container {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+}
+
+.kiosk-product-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Block all form interactions while any studio mode is active */
+body.kiosk-edit-mode *:not(.kiosk-studio-sidebar):not(.kiosk-studio-sidebar *),
+body.kiosk-drag-mode *:not(.kiosk-studio-sidebar):not(.kiosk-studio-sidebar *) {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+}
+
+/* Disable interaction EXCEPT for selection (allow pointer events) */
+body.kiosk-edit-mode input:not(.kiosk-studio-sidebar input),
+body.kiosk-edit-mode select:not(.kiosk-studio-sidebar select),
+body.kiosk-edit-mode textarea:not(.kiosk-studio-sidebar textarea) {
+    pointer-events: none !important;
+}
+
+/* Allow buttons & links so they can be inspected */
+body.kiosk-edit-mode button,
+body.kiosk-edit-mode a {
+    pointer-events: auto !important;
+}
+
+.kiosk-hover:not(.kiosk-studio-sidebar):not(.kiosk-studio-sidebar *) {
+    outline: 2px dashed #00bcd4 !important;
+    cursor: crosshair !important;
+}
+
+.kiosk-selected:not(.kiosk-studio-sidebar):not(.kiosk-studio-sidebar *) {
+    outline: 2px solid #ff5722 !important;
+}
+
+.kiosk-studio-sidebar,
+.kiosk-studio-sidebar * {
+    pointer-events: auto !important;
+}
+
+body.kiosk-drag-mode *:not(.kiosk-studio-sidebar):not(.kiosk-studio-sidebar *) {
+    cursor: grab !important;
+    user-select: none !important;
+}
+
+body.kiosk-drag-mode *:not(.kiosk-studio-sidebar):not(.kiosk-studio-sidebar *):hover {
+    outline: 2px dashed #2196f3 !important;
+}
+
+body.kiosk-drag-mode .kiosk-dragging {
+    cursor: grabbing !important;
+    outline: 2px solid #ff9800 !important;
+    opacity: 0.85 !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18) !important;
+    transition: none !important;
+}
+
+body.kiosk-hide-categories .navbar-container {
+    display: none !important;
+}
+
+body.kiosk-hide-category-headers h2 {
+    display: none !important;
+}
+
+/* Prevent category navbar from ever shrinking */
+.navbar-container {
+    flex-shrink: 0 !important;
+}
+
+/* ── TOP (default) ── */
+body.kiosk-cat-top .navbar-container {
+    order: 0 !important;
+    width: 100% !important;
+    flex-direction: row !important;
+    height: auto !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+}
+
+/* ── BOTTOM ── */
+body.kiosk-cat-bottom .navbar-container {
+    order: 99 !important;
+    width: 100% !important;
+    flex-direction: row !important;
+    height: auto !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+}
+
+/* ── LEFT ──
+   :has() scopes the grid ONLY to the wrapper that directly
+   contains BOTH .navbar-container AND #scrollspy-products.
+   Nothing else in the page is affected. */
+body.kiosk-cat-left *:has(> .navbar-container):has(> #scrollspy-products) {
+    display: grid !important;
+    grid-template-columns: var(--kiosk-sidebar-width, 110px) 1fr !important;
+    grid-template-rows: 1fr auto !important;
+    height: 100vh !important;
+    width: 100% !important;
+}
+
+body.kiosk-cat-left .navbar-container {
+    grid-column: 1 !important;
+    grid-row: 1 / span 2 !important;
+    width: var(--kiosk-sidebar-width, 110px) !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+}
+
+body.kiosk-cat-left #scrollspy-products {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    overflow-y: auto !important;
+}
+
+body.kiosk-cat-left .page-buttons {
+    grid-column: 2 !important;
+    grid-row: 2 !important;
+}
+
+/* ── RIGHT ── */
+body.kiosk-cat-right *:has(> .navbar-container):has(> #scrollspy-products) {
+    display: grid !important;
+    grid-template-columns: 1fr var(--kiosk-sidebar-width, 110px) !important;
+    grid-template-rows: 1fr auto !important;
+    height: 100vh !important;
+    width: 100% !important;
+}
+
+body.kiosk-cat-right .navbar-container {
+    grid-column: 2 !important;
+    grid-row: 1 / span 2 !important;
+    width: var(--kiosk-sidebar-width, 110px) !important;
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+}
+
+body.kiosk-cat-right #scrollspy-products {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    overflow-y: auto !important;
+}
+
+body.kiosk-cat-right .page-buttons {
+    grid-column: 1 !important;
+    grid-row: 2 !important;
+}
+
+body.kiosk-cat-left .navbar-container .category-list,
+body.kiosk-cat-right .navbar-container .category-list {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+body.kiosk-cat-left .navbar-container .category-list button,
+body.kiosk-cat-right .navbar-container .category-list button {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 6px 4px !important;
+    box-sizing: border-box !important;
+}
+
+body.kiosk-cat-left .navbar-container .category-list span,
+body.kiosk-cat-right .navbar-container .category-list span {
+    font-size: 11px !important;
+    margin-top: 4px !important;
+    text-align: center !important;
+    word-break: break-word !important;
+    width: 100% !important;
+}
+
+.kiosk-tooltip {
+    position: fixed;
+    z-index: 10000;
+    background: #000;
+    color: #fff;
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    display: none;
+}

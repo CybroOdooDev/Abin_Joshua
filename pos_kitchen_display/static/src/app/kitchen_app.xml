@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="pos_kitchen_display.KitchenApp">
+        <div class="kds-container">
+            <!-- REMINDER POPUPS -->
+            <div class="kds-reminder-stack">
+                <t t-foreach="kitchen.reminderPopups" t-as="popup" t-key="popup.id">
+                    <div class="kds-reminder-popup">
+                        <div class="kds-reminder-icon">🔔</div>
+                        <div class="kds-reminder-body">
+                            <strong>Reminder — <t t-esc="popup.order_name"/></strong>
+                            <span>Prepare <t t-esc="popup.category"/> next</span>
+                        </div>
+                        <button class="kds-reminder-close"
+                                t-on-click="() => this.dismissReminder(popup.id)">✕</button>
+                    </div>
+                </t>
+            </div>
+            <!-- HEADER -->
+            <div class="kds-topbar">
+                <button class="kds-close" t-on-click="closeDisplay">✖ Close</button>
+                <t t-if="isLastStage">
+                    <button class="kds-finish-all" t-on-click="finishAll">✔ Finish All</button>
+                </t>
+            </div>
+            <!-- Stage Tabs -->
+            <div class="kds-stages">
+                <t t-foreach="stageList" t-as="stage" t-key="stage.id">
+                    <div class="kds-stage-tab"
+                         t-att-class="state.activeStage == stage.id ? 'active' : ''"
+                         t-on-click="selectStage.bind(this, stage)">
+                        <t t-esc="stage.name"/> (<t t-esc="getStageCount(stage.id)"/>)
+                    </div>
+                </t>
+            </div>
+            <!-- Orders Grid -->
+            <div class="kds-orders">
+                <Stage stage="activeStage"/>
+            </div>
+        </div>
+    </t>
+</templates>

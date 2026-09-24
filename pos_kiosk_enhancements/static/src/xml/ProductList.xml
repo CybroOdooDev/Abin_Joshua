@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-inherit="pos_self_order.ProductListPage" t-inherit-mode="extension">
+
+    <xpath expr="//nav[@id='listgroup-categories']" position="replace">
+        <nav id="listgroup-categories"
+             class="category-list d-flex flex-grow-1 py-2 px-3 gap-2 gap-md-3 overflow-x-auto"
+             t-ref="categoryList">
+
+            <a
+                t-foreach="rootCategories"
+                t-as="category"
+                t-key="category.id"
+                t-on-click.prevent="() => this.selectCategory(category)"
+                t-att-class="{
+                    'nav-link category-item flex-shrink-0 p-0': true,
+                    'active': selfOrder.currentCategory and selfOrder.currentCategory.id === category.id
+                }"
+            >
+                <div class="ratio ratio-1x1 mb-1">
+                    <div t-att-class="{'placeholder-glow': category.has_image}">
+                        <div class="w-100 h-100 bg-200 rounded d-flex align-items-center justify-content-center"
+                             t-att-class="{'placeholder': category.has_image}">
+                            <small class="d-block fw-bold text-white text-center"
+                                   t-esc="category.name"/>
+                        </div>
+                    </div>
+                    <img t-if="category.has_image"
+                         class="rounded w-100 h-100"
+                         t-attf-src="/pos-self/get-category-image/{{ category.id }}"
+                         loading="lazy"
+                         onerror="this.remove()" />
+                </div>
+                <small class="d-block fw-bold text-center category-name"
+                       t-esc="category.name"/>
+            </a>
+
+        </nav>
+    </xpath>
+
+    <xpath expr="//section[contains(@class, 'product-list-category')]" position="replace">
+
+        <t t-if="state.searchInput">
+            <section class="product-list-category bg-view px-3 pb-4">
+                <h2 class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 display-6 fw-bold">
+                    Search Results
+                </h2>
+                <div class="o-so-products-row">
+                    <t t-foreach="globalSearchResults"
+                       t-as="result"
+                       t-key="result.product.id">
+                        <div class="d-flex flex-column">
+                            <ProductCard product="result.product"/>
+                            <small class="text-muted text-center mt-1">
+                                <t t-esc="result.categoryName"/>
+                            </small>
+                        </div>
+                    </t>
+                </div>
+            </section>
+        </t>
+
+        <t t-elif="selfOrder.currentCategory">
+
+            <t t-if="showSubCategoryGrid">
+                <section class="product-list-category bg-view px-3 pb-4">
+                    <h2 class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 display-6 fw-bold"
+                        t-esc="selfOrder.currentCategory.name"/>
+
+                    <div class="o-kiosk-subcategory-grid">
+                        <t t-foreach="subCategoriesOf(selfOrder.currentCategory.id)"
+                           t-as="subcat"
+                           t-key="subcat.id">
+                            <div class="o-kiosk-subcategory-tile"
+                                 t-on-click="() => this.selectSubCategory(subcat)">
+                                <div class="o-kiosk-subcategory-img-wrap">
+                                    <div class="o-kiosk-subcategory-img-placeholder"
+                                         t-att-class="{'placeholder-glow': subcat.has_image}">
+                                        <div class="w-100 h-100 bg-200 rounded d-flex align-items-center justify-content-center"
+                                             t-att-class="{'placeholder': subcat.has_image}">
+                                            <span class="fw-bold text-white text-center px-2"
+                                                  t-esc="subcat.name"/>
+                                        </div>
+                                    </div>
+                                    <img t-if="subcat.has_image"
+                                         class="o-kiosk-subcategory-img"
+                                         t-attf-src="/pos-self/get-category-image/{{ subcat.id }}"
+                                         loading="lazy"
+                                         onerror="this.closest('.o-kiosk-subcategory-img-wrap').querySelector('.o-kiosk-subcategory-img-placeholder').style.display='flex'" />
+                                </div>
+                                <p class="o-kiosk-subcategory-name" t-esc="subcat.name"/>
+                            </div>
+                        </t>
+                    </div>
+                </section>
+            </t>
+
+            <t t-if="filteredCategories.length">
+                <t t-foreach="filteredCategories"
+                   t-as="category"
+                   t-key="category.id">
+                    <t t-set="products"
+                       t-value="selfOrder.productsGroupedByCategory[category.id]" />
+                    <t t-set="availableProducts"
+                       t-value="!state.searchInput ? products : getFilteredProducts(products)" />
+                    <section t-if="availableProducts and availableProducts.length"
+                             class="product-list-category bg-view px-3 pb-4">
+                        <h2 class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 display-6 fw-bold">
+                            <t t-if="state.selectedSubCategory">
+                                <span class="o-kiosk-breadcrumb-parent"
+                                      t-on-click="() => { this.state.selectedSubCategory = null; }"
+                                      t-esc="selfOrder.currentCategory.name"/>
+                                <span class="o-kiosk-breadcrumb-sep"> › </span>
+                                <t t-esc="category.name"/>
+                            </t>
+                            <t t-elif="showSubCategoryGrid">
+                                <t t-esc="category.name"/>
+                            </t>
+                            <t t-else="">
+                                <t t-esc="category.name"/>
+                            </t>
+                        </h2>
+                        <div class="o-so-products-row">
+                            <t t-foreach="availableProducts"
+                               t-as="product"
+                               t-key="product.id">
+                                <ProductCard product="product"/>
+                            </t>
+                        </div>
+                    </section>
+                </t>
+            </t>
+
+        </t>
+
+    </xpath>
+
+    <xpath expr="//p[contains(text(), 'No products found')]" position="replace">
+        <p t-if="!state.searchInput
+                 and selfOrder.currentCategory
+                 and filteredCategories.length
+                 and (!selfOrder.productsGroupedByCategory[filteredCategories[0].id]
+                      or selfOrder.productsGroupedByCategory[filteredCategories[0].id].length === 0)
+                 and !showSubCategoryGrid"
+           class="mx-auto mt-3 text-center">
+            No products found
+        </p>
+    </xpath>
+
+</t>
+
+</templates>

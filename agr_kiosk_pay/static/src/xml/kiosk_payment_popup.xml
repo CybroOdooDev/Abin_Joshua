@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!--
+        AGR Kiosk Payment Method Selector Popup
+        ========================================
+        Shows a fullscreen-style modal with large touch-friendly
+        buttons for each available payment method.
+    -->
+    <t t-name="agr_kiosk_pay.KioskPaymentMethodPopup">
+        <Dialog title="dialogTitle" size="'xl'" contentClass="'agr-kiosk-payment-dialog'">
+            <!-- Error Message Banner -->
+            <t t-if="state.errorMessage">
+                <div class="agr-kiosk-error-banner">
+                    <i class="fa fa-exclamation-triangle me-2"/>
+                    <span t-esc="state.errorMessage"/>
+                </div>
+            </t>
+
+            <!-- Processing Overlay -->
+            <t t-if="state.processingPayment">
+                <div class="agr-kiosk-processing">
+                    <div class="agr-kiosk-processing-inner">
+                        <i class="fa fa-spinner fa-spin fa-3x mb-3"/>
+                        <p class="agr-kiosk-processing-text">Processing payment...</p>
+                    </div>
+                </div>
+            </t>
+
+            <!-- Payment Method Buttons Grid -->
+            <div class="agr-kiosk-methods-grid" t-att-class="{ 'agr-kiosk-methods-hidden': state.processingPayment }">
+
+                <t t-if="availablePaymentMethods.length === 0">
+                    <!-- No payment methods configured -->
+                    <div class="agr-kiosk-no-methods">
+                        <i class="fa fa-exclamation-circle fa-2x mb-3"/>
+                        <p>No payment methods available.</p>
+                        <p class="agr-kiosk-no-methods-sub">Please contact a staff member for assistance.</p>
+                    </div>
+                </t>
+
+                <t t-foreach="availablePaymentMethods" t-as="method" t-key="method.id">
+                    <button
+                            class="agr-kiosk-method-btn"
+                            t-att-class="{
+                            'agr-kiosk-method-btn--cash': method.type === 'cash',
+                            'agr-kiosk-method-btn--card': method.use_payment_terminal,
+                            'agr-kiosk-method-btn--cashsecurity': method.is_cashsecurity_payment,
+                            'agr-kiosk-method-btn--selected': state.selectedMethod and state.selectedMethod.id === method.id,
+                        }"
+                            t-on-click="() => this.selectPaymentMethod(method)"
+                            t-att-disabled="state.processingPayment">
+                        <!-- Method Name -->
+                        <div class="agr-kiosk-method-name">
+                            <t t-esc="method.name"/>
+                        </div>
+                    </button>
+                </t>
+
+            </div>
+
+            <!-- Footer: Cancel Button -->
+            <t t-set-slot="footer">
+                <button
+                        class="agr-kiosk-cancel-btn btn btn-lg btn-outline-secondary"
+                        t-on-click="onCancel"
+                        t-att-disabled="state.processingPayment">
+                    <i class="fa fa-arrow-left me-2"/>
+                    Go Back
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

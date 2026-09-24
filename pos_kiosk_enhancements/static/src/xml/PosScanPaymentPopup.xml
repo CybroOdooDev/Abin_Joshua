@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+<t t-name="pos_kiosk_enhancements.PosScanPaymentPopup">
+    <div class="" style="width:750px; margin:auto;">
+    <div style="background:var(--color-background-primary, #fff);
+                border-radius:16px;
+                border:0.5px solid rgba(0,0,0,0.12);
+                overflow:hidden;
+                font-family:Letto;">
+
+        <!-- HEADER -->
+        <div style="background:var(--color-background-secondary, #f7f7f5);
+                    padding:20px 24px 16px;
+                    border-bottom:0.5px solid rgba(0,0,0,0.08);
+                    display:flex; align-items:center; gap:10px;">
+
+            <div style="width:36px; height:36px; border-radius:50%;
+                        background:#e8f1fb;
+                        display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <rect x="2" y="2" width="5" height="5" rx="1" stroke="#185fa5"
+                          stroke-width="1.5"/>
+                    <rect x="9" y="2" width="5" height="5" rx="1" stroke="#185fa5"
+                          stroke-width="1.5"/>
+                    <rect x="2" y="9" width="5" height="5" rx="1" stroke="#185fa5"
+                          stroke-width="1.5"/>
+                    <rect x="9" y="9" width="2" height="2" fill="#185fa5"/>
+                    <rect x="13" y="9" width="2" height="2" fill="#185fa5"/>
+                    <rect x="9" y="13" width="2" height="2" fill="#185fa5"/>
+                    <rect x="13" y="13" width="2" height="2" fill="#185fa5"/>
+                </svg>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:2px;">
+
+    <div style="display:flex; align-items:center; gap:8px;">
+
+        <span style="font-size:16px; font-weight:600;">
+            Payment
+        </span>
+
+        <span style="
+            background:#e8f0fe;
+            color:#1a73e8;
+            font-size:13px;
+            font-weight:600;
+            padding:3px 10px;
+            border-radius:14px;
+        ">
+            <t t-esc="props.tracking_number"/>
+        </span>
+
+    </div>
+
+                <div style="font-size:12px; color:#888;">
+        Select method to complete order
+    </div>
+
+</div>
+        </div>
+
+        <!-- BODY -->
+        <div style="padding:20px 24px;">
+
+            <!-- ORDER DETAILS -->
+            <div style="background:var(--color-background-secondary, #f7f7f5);
+                        border-radius:12px;
+                        padding:14px 16px;
+                        margin-bottom:20px;">
+
+                <div style="display:flex; justify-content:space-between;
+                            padding:6px 0; border-bottom:0.5px solid rgba(0,0,0,0.08);">
+                    <span style="font-size:13px; color:#888;">Order ref</span>
+                    <span style="font-size:13px; font-weight:500;">
+                        <t t-esc="props.orderName"/>
+                    </span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between;
+                            padding:6px 0; border-bottom:0.5px solid rgba(0,0,0,0.08);">
+                    <span style="font-size:13px; color:#888;">Customer</span>
+                    <span style="font-size:13px;">
+                        <t t-esc="props.customer or 'Walk-in'"/>
+                    </span>
+                </div>
+
+                <div style="display:flex; justify-content:space-between; padding:6px 0;">
+                    <span style="font-size:13px; color:#888;">Table</span>
+                    <span style="font-size:13px; color:#aaa;">
+                        <t t-esc="props.table or '—'"/>
+                    </span>
+                </div>
+
+            </div>
+
+            <!-- PRODUCT LINES -->
+            <t t-if="props.lines and props.lines.length">
+
+    <div style="
+        max-height:200px;
+        overflow:auto;
+        border:0.5px solid rgba(0,0,0,0.08);
+        border-radius:10px;
+        margin-bottom:16px;
+    ">
+
+        <table style="width:100%; font-size:13px; border-collapse:collapse;">
+
+            <thead style="background:#f7f7f5;">
+                <tr>
+                    <th style="text-align:left; padding:8px;color:black;font-weight:200;">Product</th>
+                    <th style="text-align:center;color:black;font-weight:200;">Qty</th>
+                    <th style="text-align:right; padding-right:8px;color:black;font-weight:200;">Price</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <t t-foreach="props.lines" t-as="line" t-key="line.name">
+
+                    <!-- MAIN LINE -->
+                    <tr style="border-top:0.5px solid rgba(0,0,0,0.05);">
+                        <td style="padding:8px; font-weight:500;">
+                            <t t-esc="line.name"/>
+                        </td>
+                        <td style="text-align:center;">
+                            <t t-esc="line.qty"/>
+                        </td>
+                        <td style="text-align:right; padding-right:8px;">
+                            <t t-esc="(line.price * line.qty).toFixed(2)"/>
+                        </td>
+                    </tr>
+
+                    <!-- SUB PRODUCTS (ONLY IF COMBO) -->
+                    <t t-if="line.isCombo and line.children">
+
+        <t t-foreach="line.children" t-as="child" t-key="child.name">
+
+            <tr style="color:#666;">
+                <td style="padding:4px 8px 4px 24px; font-size:12px;">
+                    ↳ <t t-esc="child.name"/>
+                </td>
+                <td style="text-align:center; font-size:12px;">
+                    <t t-esc="child.qty"/>
+                </td>
+                <td style="text-align:right; padding-right:8px; font-size:12px;">
+                    <t t-esc="child.price.toFixed(2)"/>
+                </td>
+            </tr>
+
+        </t>
+
+    </t>
+
+</t> </tbody>
+
+        </table>
+
+    </div>
+
+</t>
+
+            <!-- AMOUNT -->
+            <!-- AMOUNT + TAX (RIGHT ALIGNED) -->
+            <div style="
+    margin-bottom:24px;
+    display:flex;
+    justify-content:flex-end;
+">
+
+    <div style="
+        min-width:220px;
+        font-size:14px;
+    ">
+
+        <!-- TAX -->
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            margin-bottom:6px;
+            color:#666;
+        ">
+            <span style="font-size:13px;">Tax</span>
+            <span style="font-weight:500;">
+                <t t-esc="props.tax.toFixed(2)"/>
+            </span>
+        </div>
+
+        <!-- DIVIDER -->
+        <div style="
+            border-top:1px dashed rgba(0,0,0,0.1);
+            margin:8px 0;
+        "/>
+
+        <!-- TOTAL -->
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+        ">
+            <span style="
+                font-size:14px;
+                font-weight:500;
+                color:#333;
+            ">
+                Amount Due
+            </span>
+
+            <span style="
+                font-size:26px;
+                font-weight:600;
+                color:#1d9e75;">
+                <t t-esc="formattedAmount"/>
+            </span>
+        </div>
+
+    </div>
+</div>
+
+            <!-- PAYMENT BUTTONS -->
+            <!-- PAYMENT METHODS -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+
+    <t t-foreach="paymentMethods" t-as="method" t-key="method.id">
+
+        <button t-on-click="() => this.pay(method.id)"
+                t-att-style="
+                'padding:14px 8px; border-radius:12px; border:0.5px solid ' +
+                (method.type === 'cash' ? '#a5d6a7' : '#b5d4f4') +
+                '; background:' +
+                (method.type === 'cash' ? '#eaf3de' : '#e6f1fb') +
+                '; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px;'
+            ">
+
+            <!-- ICON -->
+            <t t-if="method.type === 'cash'">
+                💵
+            </t>
+            <t t-else="">
+                💳
+            </t>
+
+            <!-- NAME -->
+            <span style="font-size:14px; font-weight:500;">
+                <t t-esc="method.name"/>
+            </span>
+
+        </button>
+
+    </t>
+
+</div>
+            <!-- CANCEL -->
+            <button t-on-click="cancel"
+                    style="width:100%;
+                           padding:10px;
+                           border-radius:8px;
+                           border:0.5px solid rgba(0,0,0,0.12);
+                           background:transparent;
+                           cursor:pointer;
+                           font-size:13px;
+                           color:#888;">
+                Cancel
+            </button>
+
+        </div>
+    </div>
+    </div>
+
+</t>
+
+</templates>
