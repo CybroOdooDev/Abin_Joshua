@@ -48,8 +48,11 @@ patch(ProductScreen.prototype, {
 
                     line.free_qty = newFree;
                     line.paid_qty = newPaid;
-                    // Override the raw quantity core set; only paid items are charged.
-                    line.set_quantity(newPaid, true);
+                    if (line.allow_quantity || line.extra_price > 0 || line.combo_price > 0) {
+                        line.set_quantity(newPaid, true);
+                    } else {
+                        line.set_quantity(newParentQty, true);
+                    }
                 }
             }
         }

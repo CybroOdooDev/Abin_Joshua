@@ -206,29 +206,38 @@ patch(ComboPage.prototype, {
 
         for (const line of childLines) {
             const data = groupedMap.get(line.product_id);
-            if (!data) continue;
+            if (!data) {
+                line.qty = parentQty;
+                continue;
+            }
 
-            const qty = num(data.qty);
-            const totalPrice = round(data.totalPrice);
-            const correctedUnitPrice = qty > 0 ? round(totalPrice / qty) : 0;
+            const unitQty = num(data.qty) || 1;
+            const totalQty = unitQty * parentQty;
+            const unitFree = num(data.freeQty);
+            const unitPaid = num(data.paidQty);
+            const totalFree = unitFree * parentQty;
+            const totalPaid = unitPaid * parentQty;
+            const singleUnitPrice = num(data.unitPrice);
+            const totalPrice = round(totalPaid * singleUnitPrice);
+            const correctedUnitPrice = totalQty > 0 ? round(totalPrice / totalQty) : 0;
 
-            line.qty = qty;
+            line.qty = totalQty;
             line.price_unit = correctedUnitPrice;
             line.discount = 0;
             line.price_subtotal = totalPrice;
             line.price_subtotal_incl = totalPrice;
-            line._freeQty = num(data.freeQty);
-            line._paidQty = num(data.paidQty);
+            line._freeQty = totalFree;
+            line._paidQty = totalPaid;
             this.selfOrder._comboPriceOverrides.set(line.uuid, {
-                qty,
+                qty: totalQty,
                 price_unit: correctedUnitPrice,
                 discount: 0,
                 price_subtotal: totalPrice,
                 price_subtotal_incl: totalPrice,
-                freeQty: num(data.freeQty),
-                paidQty: num(data.paidQty),
+                freeQty: totalFree,
+                paidQty: totalPaid,
                 freeLimit: num(this.currentCombo?.free_limit || 0),
-                originalUnitPrice: num(data.unitPrice),
+                originalUnitPrice: singleUnitPrice,
             });
         }
         this.selfOrder._applyComboPriceOverrides();

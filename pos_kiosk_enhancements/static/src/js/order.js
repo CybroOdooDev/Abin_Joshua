@@ -172,14 +172,16 @@ patch(Order.prototype, {
                 ? comboLine.combo_id[0]
                 : comboLine.combo_id;
             const comboRecord = this.pos.db.combo_by_id?.[comboId] || {};
-            const selectedQty = comboLine.quantity || 0;
+            const selectedQty = comboLine.quantity || 1;
             const paidQty = comboLine.paid_qty || 0;
             const pricePerUnit = (comboLine.combo_price || 0) + attributesPriceExtra;
+            const isTopping = comboRecord.allow_quantity || (comboLine.extra_price || 0) > 0 || (comboLine.combo_price || 0) > 0;
+            const lineQuantity = isTopping ? paidQty : selectedQty;
             result.push({
                 comboLine,
                 attribute_value_ids,
                 price: pricePerUnit,
-                quantity: paidQty,          // actual charged qty
+                quantity: lineQuantity,          // actual charged/saved qty
                 selected_qty: selectedQty,
                 free_qty: comboLine.free_qty || 0,
                 paid_qty: paidQty,
@@ -208,8 +210,11 @@ patch(Order.prototype, {
         );
         for (const line of comboLinesPrices) {
             const product = this.pos.db.product_by_id[line.comboLine.product_id[0]];
+            const initialQty = (line.allow_quantity || line.extra_price > 0 || line.combo_price > 0)
+                ? line.paid_qty
+                : (line.selected_qty || 1);
             await this.pos.addProductFromUi(product, {
-                quantity: line.quantity,
+                quantity: initialQty,
                 price: line.price,
                 comboParent,
                 comboLine: line.comboLine,
@@ -219,7 +224,7 @@ patch(Order.prototype, {
                 },
             });
             const orderline = this.get_selected_orderline();
-            orderline.selected_qty = line.selected_qty;
+            orderline.selected_qty = line.selected_qty || initialQty;
             orderline.free_qty = line.free_qty;
             orderline.paid_qty = line.paid_qty;
             orderline.combo_price = line.combo_price;
@@ -257,6 +262,78 @@ patch(Order.prototype, {
             orderline.allow_quantity = options.allow_quantity;
         }
         return result;
+    },
+    set_pricelist(pricelist) {
+        var self = this;
+        this.pricelist = pricelist;
+
+        const orderlines = this.get_orderlines();
+
+        const lines_to_recompute = orderlines.filter(
+            (line) =>
+                line.price_type === "original" && !(line.comboLines?.length || line.comboParent)
+        );
+        lines_to_recompute.forEach((line) => {
+            if (line.is_lot_tracked()) {
+                let related_lines = [];
+                const price = line.product.get_price(
+                    self.pricelist,
+                    line.get_quantity(),
+                    line.get_price_extra(),
+                    false,
+                    line,
+                    related_lines
+                );
+                related_lines.forEach((line) => line.set_unit_price(price));
+            } else {
+                line.set_unit_price(
+                    line.product.get_price(
+                        self.pricelist,
+                        line.get_quantity(),
+                        line.get_price_extra(),
+                        false
+                    )
+                );
+            }
+            self.fix_tax_included_price(line);
+        });
+
+        const combo_parent_lines = orderlines.filter(
+            (line) => line.price_type === "original" && line.comboLines?.length
+        );
+        const attributes_prices = {};
+        combo_parent_lines.forEach((parentLine) => {
+            attributes_prices[parentLine.id] = this.compute_child_lines(
+                parentLine.product,
+                parentLine.comboLines.map((childLine) => {
+                    const comboLineCopy = { ...(childLine.comboLine || {}) };
+                    if (childLine.attribute_value_ids) {
+                        comboLineCopy.configuration = {
+                            attribute_value_ids: childLine.attribute_value_ids,
+                        };
+                    }
+                    return comboLineCopy;
+                }),
+                pricelist
+            );
+        });
+
+        const combo_children_lines = orderlines.filter(
+            (line) => line.price_type === "original" && line.comboParent
+        );
+        combo_children_lines.forEach((line) => {
+            const parentPrices = attributes_prices[line.comboParent?.id] || [];
+            const matchedItem = parentPrices.find(
+                (item) =>
+                    item?.comboLine?.id &&
+                    line.comboLine?.id &&
+                    item.comboLine.id === line.comboLine.id
+            );
+            if (matchedItem) {
+                line.set_unit_price(matchedItem.price);
+            }
+            self.fix_tax_included_price(line);
+        });
     },
     export_for_printing() {
         const result = super.export_for_printing(...arguments);
@@ -300,12 +377,15 @@ patch(Order.prototype, {
                 comboPrice * paidQty
             );
 
-            receiptLine.display_qty = selectedQty;
-            receiptLine.selected_qty = selectedQty;
+            const isTopping = orderline.allow_quantity || (orderline.extra_price || 0) > 0 || (orderline.combo_price || 0) > 0;
+            const finalQty = isTopping ? paidQty : (selectedQty || orderline.get_quantity() || 1);
+
+            receiptLine.display_qty = selectedQty || orderline.get_quantity() || 1;
+            receiptLine.selected_qty = selectedQty || orderline.get_quantity() || 1;
             receiptLine.free_qty = orderline.free_qty;
             receiptLine.paid_qty = paidQty;
 
-            receiptLine.qty = String(paidQty);
+            receiptLine.qty = String(finalQty);
 
             receiptLine.unitPrice =
                 this.env.utils.formatCurrency(comboPrice);

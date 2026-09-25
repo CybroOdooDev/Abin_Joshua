@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-    <data noupdate="0">
+    <data noupdate="1">
         <record id="pos_payment_method_pay_counter" model="pos.payment.method">
             <field name="name">Pay at the Counter</field>
             <field name="journal_id" ref="pos_kiosk_enhancements.journal_pay_at_counter"/>

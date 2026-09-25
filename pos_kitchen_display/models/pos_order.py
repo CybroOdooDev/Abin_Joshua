@@ -138,7 +138,7 @@ class PosOrder(models.Model):
                         if (free_qty + paid_qty) > 0
                         else child.qty
                         if child.qty > 0
-                        else 1
+                        else (line.qty or 1)
                     )
                     is_free = free_qty > 0
                     if existing_child:
