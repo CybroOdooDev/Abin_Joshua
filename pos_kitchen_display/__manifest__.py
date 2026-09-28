@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 {
     "name": "POS Kitchen Display",
-    "version": "17.0.1.10.9",
+    "version": "17.0.1.12.9",
     "category": "Point of Sale",
-    "depends": ["agr_kiosk_pay", "pos_kiosk_enhancements", "bus", "mail", "point_of_sale", "stock_sms", "web", "website"],
+    "depends": ["agr_kiosk_pay", "pos_kiosk_enhancements", "pos_restaurant", "bus", "mail", "point_of_sale", "stock_sms", "web", "website"],
     "data": [
         'security/ir.model.access.csv',
         'data/kitchen_display_data.xml',
+        'data/pos_plating_level_data.xml',
         'views/kitchen_display_views.xml',
+        'views/pos_plating_level_views.xml',
+        'views/pos_config_views.xml',
         'views/kitchen_display_template.xml',
     ],
     "assets": {
@@ -40,6 +43,7 @@
             'pos_kitchen_display/static/src/js/kiosk_confirm_popup.xml',
         ],
         'point_of_sale._assets_pos': [
+            'pos_kitchen_display/static/src/css/plating_level.css',
             'pos_kitchen_display/static/src/js/kitchen_notification.js',
             'pos_kitchen_display/static/src/js/reminder_control_button.js',
             'pos_kitchen_display/static/src/js/reminder_control_button.xml',
@@ -49,6 +53,12 @@
             'pos_kitchen_display/static/src/js/ActionpadWidget.js',
             'pos_kitchen_display/static/src/js/table.js',
             'pos_kitchen_display/static/src/js/table.xml',
+            'pos_kitchen_display/static/src/js/plating_level_popup.js',
+            'pos_kitchen_display/static/src/js/plating_level_popup.xml',
+            'pos_kitchen_display/static/src/js/plating_level_selector.js',
+            'pos_kitchen_display/static/src/js/plating_level_selector.xml',
+            'pos_kitchen_display/static/src/js/pos_order_plating_level.js',
+            'pos_kitchen_display/static/src/js/orderline_plating_level.xml',
         ],
         "web.assets_backend": [
             "pos_kitchen_display/static/src/backend/kitchen_backend_notification.js",

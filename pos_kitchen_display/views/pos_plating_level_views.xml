@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- POS Plating Level Tree View -->
+    <record id="pos_plating_level_view_tree" model="ir.ui.view">
+        <field name="name">pos.plating.level.view.tree</field>
+        <field name="model">pos.plating.level</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+                <field name="sequence" widget="handle"/>
+                <field name="name"/>
+                <field name="color" widget="color"/>
+                <field name="is_default"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- POS Plating Level Form View -->
+    <record id="pos_plating_level_view_form" model="ir.ui.view">
+        <field name="name">pos.plating.level.view.form</field>
+        <field name="model">pos.plating.level</field>
+        <field name="arch" type="xml">
+            <form string="Plating Level">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="sequence"/>
+                        </group>
+                        <group>
+                            <field name="color" widget="color"/>
+                            <field name="is_default"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Plating Levels -->
+    <record id="action_pos_plating_level" model="ir.actions.act_window">
+        <field name="name">Plating Levels</field>
+        <field name="res_model">pos.plating.level</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create a new Plating Level (Course)
+            </p>
+            <p>
+                Define courses like Starters, Main Course, and Desserts for ordering and kitchen display.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item under POS Configuration -->
+    <menuitem
+        id="menu_pos_plating_level"
+        name="Plating Levels"
+        parent="point_of_sale.menu_point_config_product"
+        action="action_pos_plating_level"
+        sequence="50"
+    />
+</odoo>

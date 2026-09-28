@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_kitchen_display.PlatingLevelPopup" owl="1">
+        <div class="modal fade show d-block" style="background: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Select Plating Level (Course)</h5>
+                        <button type="button" class="btn-close" t-on-click="() => this.cancel()"/>
+                    </div>
+                    <div class="modal-body plating-level-options py-3">
+                        <div class="d-flex flex-column gap-2">
+                            <t t-foreach="platingLevels" t-as="level" t-key="level.id">
+                                <button class="btn btn-outline-secondary d-flex align-items-center justify-content-between p-3 fs-5"
+                                        t-att-class="{'active btn-primary text-white': level.id === currentPlatingLevelId}"
+                                        t-on-click="() => this.selectLevel(level)">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge rounded-circle p-2"
+                                              t-att-style="'background-color: ' + (level.color || '#3B82F6') + '; width: 14px; height: 14px; display: inline-block;'"/>
+                                        <span class="fw-bold"><t t-esc="level.name"/></span>
+                                    </div>
+                                    <t t-if="level.id === currentPlatingLevelId">
+                                        <i class="fa fa-check"/>
+                                    </t>
+                                </button>
+                            </t>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-secondary" t-on-click="() => this.cancel()">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

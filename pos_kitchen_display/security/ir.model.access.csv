@@ -6,4 +6,6 @@ access_kitchen_display_stage_user,kitchen.display.stage.user,model_kitchen_displ
 access_kitchen_order_manager,kitchen.order.manager,model_kitchen_order,point_of_sale.group_pos_manager,1,1,1,1
 access_kitchen_order_user,kitchen.order.manager,model_kitchen_order,point_of_sale.group_pos_user,1,1,1,1
 access_kitchen_order_line_manager,kitchen.order.line.manager,model_kitchen_order_line,point_of_sale.group_pos_manager,1,1,1,1
-access_kitchen_order_line_manager,kitchen.order.line.manager,model_kitchen_order_line,point_of_sale.group_pos_user,1,1,1,1
+access_kitchen_order_line_user,kitchen.order.line.user,model_kitchen_order_line,point_of_sale.group_pos_user,1,1,1,1
+access_pos_plating_level_manager,pos.plating.level.manager,model_pos_plating_level,point_of_sale.group_pos_manager,1,1,1,1
+access_pos_plating_level_user,pos.plating.level.user,model_pos_plating_level,point_of_sale.group_pos_user,1,1,1,1

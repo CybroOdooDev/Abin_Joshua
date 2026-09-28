@@ -97,6 +97,7 @@ class PosOrder(models.Model):
                         "qty": line.qty,
                         "note": line.note or "",
                         "is_cancelled": line.qty <= 0,
+                        "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
                     })
                 else:
                     new_lines.append({
@@ -112,6 +113,7 @@ class PosOrder(models.Model):
                         "combo_name": line.product_id.name,
                         "note": line.note or "",
                         "is_cancelled": line.qty <= 0,
+                        "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
                     })
                 for child in line.combo_line_ids:
                     _logger.warning(
@@ -126,6 +128,7 @@ class PosOrder(models.Model):
                     existing_child = existing_lines.get(child_uuid)
                     free_qty = child.free_qty or 0
                     paid_qty = child.paid_qty or 0
+                    child_plating_level_id = child.plating_level_id.id if child.plating_level_id else (line.plating_level_id.id if line.plating_level_id else False)
                     # Use selected_qty as the kitchen display quantity so that
                     # standard combo children (free_qty=0, paid_qty=0) show the
                     # correct total after a parent qty change via numpad.
@@ -149,6 +152,7 @@ class PosOrder(models.Model):
                             "paid_qty": paid_qty,
                             "is_free": is_free,
                             "is_cancelled": False,
+                            "plating_level_id": child_plating_level_id,
                         })
                     else:
                         new_lines.append({
@@ -167,6 +171,7 @@ class PosOrder(models.Model):
                             "note": child.note or "",
                             "is_free": is_free,
                             "is_cancelled": False,
+                            "plating_level_id": child_plating_level_id,
                         })
 
             elif not is_combo_child:
@@ -184,8 +189,8 @@ class PosOrder(models.Model):
                         "qty": line.qty,
                         "note": line.note or "",
                         "is_cancelled": line.qty <= 0,
+                        "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
                     })
-                    # if delta_qty > 0 and existing.is_completed:
                     if delta_qty > 0 and (
                             existing.is_completed or existing.stage_id.id != first_stage.id):
 
@@ -195,6 +200,7 @@ class PosOrder(models.Model):
                                 "qty": existing_extra.qty + delta_qty,
                                 "note": line.note or "",
                                 "is_cancelled": False,
+                                "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
                             })
                         else:
                             # Create a fresh _extra line for the delta
@@ -210,6 +216,7 @@ class PosOrder(models.Model):
                                 "combo_name": "",
                                 "note": line.note or "",
                                 "is_cancelled": False,
+                                "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
                             })
                 else:
                     new_lines.append({
@@ -224,6 +231,7 @@ class PosOrder(models.Model):
                         "combo_name": "",
                         "note": line.note or "",
                         "is_cancelled": False,
+                        "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
                     })
 
         if new_lines:

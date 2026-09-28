@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <!-- Insert Plating Level Selector at the top of ProductScreen rightpane before ProductsWidget -->
+    <t t-name="pos_kitchen_display.ProductScreenPlatingLevel"
+       t-inherit="point_of_sale.ProductScreen"
+       t-inherit-mode="extension">
+        <xpath expr="//ProductsWidget" position="before">
+            <PlatingLevelSelector/>
+        </xpath>
+    </t>
+
+    <!-- Insert Course Badge inside Cart Orderline -->
+    <t t-name="pos_kitchen_display.OrderlinePlatingLevel"
+       t-inherit="point_of_sale.Orderline"
+       t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('product-name')]" position="inside">
+            <t t-if="line and line.plating_level">
+                <span class="badge ms-1 plating-level-badge"
+                      t-att-style="'background-color: ' + (line.plating_level.color || '#3B82F6') + '; color: #ffffff; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; cursor: pointer; display: inline-block; vertical-align: middle;'"
+                      t-on-click.stop="() => this.changePlatingLevel(line)"
+                      title="Click to change course">
+                    <i class="fa fa-tag me-1" style="font-size: 0.65rem;"/>
+                    <t t-esc="line.plating_level.name"/>
+                </span>
+            </t>
+        </xpath>
+    </t>
+</templates>

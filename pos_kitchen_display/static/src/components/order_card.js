@@ -34,6 +34,7 @@ export class OrderCard extends Component {
         return Array.from(this.kitchen.stages.values())
             .sort((a, b) => a.sequence - b.sequence);
     }
+
     async notifyWaiter(ev) {
         ev.stopPropagation();
         if (this.state.notified) return;
@@ -48,79 +49,87 @@ export class OrderCard extends Component {
         this.state.notified = true;
         setTimeout(() => { this.state.notified = false; }, 10000);
     }
-    get groupedLines() {
-        const comboInstances = {};
+
+    get groupedCourses() {
+        const courseMap = {};
 
         this.props.order.lines.forEach(line => {
-            if (!line.combo_name || line.combo_name.trim() === "") return;
-            const instanceKey = line.combo_instance_uuid;
+            const courseName = line.plating_level_name || "General";
+            const courseSeq = line.plating_level_sequence !== undefined ? line.plating_level_sequence : 999;
+            const courseColor = line.plating_level_color || "#3B82F6";
+            const courseId = line.plating_level_id || null;
+            const courseKey = `${String(courseSeq).padStart(4, "0")}_${courseName}`;
 
-            if (!comboInstances[instanceKey]) {
-                comboInstances[instanceKey] = {
-                    name: line.combo_name,
-                    instanceKey,
-                    familyMap: {},
+            if (!courseMap[courseKey]) {
+                courseMap[courseKey] = {
+                    key: courseKey,
+                    id: courseId,
+                    name: courseName,
+                    sequence: courseSeq,
+                    color: courseColor,
+                    combos: {},
+                    normals: [],
                     allLines: [],
                 };
             }
 
-            const inst = comboInstances[instanceKey];
+            const course = courseMap[courseKey];
+            course.allLines.push(line);
 
-            // Skip the parent header row entirely — the combo block title
-            // already displays the combo name; repeating it as "1 x Bocadillo"
-            // under its own header is redundant and confusing.
-            if (line.pos_line_uuid === line.combo_instance_uuid) {
-                // Still add to allLines so stage nav buttons work correctly
+            if (line.combo_name && line.combo_name.trim() !== "") {
+                const instanceKey = line.combo_instance_uuid;
+                if (!course.combos[instanceKey]) {
+                    course.combos[instanceKey] = {
+                        name: line.combo_name,
+                        instanceKey,
+                        familyMap: {},
+                        allLines: [],
+                    };
+                }
+                const inst = course.combos[instanceKey];
                 inst.allLines.push(line);
-                return;
+
+                if (line.pos_line_uuid === line.combo_instance_uuid) {
+                    return;
+                }
+                const family =
+                    (line.categories && line.categories[0]) ||
+                    (line.subcategories && line.subcategories[0]) ||
+                    "Others";
+                if (!inst.familyMap[family]) inst.familyMap[family] = [];
+                inst.familyMap[family].push(line);
+            } else {
+                course.normals.push(line);
             }
-
-            // Child line: group by the child product's own POS category
-            const family =
-                (line.categories    && line.categories[0])    ||
-                (line.subcategories && line.subcategories[0]) ||
-                "Others";
-
-            if (!inst.familyMap[family]) inst.familyMap[family] = [];
-            inst.familyMap[family].push(line);
-            inst.allLines.push(line);
         });
 
-        const combos = Object.values(comboInstances).map(inst => {
-            const parentLine = inst.allLines.find(
-                l => l.pos_line_uuid === inst.instanceKey
-            );
-            const parentQty = parentLine ? (parentLine.qty || 1) : 1;
-            const families = Object.entries(inst.familyMap)
-                .sort(([a], [b]) => a.localeCompare(b));
-            return {
-                name: inst.name,
-                instanceKey: inst.instanceKey,
-                families,
-                allLines: inst.allLines,
-                parentQty,
-            };
-        });
+        return Object.values(courseMap)
+            .sort((a, b) => a.sequence - b.sequence || a.name.localeCompare(b.name))
+            .map(course => {
+                const comboList = Object.values(course.combos).map(inst => {
+                    const parentLine = inst.allLines.find(
+                        l => l.pos_line_uuid === inst.instanceKey
+                    );
+                    const parentQty = parentLine ? (parentLine.qty || 1) : 1;
+                    const families = Object.entries(inst.familyMap)
+                        .sort(([a], [b]) => a.localeCompare(b));
+                    return {
+                        name: inst.name,
+                        instanceKey: inst.instanceKey,
+                        families,
+                        allLines: inst.allLines,
+                        parentQty,
+                    };
+                });
 
-        // ── NORMAL LINES — grouped by POS category ───────────────────────
-        const normalGroups = {};
+                const reminderCount = Math.max(0, ...course.allLines.map(l => l.reminder_count || 0));
 
-        this.props.order.lines.forEach(line => {
-            if (line.combo_name && line.combo_name.trim() !== "") return;
-
-            const categoryLabel =
-                (line.categories && line.categories[0]) || "Others";
-
-            if (!normalGroups[categoryLabel]) {
-                normalGroups[categoryLabel] = { lines: [] };
-            }
-            normalGroups[categoryLabel].lines.push(line);
-        });
-
-        return {
-            combos,
-            normals: Object.entries(normalGroups),
-        };
+                return {
+                    ...course,
+                    comboList,
+                    reminderCount,
+                };
+            });
     }
 
     get isFirstStageForLines() {
@@ -159,6 +168,32 @@ export class OrderCard extends Component {
         }
     }
 
+    async moveCoursePrev(ev, courseLines) {
+        ev.stopPropagation();
+        await this.env.services.orm.call(
+            "kitchen.order.line", "action_previous_stage",
+            [courseLines.map(l => l.id)]
+        );
+        await this.kitchen.reload();
+    }
+
+    async moveCourseNext(ev, courseLines) {
+        ev.stopPropagation();
+        await this.env.services.orm.call(
+            "kitchen.order.line", "action_next_stage",
+            [courseLines.map(l => l.id)]
+        );
+    }
+
+    async finishCourse(ev, courseLines) {
+        ev.stopPropagation();
+        await this.env.services.orm.call(
+            "kitchen.order.line", "action_finish",
+            [courseLines.map(l => l.id)]
+        );
+        await this.kitchen.reload();
+    }
+
     async moveComboPrev(ev, allLines) {
         ev.stopPropagation();
         await this.env.services.orm.call(
@@ -182,36 +217,6 @@ export class OrderCard extends Component {
         await this.env.services.orm.call(
             "kitchen.order.line", "action_next_stage",
             [allLines.map(l => l.id)]
-        );
-    }
-
-    async moveCategoryNext(ev, categoryLabel) {
-        ev.stopPropagation();
-        const entry = this.groupedLines.normals.find(([k]) => k === categoryLabel);
-        if (!entry) return;
-        await this.env.services.orm.call(
-            "kitchen.order.line", "action_next_stage",
-            [entry[1].lines.map(l => l.id)]
-        );
-    }
-
-    async moveCategoryPrev(ev, categoryLabel) {
-        ev.stopPropagation();
-        const entry = this.groupedLines.normals.find(([k]) => k === categoryLabel);
-        if (!entry) return;
-        await this.env.services.orm.call(
-            "kitchen.order.line", "action_previous_stage",
-            [entry[1].lines.map(l => l.id)]
-        );
-    }
-
-    async finishCategory(ev, categoryLabel) {
-        ev.stopPropagation();
-        const entry = this.groupedLines.normals.find(([k]) => k === categoryLabel);
-        if (!entry || !entry[1].lines.length) return;
-        await this.env.services.orm.call(
-            "kitchen.order.line", "action_finish",
-            [entry[1].lines.map(l => l.id)]
         );
     }
 

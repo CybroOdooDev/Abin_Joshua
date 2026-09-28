@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_kitchen_display.PlatingLevelSelector">
+        <div class="plating-level-selector-bar d-flex align-items-center gap-2 p-2 bg-view border-bottom overflow-auto">
+            <span class="text-muted fw-bold small text-nowrap d-flex align-items-center me-1">
+                <i class="fa fa-cutlery me-1"/> Course:
+            </span>
+            <t t-foreach="platingLevels" t-as="level" t-key="level.id">
+                <button class="btn btn-sm text-nowrap course-btn"
+                        t-att-class="activePlatingLevelId === level.id ? 'active text-white shadow-sm' : 'btn-outline-secondary'"
+                        t-att-style="activePlatingLevelId === level.id ? ('background-color: ' + (level.color || '#3B82F6') + '; border-color: ' + (level.color || '#3B82F6')) : ''"
+                        t-on-click="() => this.setPlatingLevel(level.id)">
+                    <span class="badge rounded-circle p-1 me-1"
+                          t-if="activePlatingLevelId !== level.id"
+                          t-att-style="'background-color: ' + (level.color || '#3B82F6') + '; width: 8px; height: 8px; display: inline-block;'"/>
+                    <t t-esc="level.name"/>
+                </button>
+            </t>
+        </div>
+    </t>
+</templates>

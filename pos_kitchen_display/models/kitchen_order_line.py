@@ -33,6 +33,7 @@ class KitchenOrderLine(models.Model):
     free_qty = fields.Float(default=0, help="Free Quantity")
     paid_qty = fields.Float(default=0, help="Paid Quantity")
     is_completed = fields.Boolean(default=False, index=True)
+    plating_level_id = fields.Many2one("pos.plating.level", string="Plating Level", index=True)
 
     def _is_last_stage(self):
         self.ensure_one()

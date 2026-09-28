@@ -81,6 +81,10 @@ class KitchenController(http.Controller):
                     "start_time":           fields.Datetime.to_string(l.start_time),
                     "categories":           categories,
                     "subcategories":        subcategories,
+                    "plating_level_id":     l.plating_level_id.id if l.plating_level_id else None,
+                    "plating_level_name":   l.plating_level_id.name if l.plating_level_id else "General",
+                    "plating_level_sequence": l.plating_level_id.sequence if l.plating_level_id else 999,
+                    "plating_level_color":  l.plating_level_id.color if l.plating_level_id else "#3B82F6",
                     "combo_name":           l.combo_name or "",
                     "combo_instance_uuid":  l.combo_instance_uuid or "",
                     "pos_line_uuid":        l.pos_line_uuid or "",
@@ -89,9 +93,9 @@ class KitchenController(http.Controller):
                     "is_cancelled":         l.is_cancelled,
                     "is_reminder":          l.is_reminder,
                     "reminder_count":       l.reminder_count,
-                    'is_free':l.is_free,
-                    "free_qty": l.free_qty,
-                    "paid_qty": l.paid_qty,
+                    'is_free':              l.is_free,
+                    "free_qty":             l.free_qty,
+                    "paid_qty":             l.paid_qty,
                 })
 
             if lines:
