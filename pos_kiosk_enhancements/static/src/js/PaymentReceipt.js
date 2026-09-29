@@ -364,8 +364,9 @@ patch(KioskPaymentMethodPopup.prototype, {
             }
         }
         const untaxed = round(correctTotal - totalTax);
-        const qrUrl = `${baseUrl}/report/barcode/QR/${order.pos_reference}`;
-        const barcodeUrl = `${baseUrl}/report/barcode/Code128/${order.pos_reference}`;
+        const encodedRef = encodeURIComponent(order.pos_reference || "");
+        const qrUrl = `${baseUrl}/report/barcode/QR/${encodedRef}`;
+        const barcodeUrl = `${baseUrl}/report/barcode/Code128/${encodedRef}`;
         let qr_base64 = "";
         let barcode_base64 = "";
         try {

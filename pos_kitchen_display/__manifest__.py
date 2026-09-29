@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 {
     "name": "POS Kitchen Display",
-    "version": "17.0.1.12.9",
+    "version": "17.0.1.13.10",
     "category": "Point of Sale",
     "depends": ["agr_kiosk_pay", "pos_kiosk_enhancements", "pos_restaurant", "bus", "mail", "point_of_sale", "stock_sms", "web", "website"],
     "data": [
+        'security/res_groups.xml',
         'security/ir.model.access.csv',
         'data/kitchen_display_data.xml',
         'data/pos_plating_level_data.xml',
@@ -59,6 +60,8 @@
             'pos_kitchen_display/static/src/js/plating_level_selector.xml',
             'pos_kitchen_display/static/src/js/pos_order_plating_level.js',
             'pos_kitchen_display/static/src/js/orderline_plating_level.xml',
+            'pos_kitchen_display/static/src/js/appetizer_selection_popup.js',
+            'pos_kitchen_display/static/src/js/appetizer_selection_popup.xml',
         ],
         "web.assets_backend": [
             "pos_kitchen_display/static/src/backend/kitchen_backend_notification.js",

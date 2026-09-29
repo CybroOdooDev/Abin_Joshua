@@ -9,6 +9,18 @@
                 <setting string="Ask for Number of Diners" help="Automatically prompt the waiter for the guest count when opening a table" id="ask_diners_setting" invisible="not pos_module_pos_restaurant or is_kiosk_mode">
                     <field name="pos_ask_diners_on_table_open"/>
                 </setting>
+                <setting string="Plating Level" help="Allow selecting courses / plating levels for order lines" id="plating_level_setting" invisible="is_kiosk_mode">
+                    <field name="pos_enable_plating_level"/>
+                </setting>
+                <setting string="Automatic Appetizer" help="Prompt for an appetizer and dispatch to kitchen immediately when opening a table" id="auto_appetizer_setting" invisible="not pos_module_pos_restaurant or is_kiosk_mode">
+                    <field name="pos_enable_auto_appetizer"/>
+                    <div class="content-group" invisible="not pos_enable_auto_appetizer">
+                        <div class="mt16">
+                            <label for="pos_appetizer_product_ids" string="Selectable Appetizers" class="o_light_label"/>
+                            <field name="pos_appetizer_product_ids" widget="many2many_tags"/>
+                        </div>
+                    </div>
+                </setting>
             </block>
         </field>
     </record>

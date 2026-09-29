@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_kitchen_display.AppetizerSelectionPopup">
+        <div class="popup appetizer-selection-popup">
+            <div class="modal-header">
+                <h4 class="modal-title">
+                    <i class="fa fa-cutlery me-2"/>
+                    <t t-esc="props.title"/>
+                    <t t-if="props.tableName">
+                        <span class="text-muted fw-normal fs-6 ms-1">(<t t-esc="props.tableName"/>)</span>
+                    </t>
+                </h4>
+            </div>
+
+            <div class="modal-body">
+                <p class="text-muted mb-3 small">
+                    Choose an appetizer for the table. It will be sent directly to the kitchen.
+                </p>
+
+                <div class="appetizer-product-list mb-3 d-flex flex-wrap gap-2 justify-content-center" style="max-height: 240px; overflow-y: auto;">
+                    <t t-foreach="props.products" t-as="product" t-key="product.id">
+                        <div class="appetizer-product-card btn d-flex flex-column align-items-center justify-content-center p-3 border rounded"
+                             t-att-class="state.selectedProductId === product.id ? 'btn-primary text-white shadow-sm border-primary' : 'btn-light text-dark border-secondary-subtle'"
+                             style="min-width: 130px; min-height: 85px; cursor: pointer; flex: 1 1 calc(33% - 10px);"
+                             t-on-click="() => this.selectProduct(product.id)">
+                            <div class="fw-bold fs-6 text-center text-truncate w-100" t-att-title="product.display_name">
+                                <t t-esc="product.display_name"/>
+                            </div>
+                            <div class="small mt-1 opacity-75">
+                                <t t-esc="env.utils.formatCurrency(product.lst_price)"/>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+
+                <!-- Quantity Selector -->
+                <div class="d-flex align-items-center justify-content-center gap-3 py-2 border-top">
+                    <span class="text-muted fw-bold small">Quantity:</span>
+                    <button class="btn btn-outline-secondary btn-sm rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 32px; height: 32px;"
+                            t-on-click="() => this.updateQuantity(-1)">
+                        <i class="fa fa-minus"/>
+                    </button>
+                    <span class="fs-5 fw-bold px-2 text-center" style="min-width: 30px;">
+                        <t t-esc="state.quantity"/>
+                    </span>
+                    <button class="btn btn-outline-secondary btn-sm rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 32px; height: 32px;"
+                            t-on-click="() => this.updateQuantity(1)">
+                        <i class="fa fa-plus"/>
+                    </button>
+                </div>
+            </div>
+
+            <div class="footer modal-footer d-flex justify-content-between">
+                <button class="button cancel btn btn-secondary px-4" t-on-click="cancel">
+                    <t t-esc="props.cancelText"/>
+                </button>
+                <button class="button confirm btn btn-primary px-4 fw-bold"
+                        t-att-disabled="!state.selectedProductId"
+                        t-on-click="confirm">
+                    <t t-esc="props.confirmText"/>
+                </button>
+            </div>
+        </div>
+    </t>
+</templates>

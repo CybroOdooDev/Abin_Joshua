@@ -29,6 +29,7 @@ export class PlatingLevelSelector extends Component {
     }
 
     get activePlatingLevelId() {
+        if (!this.pos.config.enable_plating_level) return null;
         const order = this.currentOrder;
         if (!order) return this.defaultLevelId;
         if (!order.selected_plating_level_id) {

@@ -27,3 +27,26 @@ from . import product_template
 from . import pos_session
 from . import pos_payment_method
 from . import pos_order_line
+from . import ir_actions_report
+
+import os
+try:
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    # Fix ReportLab missing Type1 Times-Roman font on Linux when generating barcodes
+    _font_paths = [
+        '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+        '/usr/share/fonts/truetype/freefont/FreeSans.ttf',
+        '/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+    ]
+    for _fp in _font_paths:
+        if os.path.exists(_fp):
+            for _font_name in ['Times-Roman', 'Helvetica', 'Courier']:
+                try:
+                    pdfmetrics.registerFont(TTFont(_font_name, _fp))
+                except Exception:
+                    pass
+            break
+except Exception:
+    pass
+

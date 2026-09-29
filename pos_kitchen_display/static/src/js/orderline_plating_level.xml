@@ -14,7 +14,7 @@
        t-inherit="point_of_sale.Orderline"
        t-inherit-mode="extension">
         <xpath expr="//div[hasclass('product-name')]" position="inside">
-            <t t-if="line and line.plating_level">
+            <t t-if="pos.config.enable_plating_level and line and line.plating_level">
                 <span class="badge ms-1 plating-level-badge"
                       t-att-style="'background-color: ' + (line.plating_level.color || '#3B82F6') + '; color: #ffffff; font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; cursor: pointer; display: inline-block; vertical-align: middle;'"
                       t-on-click.stop="() => this.changePlatingLevel(line)"

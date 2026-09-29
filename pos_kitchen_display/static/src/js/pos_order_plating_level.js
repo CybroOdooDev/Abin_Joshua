@@ -46,7 +46,7 @@ patch(Orderline.prototype, {
     },
 
     get_plating_level() {
-        if (!this.plating_level_id) return null;
+        if (!this.pos?.config?.enable_plating_level || !this.plating_level_id) return null;
         const levels = this.pos.pos_plating_level || [];
         return levels.find(l => l.id === this.plating_level_id) || null;
     },
@@ -79,6 +79,9 @@ patch(Order.prototype, {
 
     set_orderline_options(orderline, options) {
         const res = super.set_orderline_options(...arguments);
+        if (!this.pos?.config?.enable_plating_level) {
+            return res;
+        }
         if (options && options.plating_level_id !== undefined) {
             orderline.set_plating_level(options.plating_level_id);
         } else if (!orderline.plating_level_id) {
@@ -101,9 +104,11 @@ patch(OrderlineComponent.prototype, {
     setup() {
         super.setup(...arguments);
         this.popup = useService("popup");
+        this.pos = useService("pos");
     },
 
     async changePlatingLevel(line) {
+        if (!this.pos?.config?.enable_plating_level) return;
         await this.popup.add(PlatingLevelPopup, { line });
     },
 });

@@ -58,5 +58,6 @@
         parent="point_of_sale.menu_point_config_product"
         action="action_pos_plating_level"
         sequence="50"
+        groups="pos_kitchen_display.group_pos_plating_level"
     />
 </odoo>

@@ -47,6 +47,7 @@
         'views/pos_payment_method.xml',
         'wizard/kiosk_close_session_views.xml',
         'wizard/pos_order_cancel_views.xml',
+        'views/report_invoice.xml',
     ],
 
     'assets': {

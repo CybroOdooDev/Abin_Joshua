@@ -60,6 +60,7 @@ patch(BarcodeReader.prototype, {
                 (m) => configMethodIds.includes(m.id) && (m.type === "cash" || m.type === "bank")
             );
 
+            const correctTax = Number(json.amount_tax || orderData.amount_tax || 0);
             const currentScreen = pos.mainScreen.component.name;
             const isProductScreen = currentScreen === "ProductScreen";
 
@@ -99,7 +100,7 @@ patch(BarcodeReader.prototype, {
                     customer: json.partner_id?.[1] || "",
                     tracking_number: json.tracking_number || orderData.tracking_number,
                     lines,
-                    posOrder: tempOrder,
+                    posOrder: order,
                     paymentMethods: paymentMethods.map((m) => ({
                         id: m.id,
                         name: m.name,
@@ -114,7 +115,6 @@ patch(BarcodeReader.prototype, {
 
             const jsonLines = (json.lines || []).map((line) => line[2] || line);
             const posProducts = pos.db?.product_by_id || {};
-            const correctTax = Number(json.amount_tax || orderData.amount_tax || 0);
 
             let lines = [];
 
