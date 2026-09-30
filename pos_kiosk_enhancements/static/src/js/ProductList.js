@@ -7,6 +7,24 @@ import { useSelfOrder } from "@pos_self_order/app/self_order_service";
 import { useService, useChildRef } from "@web/core/utils/hooks";
 import { fuzzyLookup } from "@web/core/utils/search";
 
+// Safely guard Bootstrap ScrollSpy against null target elements
+if (typeof window !== "undefined" && window.ScrollSpy && window.ScrollSpy.prototype) {
+    const origActivate = window.ScrollSpy.prototype._activate;
+    if (origActivate && !window.ScrollSpy.prototype._isPatchedForKiosk) {
+        window.ScrollSpy.prototype._activate = function (target) {
+            if (!target) {
+                return;
+            }
+            try {
+                return origActivate.apply(this, arguments);
+            } catch (e) {
+                // Silently ignore null classList activation safely
+            }
+        };
+        window.ScrollSpy.prototype._isPatchedForKiosk = true;
+    }
+}
+
 patch(ProductListPage.prototype, {
 
     setup() {

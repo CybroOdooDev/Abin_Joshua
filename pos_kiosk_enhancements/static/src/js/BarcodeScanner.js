@@ -41,8 +41,8 @@ patch(BarcodeReader.prototype, {
             }
 
             if (!orders.length) {
-                notification.add(_t("Order not found: ") + ref, { type: "warning" });
-                return;
+                // Not a kiosk/counter receipt barcode -> Delegate to standard Odoo POS barcode handling (e.g. products, customers, coupons)
+                return super._scan(...arguments);
             }
 
             const orderData = orders[0];
@@ -199,7 +199,7 @@ patch(BarcodeReader.prototype, {
             });
         } catch (err) {
             console.error("SCAN ERROR:", err);
-            notification.add(_t("Unexpected error"), { type: "danger" });
+            return super._scan(...arguments);
         }
     },
 });

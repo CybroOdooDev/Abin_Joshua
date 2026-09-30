@@ -184,3 +184,27 @@ class PosOrder(models.Model):
         for order in self:
             order.write({'state': 'cancel'})
         return True
+
+    def pay_kiosk_scanned_order(self, session_id, payment_method_id, amount=None):
+        self.ensure_one()
+        if self.state in ['paid', 'invoiced', 'done']:
+            return True
+
+        # Link order to current POS session
+        self.write({'session_id': session_id})
+
+        # Clear any dangling uncommitted payment lines from prior failed attempts
+        if self.payment_ids:
+            self.payment_ids.unlink()
+
+        total_to_pay = amount if amount is not None and amount > 0 else self.amount_total
+
+        self.add_payment({
+            'payment_method_id': payment_method_id,
+            'amount': total_to_pay,
+            'pos_order_id': self.id,
+            'payment_date': fields.Datetime.now(),
+        })
+
+        self.action_pos_order_paid()
+        return True

@@ -5,13 +5,15 @@
 
     <xpath expr="//nav[@id='listgroup-categories']" position="replace">
         <nav id="listgroup-categories"
-             class="category-list d-flex flex-grow-1 py-2 px-3 gap-2 gap-md-3 overflow-x-auto"
+             t-attf-class="category-list d-flex flex-grow-1 py-2 px-3 gap-2 gap-md-3 overflow-x-auto kiosk-cat-size-{{ selfOrder.config.kiosk_category_display_size or 'large' }}"
              t-ref="categoryList">
 
             <a
                 t-foreach="rootCategories"
                 t-as="category"
                 t-key="category.id"
+                t-ref="category_{{category.id}}"
+                t-attf-href="#scrollspy_{{category.id}}"
                 t-on-click.prevent="() => this.selectCategory(category)"
                 t-att-class="{
                     'nav-link category-item flex-shrink-0 p-0': true,
@@ -42,7 +44,9 @@
     <xpath expr="//section[contains(@class, 'product-list-category')]" position="replace">
 
         <t t-if="state.searchInput">
-            <section class="product-list-category bg-view px-3 pb-4">
+            <section class="product-list-category bg-view px-3 pb-4"
+                     t-attf-id="scrollspy_{{selfOrder.currentCategory ? selfOrder.currentCategory.id : 0}}"
+                     t-attf-categId="{{selfOrder.currentCategory ? selfOrder.currentCategory.id : 0}}">
                 <h2 class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 display-6 fw-bold">
                     Search Results
                 </h2>
@@ -64,7 +68,9 @@
         <t t-elif="selfOrder.currentCategory">
 
             <t t-if="showSubCategoryGrid">
-                <section class="product-list-category bg-view px-3 pb-4">
+                <section class="product-list-category bg-view px-3 pb-4"
+                         t-attf-id="scrollspy_{{selfOrder.currentCategory.id}}"
+                         t-attf-categId="{{selfOrder.currentCategory.id}}">
                     <h2 class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 display-6 fw-bold"
                         t-esc="selfOrder.currentCategory.name"/>
 
@@ -74,7 +80,7 @@
                            t-key="subcat.id">
                             <div class="o-kiosk-subcategory-tile"
                                  t-on-click="() => this.selectSubCategory(subcat)">
-                                <div class="o-kiosk-subcategory-img-wrap">
+                                 <div class="o-kiosk-subcategory-img-wrap">
                                     <div class="o-kiosk-subcategory-img-placeholder"
                                          t-att-class="{'placeholder-glow': subcat.has_image}">
                                         <div class="w-100 h-100 bg-200 rounded d-flex align-items-center justify-content-center"
@@ -105,6 +111,8 @@
                     <t t-set="availableProducts"
                        t-value="!state.searchInput ? products : getFilteredProducts(products)" />
                     <section t-if="availableProducts and availableProducts.length"
+                             t-attf-id="scrollspy_{{category.id}}"
+                             t-attf-categId="{{category.id}}"
                              class="product-list-category bg-view px-3 pb-4">
                         <h2 class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 display-6 fw-bold">
                             <t t-if="state.selectedSubCategory">

@@ -62,6 +62,18 @@ class PosConfig(models.Model):
         string="USB Printer",
         help="Name of the USB Printer",)
 
+    kiosk_category_display_size = fields.Selection(
+        selection=[
+            ('small', 'Small (Standard)'),
+            ('medium', 'Medium'),
+            ('large', 'Large'),
+            ('xlarge', 'Extra Large'),
+        ],
+        string="Category Display Size",
+        default='large',
+        help="Select the display size for category/family images on the Self-Order Kiosk.",
+    )
+
     draft_order_ids = fields.Many2many(
         "pos.order",
         string="Draft Orders",
@@ -80,6 +92,7 @@ class PosConfig(models.Model):
         data["config"]["show_both"] = self.show_both
         data["config"]["show_qr"] = self.show_qr
         data["config"]["printer_name"] = self.printer_name
+        data["config"]["kiosk_category_display_size"] = self.kiosk_category_display_size or 'large'
 
         configured_categs = self._get_available_categories()
         configured_ids = set(configured_categs.ids)

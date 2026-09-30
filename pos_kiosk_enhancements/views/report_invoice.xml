@@ -1,22 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="report_invoice_document_customer_logo" inherit_id="account.report_invoice_document">
-        <xpath expr="//div[@name='address_not_same_as_shipping']//address" position="before">
-            <t t-set="partner_logo" t-value="o.partner_id.commercial_partner_id.image_1920 or o.partner_id.image_1920"/>
-            <div t-if="partner_logo" class="mb-2 customer-logo">
-                <img t-att-src="image_data_uri(partner_logo)" style="max-height: 60px; max-width: 160px; object-fit: contain;" alt="Customer Logo"/>
+    <template id="report_invoice_document_both_logos" inherit_id="account.report_invoice_document">
+        <!-- CUSTOMER DETAILS & LOGO (RIGHT-ALIGNED) -->
+        <xpath expr="//div[hasclass('row')][1]" position="replace">
+            <div class="row mb-4" style="width: 100%; display: block; clear: both;">
+                <div style="width: 48%; float: right; display: inline-block; text-align: right;">
+                    <t t-set="partner_logo" t-value="o.partner_id.commercial_partner_id.image_1920 or o.partner_id.image_1920"/>
+                    <div t-if="partner_logo" class="mb-2">
+                        <img t-att-src="image_data_uri(partner_logo)" style="max-height: 60px; max-width: 180px; object-fit: contain;" alt="Customer Logo"/>
+                    </div>
+                    <div class="small" style="line-height: 1.35;">
+                        <span class="text-muted text-uppercase fw-bold" style="font-size: 10px;">Cliente</span><br/>
+                        <address class="mb-0 text-dark fw-bold" style="font-size: 13px;" t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["name"], "no_marker": True}'/>
+                        <address class="mb-0 text-muted" t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address"], "no_marker": True}'/>
+                        <div t-if="o.partner_id.vat" class="text-muted">
+                            <t t-if="o.company_id.account_fiscal_country_id.vat_label" t-out="o.company_id.account_fiscal_country_id.vat_label" id="inv_tax_id_label"/>
+                            <t t-else="">NIF/CIF</t>: <span t-field="o.partner_id.vat"/>
+                        </div>
+                    </div>
+                </div>
+                <div style="clear: both;"/>
             </div>
         </xpath>
-        <xpath expr="//div[@name='address_same_as_shipping']//address" position="before">
-            <t t-set="partner_logo" t-value="o.partner_id.commercial_partner_id.image_1920 or o.partner_id.image_1920"/>
-            <div t-if="partner_logo" class="mb-2 customer-logo">
-                <img t-att-src="image_data_uri(partner_logo)" style="max-height: 60px; max-width: 160px; object-fit: contain;" alt="Customer Logo"/>
-            </div>
-        </xpath>
-        <xpath expr="//div[@name='no_shipping']//address" position="before">
-            <t t-set="partner_logo" t-value="o.partner_id.commercial_partner_id.image_1920 or o.partner_id.image_1920"/>
-            <div t-if="partner_logo" class="mb-2 customer-logo">
-                <img t-att-src="image_data_uri(partner_logo)" style="max-height: 60px; max-width: 160px; object-fit: contain;" alt="Customer Logo"/>
+
+        <!-- VERI*FACTU QR & CODE BLOCK (OPTION A) -->
+        <xpath expr="//div[@name='qr_code_placeholder']" position="after">
+            <div id="verifactu_qr_code_box" t-if="'l10n_es_edi_verifactu_required' in o and o.l10n_es_edi_verifactu_required and o.l10n_es_edi_verifactu_qr_image" class="mt-3 mb-3 d-inline-block" style="page-break-inside: avoid;">
+                <div class="border rounded p-2 text-center bg-white d-inline-block" style="width: 135px; border: 1px solid #dee2e6;">
+                    <div class="fw-bold mb-1 text-muted" style="font-size: 10px;">QR tributario:</div>
+                    <img style="display: block; margin: 0 auto; width: 105px; height: 105px; object-fit: contain;" t-att-src="image_data_uri(o.l10n_es_edi_verifactu_qr_image)" alt="QR Tributario"/>
+                    <div class="fw-bold mt-1 text-primary" style="font-size: 11px; letter-spacing: 0.5px;">VERI*FACTU</div>
+                </div>
             </div>
         </xpath>
     </template>

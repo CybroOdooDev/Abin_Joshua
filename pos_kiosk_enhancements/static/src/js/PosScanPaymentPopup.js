@@ -217,6 +217,11 @@ export class PosScanPaymentPopup extends AbstractAwaitablePopup {
     }
 
     async pay(methodId) {
+        if (this.isProcessing) {
+            return;
+        }
+        this.isProcessing = true;
+
         const orderId = Number(this.props.orderId || 0);
         const amount = Number(this.correctAmount || 0);
         const currentSessionId = this.pos.pos_session.id;
@@ -225,6 +230,7 @@ export class PosScanPaymentPopup extends AbstractAwaitablePopup {
 
         if (!method) {
             this.notification.add(_t("Payment method not found."), {type: "danger"});
+            this.isProcessing = false;
             return;
         }
 
@@ -232,26 +238,20 @@ export class PosScanPaymentPopup extends AbstractAwaitablePopup {
             if (amount > 0) {
                 if (this.isCashSecurityPayment(method)) {
                     const cashSecurityOk = await this.processCashSecurityPayment(method, amount, orderId);
-                    if (!cashSecurityOk) return;
+                    if (!cashSecurityOk) {
+                        this.isProcessing = false;
+                        return;
+                    }
                 }
             }
 
-            await this.orm.write("pos.order", [orderId], {
-                session_id: currentSessionId,
-            });
+            await this.orm.call("pos.order", "pay_kiosk_scanned_order", [
+                [orderId],
+                currentSessionId,
+                methodId,
+                amount,
+            ]);
 
-            if (amount > 0) {
-                await this.orm.call("pos.order", "add_payment", [
-                    orderId,
-                    {
-                        payment_method_id: methodId,
-                        amount: amount,
-                        pos_order_id: orderId,
-                        payment_date: new Date().toISOString().split("T")[0],
-                    },
-                ]);
-            }
-            await this.orm.call("pos.order", "action_pos_order_paid", [[orderId]]);
             this.notification.add(_t("Payment Received!"), {type: "success"});
 
             const fullOrders = await this.orm.call("pos.order", "export_for_ui", [[orderId]]);
@@ -285,6 +285,8 @@ export class PosScanPaymentPopup extends AbstractAwaitablePopup {
                 _t("Payment failed: ") + (err.data?.message || err.message),
                 {type: "danger"}
             );
+        } finally {
+            this.isProcessing = false;
         }
     }
 }
