@@ -51,13 +51,12 @@
         </field>
     </record>
 
-    <!-- Menu Item under POS Configuration -->
-    <menuitem
-        id="menu_pos_plating_level"
-        name="Plating Levels"
-        parent="point_of_sale.menu_point_config_product"
-        action="action_pos_plating_level"
-        sequence="50"
-        groups="pos_kitchen_display.group_pos_plating_level"
-    />
+    <!-- Menu Item under POS Configuration -> Products -->
+    <record id="menu_pos_plating_level" model="ir.ui.menu">
+        <field name="name">Plating Levels</field>
+        <field name="parent_id" ref="point_of_sale.pos_menu_products_configuration"/>
+        <field name="action" ref="action_pos_plating_level"/>
+        <field name="sequence" eval="50"/>
+        <field name="groups_id" eval="[(6, 0, [ref('pos_kitchen_display.group_pos_plating_level')])]"/>
+    </record>
 </odoo>

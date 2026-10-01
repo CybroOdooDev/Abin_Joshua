@@ -5,7 +5,7 @@
 
     <xpath expr="//nav[@id='listgroup-categories']" position="replace">
         <nav id="listgroup-categories"
-             t-attf-class="category-list d-flex flex-grow-1 py-2 px-3 gap-2 gap-md-3 overflow-x-auto kiosk-cat-size-{{ selfOrder.config.kiosk_category_display_size or 'large' }}"
+             class="category-list d-flex flex-grow-1 py-2 px-3 gap-2 gap-md-3 overflow-x-auto"
              t-ref="categoryList">
 
             <a

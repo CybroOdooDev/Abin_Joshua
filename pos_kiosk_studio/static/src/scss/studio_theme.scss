@@ -236,32 +236,96 @@ body.kiosk-cat-right .page-buttons {
     grid-row: 2 !important;
 }
 
-body.kiosk-cat-left .navbar-container .category-list,
-body.kiosk-cat-right .navbar-container .category-list {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    width: 100% !important;
+/* ── Category Sizing (Studio slider control) ── */
+.navbar-container {
+    .search-button {
+        width: auto !important;
+        min-width: 48px !important;
+        flex-shrink: 0 !important;
+    }
+
+    #listgroup-categories,
+    .category-list {
+        .category-item {
+            width: var(--kiosk-cat-img-size, 80px) !important;
+            min-width: var(--kiosk-cat-img-size, 80px) !important;
+            flex-shrink: 0 !important;
+            text-decoration: none !important;
+
+            .ratio-1x1 {
+                width: 100% !important;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+                transition: transform 0.15s ease;
+
+                img {
+                    width: 100% !important;
+                    height: 100% !important;
+                    object-fit: cover !important;
+                    border-radius: 8px;
+                }
+            }
+
+            &:hover .ratio-1x1 {
+                transform: scale(1.03);
+            }
+
+            .category-name {
+                font-size: clamp(11px, calc(var(--kiosk-cat-img-size, 80px) * 0.14), 16px) !important;
+                line-height: 1.25 !important;
+                margin-top: 4px !important;
+                word-break: break-word !important;
+                text-align: center !important;
+            }
+        }
+    }
 }
 
-body.kiosk-cat-left .navbar-container .category-list button,
-body.kiosk-cat-right .navbar-container .category-list button {
-    width: 100% !important;
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
-    justify-content: center !important;
-    padding: 6px 4px !important;
-    box-sizing: border-box !important;
-}
+body.kiosk-cat-left,
+body.kiosk-cat-right {
+    .navbar-container {
+        padding: 8px 6px !important;
+        overflow-x: hidden !important;
 
-body.kiosk-cat-left .navbar-container .category-list span,
-body.kiosk-cat-right .navbar-container .category-list span {
-    font-size: 11px !important;
-    margin-top: 4px !important;
-    text-align: center !important;
-    word-break: break-word !important;
-    width: 100% !important;
+        #listgroup-categories,
+        .category-list {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            width: 100% !important;
+            padding: 0 !important;
+            overflow-x: hidden !important;
+
+            .category-item,
+            button {
+                width: var(--kiosk-cat-img-size, 80px) !important;
+                max-width: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                justify-content: center !important;
+                padding: 4px 0 !important;
+                margin: 0 auto 10px auto !important;
+                box-sizing: border-box !important;
+
+                .ratio-1x1 {
+                    width: var(--kiosk-cat-img-size, 80px) !important;
+                    height: var(--kiosk-cat-img-size, 80px) !important;
+                    max-width: 100% !important;
+                }
+            }
+
+            .category-name,
+            span {
+                font-size: clamp(10px, calc(var(--kiosk-cat-img-size, 80px) * 0.13), 14px) !important;
+                margin-top: 4px !important;
+                text-align: center !important;
+                word-break: break-word !important;
+                width: 100% !important;
+            }
+        }
+    }
 }
 
 .kiosk-tooltip {

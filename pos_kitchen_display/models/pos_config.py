@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from odoo import fields, models
+from odoo import api, fields, models
 
 
 class PosConfig(models.Model):
@@ -34,6 +34,46 @@ class PosConfig(models.Model):
             domain = ['|'] + domain + [('id', 'in', self.appetizer_product_ids.ids)]
         return domain
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        res = super().create(vals_list)
+        if any("enable_plating_level" in vals for vals in vals_list):
+            self._sync_plating_level_group()
+        return res
+
+    def write(self, vals):
+        res = super().write(vals)
+        if "enable_plating_level" in vals:
+            self._sync_plating_level_group()
+        return res
+
+    @api.model
+    def _sync_plating_level_group(self):
+        group = self.env.ref("pos_kitchen_display.group_pos_plating_level", raise_if_not_found=False)
+        if not group:
+            return
+        any_enabled = bool(self.env["pos.config"].sudo().search([("enable_plating_level", "=", True)], limit=1))
+        base_user = self.env.ref("base.group_user", raise_if_not_found=False)
+        pos_user = self.env.ref("point_of_sale.group_pos_user", raise_if_not_found=False)
+        pos_manager = self.env.ref("point_of_sale.group_pos_manager", raise_if_not_found=False)
+        target_groups = self.env["res.groups"]
+        if base_user:
+            target_groups |= base_user
+        if pos_user:
+            target_groups |= pos_user
+        if pos_manager:
+            target_groups |= pos_manager
+
+        if any_enabled:
+            for grp in target_groups:
+                if group not in grp.implied_ids:
+                    grp.sudo().write({"implied_ids": [(4, group.id)]})
+        else:
+            for grp in target_groups:
+                if group in grp.implied_ids:
+                    grp.sudo().write({"implied_ids": [(3, group.id)]})
+            group.sudo().write({"users": [(5, 0, 0)]})
+
 
 class ResConfigSettings(models.TransientModel):
     _inherit = "res.config.settings"
@@ -45,7 +85,6 @@ class ResConfigSettings(models.TransientModel):
     pos_enable_plating_level = fields.Boolean(
         related="pos_config_id.enable_plating_level",
         readonly=False,
-        implied_group="pos_kitchen_display.group_pos_plating_level"
     )
     pos_enable_auto_appetizer = fields.Boolean(
         related="pos_config_id.enable_auto_appetizer",
@@ -55,5 +94,9 @@ class ResConfigSettings(models.TransientModel):
         related="pos_config_id.appetizer_product_ids",
         readonly=False
     )
+
+    def set_values(self):
+        super().set_values()
+        self.env["pos.config"]._sync_plating_level_group()
 
 

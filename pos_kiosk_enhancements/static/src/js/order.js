@@ -347,21 +347,21 @@ patch(Order.prototype, {
             city: partner.city,
             zip: partner.zip,
         } : null;
-        const orderlinesByName = {};
-        for (const ol of this.get_orderlines()) {
-            const key = ol.get_full_product_name();
-            orderlinesByName[key] ??= [];
-            orderlinesByName[key].push(ol);
-        }
-        for (const receiptLine of result.orderlines) {
-            const key = receiptLine.productName;
-            const orderline = orderlinesByName[key]?.shift();
+
+        const allOrderlines = this.get_orderlines();
+        for (let i = 0; i < result.orderlines.length; i++) {
+            const receiptLine = result.orderlines[i];
+            const orderline = allOrderlines[i];
             if (orderline) {
                 receiptLine.uuid = orderline.uuid;
+                // Option B: Remove attributes completely from receipt
+                receiptLine.attributes = [];
+                receiptLine.productName = orderline.product?.name || orderline.product?.display_name || receiptLine.productName;
             }
         }
+
         for (const receiptLine of result.orderlines) {
-            const orderline = this.get_orderlines().find(
+            const orderline = allOrderlines.find(
                 (ol) => ol.uuid === receiptLine.uuid
             );
 
@@ -395,14 +395,14 @@ patch(Order.prototype, {
         }
         const groupedOrderlines = [];
         const childrenByParent = {};
-        for (const ol of this.get_orderlines()) {
+        for (const ol of allOrderlines) {
             if (ol.comboParent) {
                 const parentUuid = ol.comboParent.uuid;
                 childrenByParent[parentUuid] ??= [];
                 childrenByParent[parentUuid].push(ol);
             }
         }
-        for (const ol of this.get_orderlines()) {
+        for (const ol of allOrderlines) {
             if (ol.comboParent) {
                 continue;
             }
@@ -424,7 +424,6 @@ patch(Order.prototype, {
             }
         }
         result.orderlines = groupedOrderlines;
-        const allOrderlines = this.get_orderlines();
 
         const comboParents = allOrderlines.filter(
             (ol) =>

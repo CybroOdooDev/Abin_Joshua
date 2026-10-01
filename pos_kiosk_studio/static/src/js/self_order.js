@@ -153,6 +153,14 @@ patch(SelfOrder.prototype, {
         this.setCategoryPosition(s.categoryPosition || "top");
     },
 
+    previewCatImgSize(size) {
+        const s = parseInt(size, 10) || 80;
+        const root = document.documentElement;
+        root.style.setProperty("--kiosk-cat-img-size", s + "px");
+        root.style.setProperty("--kiosk-sidebar-width", (s + 24) + "px");
+        this.setCategoryPosition(this.studio.categoryPosition || "top");
+    },
+
     async updateTheme(data) {
         Object.assign(this.studio, data);
         await saveTheme(this.studio);

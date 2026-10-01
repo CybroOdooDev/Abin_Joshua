@@ -254,6 +254,19 @@
                             <option value="bottom">Bottom</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="form-label">Category Size</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="range" class="form-range flex-grow-1"
+                                   min="50" max="220" step="5"
+                                   t-model.number="state.catImgSize"
+                                   t-on-input="onCatImgSizeInput"/>
+                            <span class="text-muted" style="min-width:48px;text-align:right;">
+                                <t t-esc="state.catImgSize"/>px
+                            </span>
+                        </div>
+                        <div class="form-text">Adjust category display size live.</div>
+                    </div>
 
                     <!-- PRODUCT CARD -->
                     <h5 class="mt-4 border-bottom pb-1">Product Card</h5>

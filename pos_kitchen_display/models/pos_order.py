@@ -85,6 +85,7 @@ class PosOrder(models.Model):
         for line in order.lines:
             is_combo_parent = bool(line.combo_line_ids)
             is_combo_child = bool(line.combo_parent_id)
+            line_name = line._get_kitchen_product_name()
 
             if is_combo_parent:
                 parent_uuid = line.uuid
@@ -95,30 +96,34 @@ class PosOrder(models.Model):
                 if existing:
                     existing.write({
                         "qty": line.qty,
+                        "product_name": line_name,
                         "note": line.note or "",
                         "is_cancelled": line.qty <= 0,
                         "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
+                        "pos_order_line_id": line.id,
                     })
                 else:
                     new_lines.append({
                         "order_id": kitchen_order.id,
                         "product_id": line.product_id.id,
-                        "product_name": line.product_id.name,
+                        "product_name": line_name,
                         "qty": line.qty,
                         "stage_id": first_stage.id,
                         "user_id": order.user_id.id,
                         "tracking_number": str(order.tracking_number),
                         "pos_line_uuid": parent_uuid,
                         "combo_instance_uuid": parent_uuid,
-                        "combo_name": line.product_id.name,
+                        "combo_name": line_name,
                         "note": line.note or "",
                         "is_cancelled": line.qty <= 0,
                         "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
+                        "pos_order_line_id": line.id,
                     })
                 for child in line.combo_line_ids:
+                    child_name = child._get_kitchen_product_name()
                     _logger.warning(
                         "KDS CHILD -> product=%s qty=%s free_qty=%s paid_qty=%s",
-                        child.product_id.name,
+                        child_name,
                         getattr(child, "qty", None),
                         getattr(child, "free_qty", None),
                         getattr(child, "paid_qty", None),
@@ -147,18 +152,20 @@ class PosOrder(models.Model):
                     if existing_child:
                         existing_child.write({
                             "qty": display_qty,
+                            "product_name": child_name,
                             "note": child.note or "",
                             "free_qty": free_qty,
                             "paid_qty": paid_qty,
                             "is_free": is_free,
                             "is_cancelled": False,
                             "plating_level_id": child_plating_level_id,
+                            "pos_order_line_id": child.id,
                         })
                     else:
                         new_lines.append({
                             "order_id": kitchen_order.id,
                             "product_id": child.product_id.id,
-                            "product_name": child.product_id.name,
+                            "product_name": child_name,
                             "qty": display_qty,
                             "free_qty": child.free_qty or 0,
                             "paid_qty": child.paid_qty or 0,
@@ -167,11 +174,12 @@ class PosOrder(models.Model):
                             "tracking_number": str(order.tracking_number),
                             "pos_line_uuid": child_uuid,
                             "combo_instance_uuid": parent_uuid,
-                            "combo_name": line.product_id.name,
+                            "combo_name": line_name,
                             "note": child.note or "",
                             "is_free": is_free,
                             "is_cancelled": False,
                             "plating_level_id": child_plating_level_id,
+                            "pos_order_line_id": child.id,
                         })
 
             elif not is_combo_child:
@@ -187,9 +195,11 @@ class PosOrder(models.Model):
                     delta_qty = line.qty - existing.qty
                     existing.write({
                         "qty": line.qty,
+                        "product_name": line_name,
                         "note": line.note or "",
                         "is_cancelled": line.qty <= 0,
                         "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
+                        "pos_order_line_id": line.id,
                     })
                     if delta_qty > 0 and (
                             existing.is_completed or existing.stage_id.id != first_stage.id):
@@ -198,16 +208,18 @@ class PosOrder(models.Model):
                             # Already have an _extra line — just bump its qty
                             existing_extra.write({
                                 "qty": existing_extra.qty + delta_qty,
+                                "product_name": line_name,
                                 "note": line.note or "",
                                 "is_cancelled": False,
                                 "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
+                                "pos_order_line_id": line.id,
                             })
                         else:
                             # Create a fresh _extra line for the delta
                             new_lines.append({
                                 "order_id": kitchen_order.id,
                                 "product_id": line.product_id.id,
-                                "product_name": line.product_id.name,
+                                "product_name": line_name,
                                 "qty": delta_qty,
                                 "stage_id": first_stage.id,
                                 "user_id": order.user_id.id,
@@ -217,12 +229,13 @@ class PosOrder(models.Model):
                                 "note": line.note or "",
                                 "is_cancelled": False,
                                 "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
+                                "pos_order_line_id": line.id,
                             })
                 else:
                     new_lines.append({
                         "order_id": kitchen_order.id,
                         "product_id": line.product_id.id,
-                        "product_name": line.product_id.name,
+                        "product_name": line_name,
                         "qty": line.qty,
                         "stage_id": first_stage.id,
                         "user_id": order.user_id.id,
@@ -232,6 +245,7 @@ class PosOrder(models.Model):
                         "note": line.note or "",
                         "is_cancelled": False,
                         "plating_level_id": line.plating_level_id.id if line.plating_level_id else False,
+                        "pos_order_line_id": line.id,
                     })
 
         if new_lines:

@@ -317,107 +317,33 @@
 }
 
 /* ==========================================================================
-   KIOSK FAMILY / CATEGORY CONFIGURABLE DISPLAY SIZES
+   RECEIPT QR CODE SIZING & PRINT LAYOUT
    ========================================================================== */
-
-/* Dynamic sidebar width when category list is positioned on Left / Right */
-body:has(#listgroup-categories.kiosk-cat-size-small) {
-    --kiosk-sidebar-width: 95px !important;
-}
-body:has(#listgroup-categories.kiosk-cat-size-medium) {
-    --kiosk-sidebar-width: 125px !important;
-}
-body:has(#listgroup-categories.kiosk-cat-size-large) {
-    --kiosk-sidebar-width: 160px !important;
-}
-body:has(#listgroup-categories.kiosk-cat-size-xlarge) {
-    --kiosk-sidebar-width: 200px !important;
+.pos-receipt .pos-receipt-qrcode,
+.pos-receipt img#posqrcode,
+.pos-receipt img.pos-receipt-qrcode {
+    display: block !important;
+    max-width: 130px !important;
+    width: 130px !important;
+    height: auto !important;
+    margin: 10px auto !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
 }
 
-/* Category Navigation Bar Sizing (Default / Horizontal layout) */
-#listgroup-categories {
-    /* Small tier */
-    &.kiosk-cat-size-small {
-        .category-item {
-            width: 75px !important;
-            .category-name {
-                font-size: 11px;
-            }
-        }
+@media print {
+    .pos-receipt {
+        page-break-after: avoid !important;
+        break-after: avoid !important;
     }
-
-    /* Medium tier */
-    &.kiosk-cat-size-medium {
-        .category-item {
-            width: 105px !important;
-            .category-name {
-                font-size: 13px;
-                font-weight: 600;
-            }
-            .ratio-1x1 {
-                border-radius: 8px;
-            }
-        }
-    }
-
-    /* Large tier (Recommended Default) */
-    &.kiosk-cat-size-large {
-        .category-item {
-            width: 140px !important;
-            .category-name {
-                font-size: 15px;
-                font-weight: 700;
-                margin-top: 4px;
-                line-height: 1.25;
-            }
-            .ratio-1x1 {
-                border-radius: 12px;
-                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-            }
-        }
-    }
-
-    /* Extra Large tier */
-    &.kiosk-cat-size-xlarge {
-        .category-item {
-            width: 180px !important;
-            .category-name {
-                font-size: 17px;
-                font-weight: 800;
-                margin-top: 6px;
-                line-height: 1.25;
-            }
-            .ratio-1x1 {
-                border-radius: 16px;
-                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-            }
-        }
-    }
-}
-
-/* Sidebar Specific Adjustment: Fit category items 100% inside sidebar width without horizontal scroll */
-body.kiosk-cat-left, body.kiosk-cat-right {
-    .navbar-container {
-        padding-left: 8px !important;
-        padding-right: 8px !important;
-        overflow-x: hidden !important;
-
-        #listgroup-categories {
-            width: 100% !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-
-            .category-item {
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 4px 0 !important;
-                margin: 0 auto 10px auto !important;
-                box-sizing: border-box !important;
-
-                .ratio-1x1 {
-                    width: 100% !important;
-                }
-            }
-        }
+    .pos-receipt .pos-receipt-qrcode,
+    .pos-receipt img#posqrcode,
+    .pos-receipt img.pos-receipt-qrcode {
+        max-width: 120px !important;
+        width: 120px !important;
+        height: auto !important;
+        margin: 6px auto !important;
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
     }
 }

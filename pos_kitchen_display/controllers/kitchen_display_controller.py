@@ -75,7 +75,7 @@ class KitchenController(http.Controller):
 
                 lines.append({
                     "id":                   l.id,
-                    "product":              l.product_name,
+                    "product":              l.product_name or (l.pos_order_line_id._get_kitchen_product_name() if l.pos_order_line_id else (l.product_id.display_name or l.product_id.name or "")),
                     "qty":                  l.qty,
                     "stage_id":             l.stage_id.id,
                     "start_time":           fields.Datetime.to_string(l.start_time),

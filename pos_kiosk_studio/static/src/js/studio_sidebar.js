@@ -119,10 +119,7 @@ export class StudioSidebar extends Component {
     onCatImgSizeInput(ev) {
         const size = parseInt(ev.target.value, 10) || 80;
         this.state.catImgSize = size;
-        const root = document.documentElement;
-        root.style.setProperty("--kiosk-cat-img-size", size + "px");
-        root.style.setProperty("--kiosk-sidebar-width", (size + 24) + "px");
-        this.selfOrder.setCategoryPosition(this.state.categoryPosition);
+        this.selfOrder.previewCatImgSize(size);
     }
 
     onImgSizeInput(ev) {

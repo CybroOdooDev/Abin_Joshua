@@ -38,11 +38,6 @@
                             <field name="show_both"/>
                         </group>
                     </group>
-                    <group string="Kiosk Family / Category Display Settings">
-                        <group>
-                            <field name="kiosk_category_display_size" widget="radio"/>
-                        </group>
-                    </group>
                 </div>
             </xpath>
 
