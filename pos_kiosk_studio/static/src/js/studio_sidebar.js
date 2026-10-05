@@ -7,6 +7,7 @@ import {
     saveImageToServer,
     deleteImageFromServer,
 } from "@pos_kiosk_studio/js/kiosk_storage";
+import { PREDEFINED_LAYOUTS } from "@pos_kiosk_studio/js/self_order";
 
 const EMOJI_GROUPS = [
     { label: "Smileys", emojis: ["😀","😂","😍","🥰","😎","🤩","😋","🤗","😊","🙂","😉","🥳"] },
@@ -25,6 +26,11 @@ export class StudioSidebar extends Component {
         const s = this.selfOrder.studio;
 
         this.state = useState({
+            activeTab: "layout",
+            titleBold: s.titleBold ?? true,
+            titleTransform: s.titleTransform || "none",
+            predefinedLayout: s.predefinedLayout || "default",
+
             primaryColor: s.primaryColor,
             secondaryColor: s.secondaryColor,
             backgroundColor: s.backgroundColor,
@@ -53,6 +59,7 @@ export class StudioSidebar extends Component {
             showCategories: s.showCategories ?? true,
             categoryPosition: s.categoryPosition || "top",
             showCategoryHeaders: s.showCategoryHeaders ?? true,
+            showCategoryLabels: s.showCategoryLabels ?? true,
 
             catImgSize: s.catImgSize ?? 80,
             imgSize: s.imgSize ?? 100,
@@ -110,6 +117,11 @@ export class StudioSidebar extends Component {
         document.body.classList.toggle("kiosk-hide-categories", !this.state.showCategories);
     }
 
+    toggleCategoryLabels(ev) {
+        this.state.showCategoryLabels = ev.target.checked;
+        this.selfOrder.previewCategoryLabels(this.state.showCategoryLabels);
+    }
+
     setCategoryPosition(ev) {
         const pos = ev.target.value;
         this.state.categoryPosition = pos;
@@ -132,6 +144,99 @@ export class StudioSidebar extends Component {
         const padding = parseInt(ev.target.value, 10) || 0;
         this.state.imgPadding = padding;
         document.documentElement.style.setProperty("--kiosk-img-padding", padding + "%");
+    }
+
+    get predefinedLayouts() {
+        return PREDEFINED_LAYOUTS;
+    }
+
+    selectTab(tab) {
+        this.state.activeTab = tab;
+    }
+
+    selectPreset(presetId) {
+        this.state.predefinedLayout = presetId;
+        this.selfOrder.applyLayoutPreset(presetId);
+    }
+
+    toggleTitleBold(ev) {
+        this.state.titleBold = ev.target.checked;
+        this.selfOrder.previewTitleBold(this.state.titleBold);
+    }
+
+    toggleTitleUppercase(ev) {
+        this.state.titleTransform = ev.target.checked ? "uppercase" : "none";
+        this.selfOrder.previewTitleTransform(this.state.titleTransform);
+    }
+
+    onNavbarColorInput(ev) {
+        const color = ev.target.value;
+        this.state.navbarColor = color;
+        this.selfOrder.previewNavbarColor(color);
+    }
+
+    onNavbarTextColorInput(ev) {
+        const color = ev.target.value;
+        this.state.navbarTextColor = color;
+        this.selfOrder.previewNavbarTextColor(color);
+    }
+
+    onPrimaryColorInput(ev) {
+        const color = ev.target.value;
+        this.state.primaryColor = color;
+        document.documentElement.style.setProperty("--kiosk-primary", color);
+    }
+
+    onSecondaryColorInput(ev) {
+        const color = ev.target.value;
+        this.state.secondaryColor = color;
+        document.documentElement.style.setProperty("--kiosk-secondary", color);
+    }
+
+    onBgColorInput(ev) {
+        const color = ev.target.value;
+        this.state.backgroundColor = color;
+        document.documentElement.style.setProperty("--kiosk-background", color);
+    }
+
+    onCartBgColorInput(ev) {
+        const color = ev.target.value;
+        this.state.cartBgColor = color;
+        document.documentElement.style.setProperty("--kiosk-cart-bg", color);
+    }
+
+    onCartTextColorInput(ev) {
+        const color = ev.target.value;
+        this.state.cartTextColor = color;
+        document.documentElement.style.setProperty("--kiosk-cart-text", color);
+    }
+
+    onProductBgColorInput(ev) {
+        const color = ev.target.value;
+        this.state.productBgColor = color;
+        document.documentElement.style.setProperty("--kiosk-product-bg", color);
+    }
+
+    onProductTextColorInput(ev) {
+        const color = ev.target.value;
+        this.state.productTextColor = color;
+        document.documentElement.style.setProperty("--kiosk-product-text", color);
+    }
+
+    onElementBgColorInput(ev) {
+        const color = ev.target.value;
+        this.state.elementBgColor = color;
+        if (this.selectedElement) {
+            this.selectedElement.style.setProperty("background-color", color, "important");
+        }
+    }
+
+    onElementTextColorInput(ev) {
+        const color = ev.target.value;
+        this.state.elementTextColor = color;
+        if (this.selectedElement) {
+            this.selectedElement.style.setProperty("color", color, "important");
+        }
     }
 
     get availableFonts() {
@@ -264,9 +369,13 @@ export class StudioSidebar extends Component {
             showCategories: this.state.showCategories,
             categoryPosition: this.state.categoryPosition,
             showCategoryHeaders: this.state.showCategoryHeaders,
+            showCategoryLabels: this.state.showCategoryLabels,
             catImgSize: this.state.catImgSize,
             imgSize: this.state.imgSize,
             imgPadding: this.state.imgPadding,
+            titleBold: this.state.titleBold,
+            titleTransform: this.state.titleTransform,
+            predefinedLayout: this.state.predefinedLayout,
         });
     }
 
@@ -295,9 +404,13 @@ export class StudioSidebar extends Component {
             showCategories: d.showCategories,
             categoryPosition: d.categoryPosition,
             showCategoryHeaders: d.showCategoryHeaders,
+            showCategoryLabels: d.showCategoryLabels,
             catImgSize: d.catImgSize,
             imgSize: d.imgSize,
             imgPadding: d.imgPadding,
+            titleBold: d.titleBold,
+            titleTransform: d.titleTransform,
+            predefinedLayout: d.predefinedLayout,
             backgroundImage: null,
             backgroundImageName: null,
         });

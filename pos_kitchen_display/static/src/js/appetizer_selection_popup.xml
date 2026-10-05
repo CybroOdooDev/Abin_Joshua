@@ -7,22 +7,29 @@
                     <i class="fa fa-cutlery me-2"/>
                     <t t-esc="props.title"/>
                     <t t-if="props.tableName">
-                        <span class="text-muted fw-normal fs-6 ms-1">(<t t-esc="props.tableName"/>)</span>
+                        <span class="text-muted fw-normal fs-6 ms-1">
+                            (<t t-esc="props.tableName"/><t t-if="props.dinersCount"> - <t t-esc="props.dinersCount"/> Diners</t>)
+                        </span>
                     </t>
                 </h4>
             </div>
 
             <div class="modal-body">
                 <p class="text-muted mb-3 small">
-                    Choose an appetizer for the table. It will be sent directly to the kitchen.
+                    Choose an appetizer for the table. The quantity defaults to the number of diners.
                 </p>
 
                 <div class="appetizer-product-list mb-3 d-flex flex-wrap gap-2 justify-content-center" style="max-height: 240px; overflow-y: auto;">
                     <t t-foreach="props.products" t-as="product" t-key="product.id">
-                        <div class="appetizer-product-card btn d-flex flex-column align-items-center justify-content-center p-3 border rounded"
-                             t-att-class="state.selectedProductId === product.id ? 'btn-primary text-white shadow-sm border-primary' : 'btn-light text-dark border-secondary-subtle'"
+                        <div class="appetizer-product-card btn position-relative d-flex flex-column align-items-center justify-content-center p-3 border rounded shadow-sm"
+                             t-att-class="state.selectedProductId === product.id ? 'btn-primary text-white border-primary' : 'btn-light text-dark border-secondary-subtle'"
                              style="min-width: 130px; min-height: 85px; cursor: pointer; flex: 1 1 calc(33% - 10px);"
                              t-on-click="() => this.selectProduct(product.id)">
+                            <t t-if="state.selectedProductId === product.id">
+                                <span class="position-absolute top-0 end-0 m-1 badge bg-white text-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 22px; height: 22px;">
+                                    <i class="fa fa-check"/>
+                                </span>
+                            </t>
                             <div class="fw-bold fs-6 text-center text-truncate w-100" t-att-title="product.display_name">
                                 <t t-esc="product.display_name"/>
                             </div>
@@ -34,18 +41,22 @@
                 </div>
 
                 <!-- Quantity Selector -->
-                <div class="d-flex align-items-center justify-content-center gap-3 py-2 border-top">
-                    <span class="text-muted fw-bold small">Quantity:</span>
-                    <button class="btn btn-outline-secondary btn-sm rounded-circle d-flex align-items-center justify-content-center"
-                            style="width: 32px; height: 32px;"
+                <div class="d-flex align-items-center justify-content-center gap-3 py-3 border-top bg-light rounded mt-2">
+                    <span class="text-dark fw-bold small">Quantity:</span>
+                    <button class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 36px; height: 36px;"
                             t-on-click="() => this.updateQuantity(-1)">
                         <i class="fa fa-minus"/>
                     </button>
-                    <span class="fs-5 fw-bold px-2 text-center" style="min-width: 30px;">
-                        <t t-esc="state.quantity"/>
-                    </span>
-                    <button class="btn btn-outline-secondary btn-sm rounded-circle d-flex align-items-center justify-content-center"
-                            style="width: 32px; height: 32px;"
+                    <input type="number"
+                           class="form-control text-center fw-bold fs-5 bg-white border"
+                           style="width: 80px; height: 38px;"
+                           min="1"
+                           t-att-value="state.quantity"
+                           t-on-input="onQuantityChange"
+                           t-on-change="onQuantityChange"/>
+                    <button class="btn btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center"
+                            style="width: 36px; height: 36px;"
                             t-on-click="() => this.updateQuantity(1)">
                         <i class="fa fa-plus"/>
                     </button>

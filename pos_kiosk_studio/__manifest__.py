@@ -21,7 +21,7 @@
 #############################################################################
 {
     "name": "POS Kiosk Studio (Theme Editor)",
-    "version": "17.0.1.2.2",
+    "version": "17.0.1.3.3",
     "category": "Point of Sale",
     "summary": "Live theme editor for POS Kiosk / Self-Order in Community edition",
     'author': "Cybrosys Techno Solutions",

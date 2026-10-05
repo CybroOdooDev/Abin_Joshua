@@ -71,12 +71,18 @@ patch(Table.prototype, {
 // Patch FloorScreen to automatically prompt for number of diners and appetizer when opening a new table
 patch(FloorScreen.prototype, {
     async onSelectTable(table, ev) {
-        const isNewTableOrder = !table.order_count;
+        const wasNewTable = !table.order_count;
         await super.onSelectTable(...arguments);
 
-        if (isNewTableOrder && !this.pos.isEditMode) {
+        if (!this.pos.isEditMode) {
             const order = this.pos.get_order();
             if (!order) return;
+
+            // Only prompt for diners and appetizer if opening a new table or an empty table
+            const hasExistingLines = order.get_orderlines().length > 0;
+            if (!wasNewTable && hasExistingLines) {
+                return;
+            }
 
             let dinersConfirmed = false;
             let count = 0;
@@ -144,7 +150,12 @@ patch(FloorScreen.prototype, {
                     : [];
 
                 let appetizerProducts = rawIds
-                    .map(id => this.pos.db.get_product_by_id(id) || (this.pos.db.product_by_id && this.pos.db.product_by_id[id]))
+                    .map(id => {
+                        const numId = Number(id);
+                        return this.pos.db.get_product_by_id(numId) ||
+                               this.pos.db.get_product_by_id(id) ||
+                               (this.pos.db.product_by_id && (this.pos.db.product_by_id[numId] || this.pos.db.product_by_id[id]));
+                    })
                     .filter(Boolean);
 
                 // If not found in POS DB, fetch from ORM as fallback
@@ -181,7 +192,7 @@ patch(FloorScreen.prototype, {
                     if (confirmed && payload?.product) {
                         const qty = payload.quantity || 1;
                         const productToAdd = this.pos.db.get_product_by_id(payload.product.id) || payload.product;
-                        order.add_product(productToAdd, {
+                        await order.add_product(productToAdd, {
                             quantity: qty,
                         });
                         order.send_to_kitchen = true;

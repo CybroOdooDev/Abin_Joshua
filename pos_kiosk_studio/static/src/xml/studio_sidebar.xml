@@ -57,6 +57,7 @@
                         <div class="d-flex gap-2 align-items-center">
                             <input type="color"
                                    t-model="state.elementBgColor"
+                                   t-on-input="onElementBgColorInput"
                                    class="form-control form-control-color"
                                    style="flex:1;"/>
                             <button class="btn btn-sm btn-outline-secondary"
@@ -71,6 +72,7 @@
                         <div class="d-flex gap-2 align-items-center">
                             <input type="color"
                                    t-model="state.elementTextColor"
+                                   t-on-input="onElementTextColorInput"
                                    class="form-control form-control-color"
                                    style="flex:1;"/>
                             <button class="btn btn-sm btn-outline-secondary"
@@ -166,162 +168,244 @@
 
             <!-- THEME MODE -->
             <t t-else="">
+                <!-- TABS HEADER -->
+                <div class="kiosk-studio-tabs">
+                    <button class="kiosk-tab-btn"
+                            t-att-class="state.activeTab === 'layout' ? 'active' : ''"
+                            t-on-click="() => this.selectTab('layout')">
+                        <i class="fa fa-th-large"/>
+                        <span>Layout</span>
+                    </button>
+                    <button class="kiosk-tab-btn"
+                            t-att-class="state.activeTab === 'typography' ? 'active' : ''"
+                            t-on-click="() => this.selectTab('typography')">
+                        <i class="fa fa-font"/>
+                        <span>Text</span>
+                    </button>
+                    <button class="kiosk-tab-btn"
+                            t-att-class="state.activeTab === 'colors' ? 'active' : ''"
+                            t-on-click="() => this.selectTab('colors')">
+                        <i class="fa fa-paint-brush"/>
+                        <span>Colors</span>
+                    </button>
+                    <button class="kiosk-tab-btn"
+                            t-att-class="state.activeTab === 'cards' ? 'active' : ''"
+                            t-on-click="() => this.selectTab('cards')">
+                        <i class="fa fa-clone"/>
+                        <span>Cards</span>
+                    </button>
+                </div>
+
                 <div class="p-3 overflow-auto" style="flex-grow:1">
-                    <!-- BUTTON COLORS -->
-                    <div class="mb-3">
-                        <label class="form-label">Primary Button</label>
-                        <input type="color" t-model="state.primaryColor" class="form-control form-control-color w-100"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Secondary Button</label>
-                        <input type="color" t-model="state.secondaryColor" class="form-control form-control-color w-100"/>
-                    </div>
-
-                    <!-- BACKGROUND COLOR -->
-                    <div class="mb-3">
-                        <label class="form-label">Background Color</label>
-                        <input type="color" t-model="state.backgroundColor" class="form-control form-control-color w-100"/>
-                    </div>
-
-                    <!-- FONT STYLE -->
-                    <div class="mb-3">
-                        <label class="form-label">Font Style</label>
-                        <select t-model="state.fontFamily" class="form-control w-100">
-                            <t t-foreach="availableFonts" t-as="font" t-key="font.value">
-                                <option t-att-value="font.value"
-                                        t-att-style="'font-family:' + font.value">
-                                    <t t-esc="font.label"/>
-                                </option>
-                            </t>
-                        </select>
-                    </div>
-
-                    <!-- BACKGROUND IMAGE -->
-                    <div class="mb-3">
-                        <label class="form-label">Background Image</label>
-                        <div style="position:relative;">
-                            <input type="file" accept="image/*" class="form-control" t-on-change="onImageChange"/>
-                            <t t-if="state.backgroundImageName">
-                                <div style="position:absolute;inset:0;background:#fff;border:1px solid #ced4da;border-radius:4px;display:flex;align-items:center;gap:6px;padding:0 10px;font-size:0.875rem;pointer-events:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
-                                    <span>📎</span>
-                                    <span t-esc="state.backgroundImageName"
-                                          style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"/>
-                                </div>
-                            </t>
-                        </div>
-                        <t t-if="state.backgroundImage">
-                            <div class="mt-2 text-center">
-                                <img t-att-src="state.backgroundImage" style="max-width:100%;border-radius:6px;"/>
+                    <!-- TAB 1: LAYOUT & PRESETS -->
+                    <t t-if="state.activeTab === 'layout'">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Predefined Layouts</label>
+                            <div class="kiosk-presets-grid">
+                                <t t-foreach="predefinedLayouts" t-as="preset" t-key="preset.id">
+                                    <div class="kiosk-preset-card"
+                                         t-att-class="state.predefinedLayout === preset.id ? 'active' : ''"
+                                         t-on-click="() => this.selectPreset(preset.id)">
+                                        <i t-attf-class="fa #{preset.icon} preset-icon"/>
+                                        <span class="preset-name" t-esc="preset.name"/>
+                                        <span class="preset-desc" t-esc="preset.description"/>
+                                    </div>
+                                </t>
                             </div>
-                            <button class="btn btn-sm btn-danger mt-2 w-100" t-on-click="resetBackgroundImage">
-                                Reset Background Image
-                            </button>
-                        </t>
-                    </div>
+                            <div class="form-text">Choose a 1-click layout template. You can customize details below.</div>
+                        </div>
 
-                    <!-- NAVBAR -->
-                    <h5 class="mt-4 border-bottom pb-1">Navbar</h5>
-                    <div class="mb-3">
-                        <label class="form-label">Navbar Background</label>
-                        <input type="color" t-model="state.navbarColor" class="form-control form-control-color w-100"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Navbar Text</label>
-                        <input type="color" t-model="state.navbarTextColor" class="form-control form-control-color w-100"/>
-                    </div>
-                    <div class="mb-3 d-flex align-items-center justify-content-between">
-                        <label class="form-label m-0">Show Categories</label>
-                        <div class="form-check form-switch m-0">
-                            <input class="form-check-input" type="checkbox" role="switch"
-                                   t-att-checked="state.showCategories"
-                                   t-on-change="toggleCategories"/>
+                        <h6 class="mt-3 border-bottom pb-1 fw-bold">Navigation Bar</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Category Position</label>
+                            <select class="form-control" t-model="state.categoryPosition" t-on-change="setCategoryPosition">
+                                <option value="top">Top (Horizontal Tabs)</option>
+                                <option value="left">Left (Sidebar)</option>
+                                <option value="right">Right (Sidebar)</option>
+                                <option value="bottom">Bottom (Touch Bar)</option>
+                            </select>
                         </div>
-                    </div>
-                    <div class="mb-3 d-flex align-items-center justify-content-between">
-                        <label class="form-label m-0">Show Category Titles</label>
-                        <div class="form-check form-switch m-0">
-                            <input class="form-check-input" type="checkbox"
-                                   t-att-checked="state.showCategoryHeaders"
-                                   t-on-change="(ev) => state.showCategoryHeaders = ev.target.checked"/>
+                        <div class="mb-3">
+                            <label class="form-label">Category Size</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="range" class="form-range flex-grow-1"
+                                       min="50" max="220" step="5"
+                                       t-model.number="state.catImgSize"
+                                       t-on-input="onCatImgSizeInput"/>
+                                <span class="text-muted" style="min-width:48px;text-align:right;">
+                                    <t t-esc="state.catImgSize"/>px
+                                </span>
+                            </div>
                         </div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Product Category Position</label>
-                        <select class="form-control" t-model="state.categoryPosition" t-on-change="setCategoryPosition">
-                            <option value="top">Top</option>
-                            <option value="left">Left</option>
-                            <option value="right">Right</option>
-                            <option value="bottom">Bottom</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Category Size</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="range" class="form-range flex-grow-1"
-                                   min="50" max="220" step="5"
-                                   t-model.number="state.catImgSize"
-                                   t-on-input="onCatImgSizeInput"/>
-                            <span class="text-muted" style="min-width:48px;text-align:right;">
-                                <t t-esc="state.catImgSize"/>px
-                            </span>
+                        <div class="mb-3 d-flex align-items-center justify-content-between">
+                            <label class="form-label m-0">Show Category Bar</label>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       t-att-checked="state.showCategories"
+                                       t-on-change="toggleCategories"/>
+                            </div>
                         </div>
-                        <div class="form-text">Adjust category display size live.</div>
-                    </div>
+                        <div class="mb-3 d-flex align-items-center justify-content-between">
+                            <label class="form-label m-0">Show Category Labels</label>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       t-att-checked="state.showCategoryLabels"
+                                       t-on-change="toggleCategoryLabels"/>
+                            </div>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center justify-content-between">
+                            <label class="form-label m-0">Show Section Titles</label>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input" type="checkbox"
+                                       t-att-checked="state.showCategoryHeaders"
+                                       t-on-change="(ev) => state.showCategoryHeaders = ev.target.checked"/>
+                            </div>
+                        </div>
+                    </t>
 
-                    <!-- PRODUCT CARD -->
-                    <h5 class="mt-4 border-bottom pb-1">Product Card</h5>
-                    <div class="mb-3">
-                        <label class="form-label">Product Background</label>
-                        <input type="color" t-model="state.productBgColor" class="form-control form-control-color w-100"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Product Text</label>
-                        <input type="color" t-model="state.productTextColor" class="form-control form-control-color w-100"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Radius</label>
-                        <input type="text" t-model="state.productRadius" class="form-control"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Image Size</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="range" class="form-range flex-grow-1"
-                                   min="30" max="100" step="5"
-                                   t-model.number="state.imgSize"
-                                   t-on-input="onImgSizeInput"/>
-                            <span class="text-muted" style="min-width:42px;text-align:right;">
-                                <t t-esc="state.imgSize"/>%
-                            </span>
+                    <!-- TAB 2: TYPOGRAPHY -->
+                    <t t-elif="state.activeTab === 'typography'">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Font Family</label>
+                            <select t-model="state.fontFamily" class="form-control w-100">
+                                <t t-foreach="availableFonts" t-as="font" t-key="font.value">
+                                    <option t-att-value="font.value"
+                                            t-att-style="'font-family:' + font.value">
+                                        <t t-esc="font.label"/>
+                                    </option>
+                                </t>
+                            </select>
+                            <div class="form-text">Sets typography across the kiosk app.</div>
                         </div>
-                        <div class="form-text">Resize all product images. 100% = full width.</div>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Image Padding</label>
-                        <div class="d-flex align-items-center gap-2">
-                            <input type="range" class="form-range flex-grow-1"
-                                   min="0" max="25" step="1"
-                                   t-model.number="state.imgPadding"
-                                   t-on-input="onImgPaddingInput"/>
-                            <span class="text-muted" style="min-width:42px;text-align:right;">
-                                <t t-esc="state.imgPadding"/>%
-                            </span>
-                        </div>
-                        <div class="form-text">Add space around product images for alignment.</div>
-                    </div>
 
-                    <!-- CART -->
-                    <h5 class="mt-4 border-bottom pb-1">Cart</h5>
-                    <div class="mb-3">
-                        <label class="form-label">Cart Background</label>
-                        <input type="color" t-model="state.cartBgColor" class="form-control form-control-color w-100"/>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Cart Text</label>
-                        <input type="color" t-model="state.cartTextColor" class="form-control form-control-color w-100"/>
-                    </div>
+                        <h6 class="mt-4 border-bottom pb-1 fw-bold">Title Styling</h6>
+                        <div class="mb-3 d-flex align-items-center justify-content-between p-2 rounded bg-light border">
+                            <div>
+                                <label class="form-label m-0 fw-bold">Bold Titles</label>
+                                <div class="text-muted" style="font-size:0.75rem;">Make product &amp; category titles prominent</div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       t-att-checked="state.titleBold"
+                                       t-on-change="toggleTitleBold"/>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 d-flex align-items-center justify-content-between p-2 rounded bg-light border">
+                            <div>
+                                <label class="form-label m-0 fw-bold">UPPERCASE Titles</label>
+                                <div class="text-muted" style="font-size:0.75rem;">ALL CAPS for headers and item names</div>
+                            </div>
+                            <div class="form-check form-switch m-0">
+                                <input class="form-check-input" type="checkbox" role="switch"
+                                       t-att-checked="state.titleTransform === 'uppercase'"
+                                       t-on-change="toggleTitleUppercase"/>
+                            </div>
+                        </div>
+                    </t>
+
+                    <!-- TAB 3: COLORS & THEME -->
+                    <t t-elif="state.activeTab === 'colors'">
+                        <h6 class="border-bottom pb-1 fw-bold">Buttons</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Primary Button</label>
+                            <input type="color" t-model="state.primaryColor" t-on-input="onPrimaryColorInput" class="form-control form-control-color w-100"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Secondary Button</label>
+                            <input type="color" t-model="state.secondaryColor" t-on-input="onSecondaryColorInput" class="form-control form-control-color w-100"/>
+                        </div>
+
+                        <h6 class="mt-4 border-bottom pb-1 fw-bold">Page Background</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Background Color</label>
+                            <input type="color" t-model="state.backgroundColor" t-on-input="onBgColorInput" class="form-control form-control-color w-100"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Background Image</label>
+                            <div style="position:relative;">
+                                <input type="file" accept="image/*" class="form-control" t-on-change="onImageChange"/>
+                                <t t-if="state.backgroundImageName">
+                                    <div style="position:absolute;inset:0;background:#fff;border:1px solid #ced4da;border-radius:4px;display:flex;align-items:center;gap:6px;padding:0 10px;font-size:0.875rem;pointer-events:none;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">
+                                        <span>📎</span>
+                                        <span t-esc="state.backgroundImageName"
+                                              style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"/>
+                                    </div>
+                                </t>
+                            </div>
+                            <t t-if="state.backgroundImage">
+                                <div class="mt-2 text-center">
+                                    <img t-att-src="state.backgroundImage" style="max-width:100%;border-radius:6px;"/>
+                                </div>
+                                <button class="btn btn-sm btn-danger mt-2 w-100" t-on-click="resetBackgroundImage">
+                                    Reset Background Image
+                                </button>
+                            </t>
+                        </div>
+
+                        <h6 class="mt-4 border-bottom pb-1 fw-bold">Navbar &amp; Cart</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Navbar Background</label>
+                            <input type="color" t-model="state.navbarColor" t-on-input="onNavbarColorInput" class="form-control form-control-color w-100"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Navbar Text</label>
+                            <input type="color" t-model="state.navbarTextColor" t-on-input="onNavbarTextColorInput" class="form-control form-control-color w-100"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cart Background</label>
+                            <input type="color" t-model="state.cartBgColor" t-on-input="onCartBgColorInput" class="form-control form-control-color w-100"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Cart Text</label>
+                            <input type="color" t-model="state.cartTextColor" t-on-input="onCartTextColorInput" class="form-control form-control-color w-100"/>
+                        </div>
+                    </t>
+
+                    <!-- TAB 4: PRODUCT CARDS -->
+                    <t t-elif="state.activeTab === 'cards'">
+                        <div class="mb-3">
+                            <label class="form-label">Card Background</label>
+                            <input type="color" t-model="state.productBgColor" t-on-input="onProductBgColorInput" class="form-control form-control-color w-100"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Card Text Color</label>
+                            <input type="color" t-model="state.productTextColor" t-on-input="onProductTextColorInput" class="form-control form-control-color w-100"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Corner Radius</label>
+                            <input type="text" t-model="state.productRadius" class="form-control" placeholder="e.g. 12px"/>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Image Size</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="range" class="form-range flex-grow-1"
+                                       min="30" max="100" step="5"
+                                       t-model.number="state.imgSize"
+                                       t-on-input="onImgSizeInput"/>
+                                <span class="text-muted" style="min-width:42px;text-align:right;">
+                                    <t t-esc="state.imgSize"/>%
+                                </span>
+                            </div>
+                            <div class="form-text">Resize product images within their cards.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Image Padding</label>
+                            <div class="d-flex align-items-center gap-2">
+                                <input type="range" class="form-range flex-grow-1"
+                                       min="0" max="25" step="1"
+                                       t-model.number="state.imgPadding"
+                                       t-on-input="onImgPaddingInput"/>
+                                <span class="text-muted" style="min-width:42px;text-align:right;">
+                                    <t t-esc="state.imgPadding"/>%
+                                </span>
+                            </div>
+                            <div class="form-text">Add space around product images.</div>
+                        </div>
+                    </t>
 
                     <!-- ACTIONS -->
-                    <div class="d-flex gap-2 mt-4">
+                    <div class="d-flex gap-2 mt-4 pt-2 border-top">
                         <button class="btn btn-primary w-100" t-on-click="applyTheme">Apply</button>
                         <button class="btn btn-secondary w-100" t-on-click="resetTheme">Reset</button>
                     </div>

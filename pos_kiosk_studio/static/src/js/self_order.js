@@ -11,6 +11,84 @@ import {
 
 const DRAG_THRESHOLD = 6;
 
+export const PREDEFINED_LAYOUTS = [
+    {
+        id: "default",
+        name: "Classic Grid",
+        description: "Standard layout with top category bar and flexible cards",
+        icon: "fa-th-large",
+        settings: {
+            categoryPosition: "top",
+            catImgSize: 80,
+            productRadius: "8px",
+            imgSize: 100,
+            imgPadding: 0,
+            titleBold: true,
+            titleTransform: "none",
+        },
+    },
+    {
+        id: "sidebar",
+        name: "Modern Sidebar",
+        description: "Vertical left navigation with clean spacious product cards",
+        icon: "fa-columns",
+        settings: {
+            categoryPosition: "left",
+            catImgSize: 95,
+            productRadius: "14px",
+            imgSize: 90,
+            imgPadding: 2,
+            titleBold: true,
+            titleTransform: "none",
+        },
+    },
+    {
+        id: "hero",
+        name: "Fast-Food Hero",
+        description: "Large eye-catching cards with bold uppercase headings",
+        icon: "fa-fire",
+        settings: {
+            categoryPosition: "top",
+            catImgSize: 120,
+            productRadius: "18px",
+            imgSize: 100,
+            imgPadding: 0,
+            titleBold: true,
+            titleTransform: "uppercase",
+        },
+    },
+    {
+        id: "compact",
+        name: "Compact List",
+        description: "High-density cards for fast browsing through large menus",
+        icon: "fa-list",
+        settings: {
+            categoryPosition: "top",
+            catImgSize: 65,
+            productRadius: "6px",
+            imgSize: 75,
+            imgPadding: 4,
+            titleBold: false,
+            titleTransform: "none",
+        },
+    },
+    {
+        id: "touch",
+        name: "Touch Bottom",
+        description: "Bottom navigation for easy thumb reach on tall kiosks",
+        icon: "fa-hand-pointer-o",
+        settings: {
+            categoryPosition: "bottom",
+            catImgSize: 90,
+            productRadius: "12px",
+            imgSize: 90,
+            imgPadding: 0,
+            titleBold: true,
+            titleTransform: "none",
+        },
+    },
+];
+
 patch(SelfOrder.prototype, {
     async setup(env, services) {
         await super.setup(env, services);
@@ -30,9 +108,13 @@ patch(SelfOrder.prototype, {
             showCategories: true,
             categoryPosition: "top",
             showCategoryHeaders: true,
+            showCategoryLabels: true,
             catImgSize: 80,
             imgSize: 100,
             imgPadding: 0,
+            titleBold: true,
+            titleTransform: "none",
+            predefinedLayout: "default",
         };
 
         const { theme, elementStyles } = await loadKioskSettings();
@@ -72,6 +154,8 @@ patch(SelfOrder.prototype, {
             "font-size:11px;white-space:nowrap;";
         document.body.appendChild(this._tooltip);
         document.body.classList.add("kiosk-theme");
+        document.body.classList.add("notranslate");
+        document.documentElement.setAttribute("translate", "no");
 
         this._applyTheme();
         this._startStyleObserver();
@@ -149,8 +233,22 @@ patch(SelfOrder.prototype, {
 
         document.body.classList.toggle("kiosk-hide-categories", s.showCategories === false);
         document.body.classList.toggle("kiosk-hide-category-headers", s.showCategoryHeaders === false);
+        document.body.classList.toggle("kiosk-hide-category-labels", s.showCategoryLabels === false);
+        document.body.classList.toggle("kiosk-title-bold", s.titleBold !== false);
+        document.body.classList.toggle("kiosk-title-uppercase", s.titleTransform === "uppercase");
+
+        const LAYOUT_IDS = ["default", "sidebar", "hero", "compact", "touch"];
+        LAYOUT_IDS.forEach(id => document.body.classList.remove(`kiosk-layout-${id}`));
+        if (s.predefinedLayout && LAYOUT_IDS.includes(s.predefinedLayout)) {
+            document.body.classList.add(`kiosk-layout-${s.predefinedLayout}`);
+        }
 
         this.setCategoryPosition(s.categoryPosition || "top");
+    },
+
+    previewCategoryLabels(show) {
+        this.studio.showCategoryLabels = show;
+        document.body.classList.toggle("kiosk-hide-category-labels", show === false);
     },
 
     previewCatImgSize(size) {
@@ -161,9 +259,76 @@ patch(SelfOrder.prototype, {
         this.setCategoryPosition(this.studio.categoryPosition || "top");
     },
 
+    previewTitleBold(bold) {
+        this.studio.titleBold = bold;
+        document.body.classList.toggle("kiosk-title-bold", bold !== false);
+    },
+
+    previewTitleTransform(transform) {
+        this.studio.titleTransform = transform;
+        document.body.classList.toggle("kiosk-title-uppercase", transform === "uppercase");
+    },
+
+    previewNavbarColor(color) {
+        this.studio.navbarColor = color;
+        document.documentElement.style.setProperty("--kiosk-navbar-bg", color);
+        const navbarEls = document.querySelectorAll(".navbar-container, #listgroup-categories, .category-list, .category-item");
+        navbarEls.forEach(el => el.style.removeProperty("background-color"));
+    },
+
+    previewNavbarTextColor(color) {
+        this.studio.navbarTextColor = color;
+        document.documentElement.style.setProperty("--kiosk-navbar-text", color);
+        const navbarEls = document.querySelectorAll(".navbar-container, #listgroup-categories, .category-list, .category-item");
+        navbarEls.forEach(el => el.style.removeProperty("color"));
+    },
+
+    applyLayoutPreset(presetId) {
+        const preset = PREDEFINED_LAYOUTS.find(p => p.id === presetId);
+        if (!preset) return;
+        this.studio.predefinedLayout = presetId;
+        Object.assign(this.studio, preset.settings);
+        this._applyTheme();
+        if (this._studioSidebar) {
+            Object.assign(this._studioSidebar.state, {
+                predefinedLayout: presetId,
+                ...preset.settings,
+            });
+        }
+    },
+
     async updateTheme(data) {
         Object.assign(this.studio, data);
         await saveTheme(this.studio);
+
+        if (data.navbarColor) {
+            const navbarKeywords = ["navbar", "listgroup-categories", "category-list", "category-item"];
+            let cleaned = false;
+            for (const selector of Object.keys(this.elementStyles)) {
+                if (navbarKeywords.some(kw => selector.includes(kw))) {
+                    if (this.elementStyles[selector]["background-color"]) {
+                        delete this.elementStyles[selector]["background-color"];
+                        cleaned = true;
+                    }
+                    if (this.elementStyles[selector]["color"]) {
+                        delete this.elementStyles[selector]["color"];
+                        cleaned = true;
+                    }
+                    if (Object.keys(this.elementStyles[selector]).length === 0) {
+                        delete this.elementStyles[selector];
+                    }
+                }
+            }
+            if (cleaned) {
+                await saveElementStyles(this.elementStyles);
+            }
+            const navbarEls = document.querySelectorAll(".navbar-container, #listgroup-categories, .category-list, .category-item");
+            navbarEls.forEach(el => {
+                el.style.removeProperty("background-color");
+                el.style.removeProperty("color");
+            });
+        }
+
         this._applyTheme();
         this._applySavedElementStyles();
     },
@@ -569,6 +734,9 @@ patch(SelfOrder.prototype, {
                         }
                         return;
                     }
+                    if (k === "background-color" && (el.matches(".navbar-container, #listgroup-categories, .category-list, .category-item, .o-so-products-row, .product-list-category") || el.closest(".navbar-container"))) {
+                        return;
+                    }
                     if (!LAYOUT_PROTECTED.has(k)) {
                         el.style.setProperty(k, v, "important");
                     }
@@ -588,9 +756,7 @@ patch(SelfOrder.prototype, {
             if (current.classList?.length) {
                 const stableClasses = [...current.classList]
                     .filter(c =>
-                        c !== "kiosk-selected" &&
-                        c !== "kiosk-hover" &&
-                        c !== "kiosk-dragging" &&
+                        !c.startsWith("kiosk-") &&
                         !c.startsWith("o_")
                     )
                     .slice(0, 2);

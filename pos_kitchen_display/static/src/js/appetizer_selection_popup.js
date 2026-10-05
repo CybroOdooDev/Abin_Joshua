@@ -19,9 +19,10 @@ export class AppetizerSelectionPopup extends AbstractAwaitablePopup {
     setup() {
         super.setup();
         const firstProduct = this.props.products[0] || null;
+        const initialQty = Math.max(1, parseInt(this.props.dinersCount, 10) || 1);
         this.state = useState({
             selectedProductId: firstProduct ? firstProduct.id : null,
-            quantity: 1,
+            quantity: initialQty,
         });
     }
 
@@ -30,9 +31,19 @@ export class AppetizerSelectionPopup extends AbstractAwaitablePopup {
     }
 
     updateQuantity(delta) {
-        const next = this.state.quantity + delta;
+        const current = parseInt(this.state.quantity, 10) || 1;
+        const next = current + delta;
         if (next >= 1) {
             this.state.quantity = next;
+        }
+    }
+
+    onQuantityChange(ev) {
+        const val = parseInt(ev.target.value, 10);
+        if (!isNaN(val) && val >= 1) {
+            this.state.quantity = val;
+        } else if (isNaN(val) || val < 1) {
+            this.state.quantity = 1;
         }
     }
 
@@ -43,7 +54,7 @@ export class AppetizerSelectionPopup extends AbstractAwaitablePopup {
     getPayload() {
         return {
             product: this.selectedProduct,
-            quantity: this.state.quantity,
+            quantity: Math.max(1, parseInt(this.state.quantity, 10) || 1),
         };
     }
 }
