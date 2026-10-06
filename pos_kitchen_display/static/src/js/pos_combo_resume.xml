@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <!-- 1. Extend ComboConfiguratorPopup: Allow partial selection & select later -->
+    <t t-name="pos_kitchen_display.ComboConfiguratorPopup"
+       t-inherit="point_of_sale.ComboConfiguratorPopup"
+       t-inherit-mode="extension">
+
+        <!-- Add 'Select later' action in combo group header -->
+        <xpath expr="//h3[hasclass('me-auto')]" position="replace">
+            <div class="d-flex justify-content-between align-items-center mb-2 w-100">
+                <h3 class="m-0" t-esc="combo.name"/>
+                <button t-if="state.combo[combo_id]"
+                        class="btn btn-sm btn-outline-secondary py-0 px-2"
+                        style="font-size: 0.8rem;"
+                        t-on-click.prevent.stop="() => this.clearComboChoice(combo_id)">
+                    <i class="fa fa-undo me-1"/>Select later
+                </button>
+            </div>
+        </xpath>
+
+        <!-- Replace footer to enable Add / Update even with partial selection -->
+        <xpath expr="//footer[hasclass('modal-footer')]" position="replace">
+            <footer class="footer footer-flex modal-footer">
+                <t t-set="_allSelected" t-value="areAllCombosSelected()"/>
+                <t t-set="_hasSelection" t-value="hasSelectedCombo()"/>
+                <button class="button highlight confirm btn btn-lg btn-primary"
+                        t-att-disabled="!_hasSelection"
+                        t-on-click="confirm">
+                    <t t-if="props.isEdit">
+                        <t t-if="_allSelected">Update Menu</t>
+                        <t t-else="">Update (Resume Later)</t>
+                    </t>
+                    <t t-else="">
+                        <t t-if="_allSelected">Add to order</t>
+                        <t t-else="">Add (Resume Later)</t>
+                    </t>
+                </button>
+                <button class="button cancel btn btn-lg btn-secondary" t-on-click="cancel">
+                    Discard
+                </button>
+                <div class="ms-auto text-end">
+                    <t t-if="!_allSelected and _hasSelection">
+                        <span class="text-warning small fw-bold">
+                            <i class="fa fa-clock-o me-1"/>Pending courses can be selected later
+                        </span>
+                    </t>
+                    <t t-elif="!_hasSelection">
+                        <span class="text-muted small">
+                            Select at least one item to proceed
+                        </span>
+                    </t>
+                </div>
+            </footer>
+        </xpath>
+    </t>
+
+    <!-- 2. Extend Orderline: Insert Resume Menu badge for Combo parents -->
+    <t t-name="pos_kitchen_display.OrderlineComboResume"
+       t-inherit="point_of_sale.Orderline"
+       t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('product-name')]" position="inside">
+            <t t-if="line and line.isResumeableCombo">
+                <t t-if="line.pendingComboCount > 0">
+                    <span class="badge bg-warning text-dark ms-1 cursor-pointer resume-combo-badge shadow-sm"
+                          style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; display: inline-block; vertical-align: middle;"
+                          t-on-click.stop="() => this.resumeCombo(line)"
+                          title="Click to resume menu and choose pending courses">
+                        <i class="fa fa-cutlery me-1" style="font-size: 0.65rem;"/>Resume (<t t-esc="line.pendingComboCount"/> pending)
+                    </span>
+                </t>
+                <t t-else="">
+                    <span class="badge bg-light text-secondary border ms-1 cursor-pointer resume-combo-badge"
+                          style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; display: inline-block; vertical-align: middle;"
+                          t-on-click.stop="() => this.resumeCombo(line)"
+                          title="Click to edit menu choices">
+                        <i class="fa fa-pencil me-1" style="font-size: 0.65rem;"/>Edit Menu
+                    </span>
+                </t>
+            </t>
+        </xpath>
+    </t>
+
+    <!-- 3. Control Button Template for ProductScreen -->
+    <t t-name="pos_kitchen_display.ResumeMenuButton">
+        <button class="control-button btn btn-light btn-lg flex-fill d-flex align-items-center justify-content-center gap-2"
+                t-on-click="click">
+            <i class="fa fa-cutlery"/>
+            <span>
+                <t t-if="pendingCount > 0">
+                    Resume Menu (<t t-esc="pendingCount"/> pending)
+                </t>
+                <t t-else="">
+                    Edit Menu
+                </t>
+            </span>
+        </button>
+    </t>
+</templates>

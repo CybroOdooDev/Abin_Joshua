@@ -158,6 +158,36 @@ patch(ComboConfiguratorPopup.prototype, {
         return item.paidQty * comboLine.combo_price;
     },
 
+    formattedComboPrice(comboLine) {
+        if (!comboLine) return "";
+        const combo = this.pos.db.combo_by_id[comboLine.combo_id[0]];
+        if (!combo) return "";
+
+        const freeLimit = Number(combo.free_limit || 0);
+
+        // When the free-item option is disabled or set to 0,
+        // any predefined supplement price should be displayed directly inside the product card
+        if (freeLimit <= 0) {
+            const price = Number(comboLine.combo_price || 0);
+            if (price <= 0) {
+                return "";
+            }
+            if (combo.allow_quantity) {
+                const qty = this.getQty(comboLine.id);
+                const finalPrice = qty > 1 ? qty * price : price;
+                return "+ " + this.env.utils.formatCurrency(finalPrice);
+            }
+            return "+ " + this.env.utils.formatCurrency(price);
+        }
+
+        // When free_limit > 0 (free items option enabled)
+        const extraCharge = this.getExtraCharge(comboLine);
+        if (extraCharge > 0) {
+            return "+ " + this.env.utils.formatCurrency(extraCharge);
+        }
+        return "";
+    },
+
     getComboBasePrice() {
         const product = this.props.product;
         if (!product) return 0;

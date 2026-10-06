@@ -202,6 +202,32 @@ patch(ComboSelection.prototype, {
     _getLineExtraInfo(lineId) {
         const combo = this.props.combo;
         const state = this.props.comboState.lines[lineId];
+        const line = combo.combo_line_ids.find((l) => l.id === lineId);
+        const unitPrice = line ? (line.combo_price || line.price_extra || line.price || 0) : 0;
+
+        if (unitPrice <= 0) {
+            return {
+                show: false,
+                paidQty: 0,
+                extraPrice: 0,
+            };
+        }
+
+        const freeLimit = Number(combo.free_limit || 0);
+
+        // When the free-item option is disabled or set to 0,
+        // any predefined supplement prices should be displayed directly on the screen
+        if (freeLimit <= 0) {
+            const qty = (state && state.selected && combo.allow_quantity)
+                ? Number(state.qty || 1)
+                : 1;
+            const extraPrice = qty * unitPrice;
+            return {
+                show: true,
+                paidQty: (state && state.selected) ? qty : 0,
+                extraPrice: extraPrice,
+            };
+        }
 
         if (!state || !state.selected) {
             return {
@@ -212,7 +238,7 @@ patch(ComboSelection.prototype, {
         }
 
         const order = this.props.comboState.selectionOrder || [];
-        let remainingFree = combo.free_limit || 0;
+        let remainingFree = freeLimit;
 
         for (const selectedLineId of order) {
             const selectedState = this.props.comboState.lines[selectedLineId];
@@ -221,8 +247,8 @@ patch(ComboSelection.prototype, {
                 continue;
             }
 
-            const line = combo.combo_line_ids.find((l) => l.id === selectedLineId);
-            if (!line) {
+            const selLine = combo.combo_line_ids.find((l) => l.id === selectedLineId);
+            if (!selLine) {
                 continue;
             }
 
@@ -233,8 +259,8 @@ patch(ComboSelection.prototype, {
             remainingFree = Math.max(remainingFree - freeQty, 0);
 
             if (selectedLineId === lineId) {
-                const unitPrice = line.combo_price || line.price_extra || line.price || 0;
-                const extraPrice = paidQty * unitPrice;
+                const selUnitPrice = selLine.combo_price || selLine.price_extra || selLine.price || 0;
+                const extraPrice = paidQty * selUnitPrice;
 
                 return {
                     show: paidQty > 0 && extraPrice > 0,

@@ -5,19 +5,9 @@
        t-inherit-mode="extension">
         <xpath expr="//label[contains(@class,'combo-line')]"
                position="inside">
-            <div class="combo-card-footer">
-                <t t-if="getExtraCharge(combo_line) > 0">
-                    <div class="combo-extra-price text-danger fw-bold">
-                        +
-                        <t t-esc="
-                            env.utils.formatCurrency(
-                                getExtraCharge(combo_line)
-                            )
-                        "/>
-                    </div>
-                </t>
-                <!-- Quantity controls only if allow_quantity -->
-                <t t-if="combo.allow_quantity">
+            <!-- Quantity controls only if allow_quantity -->
+            <t t-if="combo.allow_quantity">
+                <div class="combo-card-footer">
                     <div class="extra-topping-controls">
                         <button
                             type="button"
@@ -37,13 +27,8 @@
                             +
                         </button>
                     </div>
-                </t>
-            </div>
-        </xpath>
-        <!-- Hide Odoo combo price -->
-        <xpath expr="//ProductCard"
-               position="attributes">
-            <attribute name="price">''</attribute>
+                </div>
+            </t>
         </xpath>
         <!-- Hide radio only for quantity-enabled combos -->
         <xpath expr="//input[@type='radio']"

@@ -27,3 +27,8 @@
     text-align: center;
     font-weight: 600;
 }
+
+.combo-configurator-popup .price-tag {
+    color: #dc3545 !important;
+    font-weight: 700;
+}
