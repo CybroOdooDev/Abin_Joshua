@@ -29,6 +29,14 @@ patch(ProductScreen.prototype, {
         if (comboParentLine?.comboParent) {
             comboParentLine = comboParentLine.comboParent;
         }
+
+        // Clean up any stale (removed) lines from comboLines before touching qty
+        if (comboParentLine?.comboLines?.length) {
+            comboParentLine.comboLines = comboParentLine.comboLines.filter(
+                (l) => l && l.order !== null && l.order !== undefined
+            );
+        }
+
         const oldParentQty =
             val !== "remove" && comboParentLine?.comboLines?.length
                 ? comboParentLine.get_quantity()
@@ -41,6 +49,10 @@ patch(ProductScreen.prototype, {
                 const ratio = newParentQty / oldParentQty;
 
                 for (const line of comboParentLine.comboLines) {
+                    // Guard: skip orphaned lines where order has been removed
+                    if (!line || !line.order) {
+                        continue;
+                    }
                     line.selected_qty = (line.selected_qty || 1) * ratio;
 
                     const newFree = Math.round((line.free_qty || 0) * ratio);

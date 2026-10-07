@@ -8,6 +8,36 @@ _logger = logging.getLogger(__name__)
 class PosOrder(models.Model):
     _inherit = "pos.order"
 
+    def _link_combo_items(self, order_vals):
+        self.ensure_one()
+        all_lines = [l[2] for l in order_vals.get('lines', []) if l and len(l) > 2 and isinstance(l[2], dict)]
+        lines = [l for l in all_lines if l.get('combo_parent_id') or l.get('combo_line_ids')]
+        if not lines:
+            return
+
+        uuid_by_cid = {l['id']: l['uuid'] for l in all_lines if l.get('id') is not None and l.get('uuid')}
+        line_by_uuid = {line.uuid: line for line in self.lines if line.uuid}
+        line_by_id = {line.id: line for line in self.lines if line.id}
+
+        for line in lines:
+            parent_ref = line.get('combo_parent_id')
+            if not parent_ref:
+                continue
+
+            parent_line = None
+            if isinstance(parent_ref, str):
+                parent_line = line_by_uuid.get(parent_ref)
+            elif parent_ref in uuid_by_cid:
+                parent_line = line_by_uuid.get(uuid_by_cid[parent_ref])
+            elif isinstance(parent_ref, int):
+                parent_line = line_by_id.get(parent_ref)
+                if not parent_line:
+                    parent_line = self.env['pos.order.line'].browse(parent_ref).exists()
+
+            child_line = line_by_uuid.get(line.get('uuid'))
+            if child_line and parent_line:
+                child_line.combo_parent_id = parent_line.id
+
     @api.model
     def create_from_ui(self, orders, draft=False):
         res = super().create_from_ui(orders, draft)

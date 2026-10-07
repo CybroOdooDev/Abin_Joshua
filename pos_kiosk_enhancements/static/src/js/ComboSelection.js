@@ -229,14 +229,6 @@ patch(ComboSelection.prototype, {
             };
         }
 
-        if (!state || !state.selected) {
-            return {
-                show: false,
-                paidQty: 0,
-                extraPrice: 0,
-            };
-        }
-
         const order = this.props.comboState.selectionOrder || [];
         let remainingFree = freeLimit;
 
@@ -268,6 +260,22 @@ patch(ComboSelection.prototype, {
                     extraPrice,
                 };
             }
+        }
+
+        // If this item is unselected, show surcharge dynamically when free quota is exhausted
+        if (!state || !state.selected) {
+            if (remainingFree <= 0 && unitPrice > 0) {
+                return {
+                    show: true,
+                    paidQty: 0,
+                    extraPrice: unitPrice,
+                };
+            }
+            return {
+                show: false,
+                paidQty: 0,
+                extraPrice: 0,
+            };
         }
 
         return {

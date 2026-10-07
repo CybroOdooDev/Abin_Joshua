@@ -28,7 +28,6 @@ from . import pos_session
 from . import pos_payment_method
 from . import pos_order_line
 from . import ir_actions_report
-from . import account_move
 
 import os
 try:

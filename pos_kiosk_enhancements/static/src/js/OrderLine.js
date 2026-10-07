@@ -16,11 +16,19 @@ patch(Orderline.prototype, {
         json.combo_price = this.combo_price || 0;
         json.extra_price = this.extra_price || 0;
         json.allow_quantity = this.allow_quantity || false;
-         json.combo_line_ids = (json.combo_line_ids || []).filter(
-            (id) => id !== undefined && id !== null
-        );
+        if (this.comboLines && this.comboLines.length > 0) {
+            json.combo_line_ids = this.comboLines
+                .map((line) => line?.uuid || line?.id || line?.cid)
+                .filter(Boolean);
+        } else {
+            json.combo_line_ids = (json.combo_line_ids || []).filter(
+                (id) => id !== undefined && id !== null
+            );
+        }
 
-        if (!json.combo_parent_id) {
+        if (this.comboParent) {
+            json.combo_parent_id = this.comboParent.uuid || this.comboParent.id || this.comboParent.cid;
+        } else if (!json.combo_parent_id) {
             json.combo_parent_id = false;
         }
 

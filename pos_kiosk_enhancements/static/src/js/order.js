@@ -158,7 +158,7 @@ patch(Order.prototype, {
 
     compute_child_lines(comboParentProduct, comboLines, pricelist) {
         const result = [];
-        for (const comboLine of comboLines) {
+        for (const comboLine of (comboLines || [])) {
             const attribute_value_ids = comboLine.configuration?.attribute_value_ids;
             const attributesPriceExtra =
                 (attribute_value_ids || [])
@@ -175,8 +175,8 @@ patch(Order.prototype, {
             const selectedQty = comboLine.quantity || 1;
             const paidQty = comboLine.paid_qty || 0;
             const pricePerUnit = (comboLine.combo_price || 0) + attributesPriceExtra;
-            const isTopping = comboRecord.allow_quantity || (comboLine.extra_price || 0) > 0 || (comboLine.combo_price || 0) > 0;
-            const lineQuantity = isTopping ? paidQty : selectedQty;
+            const isTopping = !!comboRecord.allow_quantity;
+            const lineQuantity = (isTopping && comboLine.paid_qty !== undefined) ? paidQty : selectedQty;
             result.push({
                 comboLine,
                 attribute_value_ids,
@@ -210,7 +210,7 @@ patch(Order.prototype, {
         );
         for (const line of comboLinesPrices) {
             const product = this.pos.db.product_by_id[line.comboLine.product_id[0]];
-            const initialQty = (line.allow_quantity || line.extra_price > 0 || line.combo_price > 0)
+            const initialQty = (line.allow_quantity && line.paid_qty !== undefined)
                 ? line.paid_qty
                 : (line.selected_qty || 1);
             await this.pos.addProductFromUi(product, {

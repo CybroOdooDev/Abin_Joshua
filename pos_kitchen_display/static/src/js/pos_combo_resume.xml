@@ -64,16 +64,16 @@
                     <span class="badge bg-warning text-dark ms-1 cursor-pointer resume-combo-badge shadow-sm"
                           style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; display: inline-block; vertical-align: middle;"
                           t-on-click.stop="() => this.resumeCombo(line)"
-                          title="Click to resume menu and choose pending courses">
-                        <i class="fa fa-cutlery me-1" style="font-size: 0.65rem;"/>Resume (<t t-esc="line.pendingComboCount"/> pending)
+                          title="Click para editar o completar platos pendientes">
+                        <i class="fa fa-pencil me-1" style="font-size: 0.65rem;"/>Editar menú (<t t-esc="line.pendingComboCount"/> pendiente<t t-if="line.pendingComboCount > 1">s</t>)
                     </span>
                 </t>
                 <t t-else="">
-                    <span class="badge bg-light text-secondary border ms-1 cursor-pointer resume-combo-badge"
+                    <span class="badge bg-primary text-white ms-1 cursor-pointer resume-combo-badge shadow-sm"
                           style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; display: inline-block; vertical-align: middle;"
                           t-on-click.stop="() => this.resumeCombo(line)"
-                          title="Click to edit menu choices">
-                        <i class="fa fa-pencil me-1" style="font-size: 0.65rem;"/>Edit Menu
+                          title="Click para editar platos del menú">
+                        <i class="fa fa-pencil me-1" style="font-size: 0.65rem;"/>Editar menú
                     </span>
                 </t>
             </t>
@@ -84,13 +84,13 @@
     <t t-name="pos_kitchen_display.ResumeMenuButton">
         <button class="control-button btn btn-light btn-lg flex-fill d-flex align-items-center justify-content-center gap-2"
                 t-on-click="click">
-            <i class="fa fa-cutlery"/>
+            <i class="fa fa-pencil"/>
             <span>
                 <t t-if="pendingCount > 0">
-                    Resume Menu (<t t-esc="pendingCount"/> pending)
+                    Editar menú (<t t-esc="pendingCount"/> pendiente<t t-if="pendingCount > 1">s</t>)
                 </t>
                 <t t-else="">
-                    Edit Menu
+                    Editar menú
                 </t>
             </span>
         </button>

@@ -181,9 +181,34 @@ patch(ComboConfiguratorPopup.prototype, {
         }
 
         // When free_limit > 0 (free items option enabled)
-        const extraCharge = this.getExtraCharge(comboLine);
-        if (extraCharge > 0) {
-            return "+ " + this.env.utils.formatCurrency(extraCharge);
+        const price = Number(comboLine.combo_price || 0);
+        if (price <= 0) {
+            return "";
+        }
+
+        if (combo.allow_quantity) {
+            const item = this.extraToppingState.selections[comboLine.id];
+            if (item && item.qty > 0) {
+                if (item.paidQty > 0) {
+                    return "+ " + this.env.utils.formatCurrency(item.paidQty * price);
+                }
+                return ""; // free item
+            }
+            // Item unselected: show surcharge if all free choices have been exhausted
+            const remainingFree = this.getRemainingFree(combo.id);
+            if (remainingFree <= 0) {
+                return "+ " + this.env.utils.formatCurrency(price);
+            }
+            return "";
+        }
+
+        // Standard combo with free_limit
+        const selectedLineId = this.state.combo[combo.id];
+        if (selectedLineId === comboLine.id) {
+            return ""; // selected item is free
+        }
+        if (selectedLineId) {
+            return "+ " + this.env.utils.formatCurrency(price);
         }
         return "";
     },

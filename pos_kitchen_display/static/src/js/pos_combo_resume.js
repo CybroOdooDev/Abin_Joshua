@@ -79,52 +79,13 @@ patch(Orderline.prototype, {
     },
 });
 
-// 3. Patch Order Model to safely handle partial combo price calculations without division by zero
-patch(Order.prototype, {
-    compute_child_lines(comboParentProduct, comboLines, pricelist) {
-        if (!comboLines || !comboLines.length) {
-            return [];
-        }
-        const parentLstPrice = comboParentProduct.get_price(pricelist, 1);
-        const originalTotal = comboLines.reduce((acc, comboLine) => {
-            const originalPrice = this.pos.db.combo_by_id[comboLine.combo_id[0]]?.base_price || 0;
-            return acc + originalPrice;
-        }, 0);
-
-        const combolines = [];
-        let remainingTotal = parentLstPrice;
-
-        for (let i = 0; i < comboLines.length; i++) {
-            const comboLine = comboLines[i];
-            const combo = this.pos.db.combo_by_id[comboLine.combo_id[0]];
-            let priceUnit = 0;
-            if (originalTotal !== 0 && isFinite(originalTotal)) {
-                priceUnit = round_di(
-                    (combo.base_price * parentLstPrice) / originalTotal,
-                    this.pos.dp["Product Price"]
-                );
-            } else {
-                priceUnit = round_di(parentLstPrice / comboLines.length, this.pos.dp["Product Price"]);
-            }
-            remainingTotal -= priceUnit;
-            if (i === comboLines.length - 1) {
-                priceUnit += remainingTotal;
-            }
-            const attribute_value_ids = comboLine.configuration?.attribute_value_ids;
-            const attributesPriceExtra = (attribute_value_ids ?? [])
-                .map((id) => this.pos.db.attribute_value_by_id[id]?.price_extra || 0)
-                .reduce((acc, price) => acc + price, 0);
-            const totalPriceExtra = priceUnit + attributesPriceExtra + (comboLine.combo_price || 0);
-            combolines.push({ comboLine: comboLine, price: totalPriceExtra, attribute_value_ids });
-        }
-        return combolines;
-    },
-});
-
-// 4. Patch PosStore to handle Reopening / Resuming the Combo Menu
+// 3. Patch PosStore to handle Reopening / Resuming the Combo Menu
 patch(PosStore.prototype, {
     async resumeComboOrderline(parentLine) {
         if (!parentLine) return;
+        if (!parentLine.comboLines) {
+            parentLine.comboLines = [];
+        }
         const currentOrder = this.get_order();
         if (!currentOrder) return;
 
@@ -182,7 +143,7 @@ patch(PosStore.prototype, {
             if (existingChild) {
                 // If selection changed
                 if (existingChild.comboLine.id !== comboLine.id) {
-                    currentOrder.remove_orderline(existingChild);
+                    currentOrder.removeOrderline(existingChild);
                     const idx = parentLine.comboLines.indexOf(existingChild);
                     if (idx > -1) {
                         parentLine.comboLines.splice(idx, 1);
@@ -224,7 +185,7 @@ patch(PosStore.prototype, {
         // Remove any choice that was deselected
         for (const comboId in existingChildrenByComboId) {
             const removedChild = existingChildrenByComboId[comboId];
-            currentOrder.remove_orderline(removedChild);
+            currentOrder.removeOrderline(removedChild);
             const idx = parentLine.comboLines.indexOf(removedChild);
             if (idx > -1) {
                 parentLine.comboLines.splice(idx, 1);
@@ -233,6 +194,12 @@ patch(PosStore.prototype, {
         }
 
         if (hasChanges) {
+            // Purge any stale (removed) lines left in the parent's comboLines array
+            parentLine.comboLines = (parentLine.comboLines || []).filter(
+                (l) => l && l.order !== null && l.order !== undefined
+            );
+            // Re-select the parent combo line so the numpad works on it
+            currentOrder.select_orderline(parentLine);
             currentOrder.send_to_kitchen = true;
             if (typeof this.sendOrderInPreparationUpdateLastChange === "function") {
                 await this.sendOrderInPreparationUpdateLastChange(currentOrder);
