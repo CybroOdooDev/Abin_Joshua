@@ -354,10 +354,33 @@ patch(Order.prototype, {
             const orderline = allOrderlines[i];
             if (orderline) {
                 receiptLine.uuid = orderline.uuid;
-                // Option B: Remove attributes completely from receipt
-                receiptLine.attributes = [];
                 receiptLine.productName = orderline.product?.name || orderline.product?.display_name || receiptLine.productName;
+
+                // Keep only attributes with an additional cost (price_extra != 0)
+                // Filter out zero-cost kitchen instructions (meat doneness, bread choice, etc.)
+                const rawAttributes = receiptLine.attributes || (
+                    orderline.attribute_value_ids && typeof orderline.findAttribute === "function"
+                        ? orderline.findAttribute(orderline.attribute_value_ids, orderline.custom_attribute_value_ids)
+                        : []
+                );
+
+                receiptLine.attributes = (rawAttributes || [])
+                    .map((attr) => {
+                        const paidValues = (attr.valuesForOrderLine || []).filter(
+                            (val) => Boolean(val.price_extra && Number(val.price_extra) !== 0)
+                        );
+                        if (paidValues.length > 0) {
+                            return {
+                                ...attr,
+                                valuesForOrderLine: paidValues,
+                            };
+                        }
+                        return null;
+                    })
+                    .filter(Boolean);
             }
+            delete receiptLine.isResumeableCombo;
+            delete receiptLine.pendingComboCount;
         }
 
         for (const receiptLine of result.orderlines) {
@@ -373,19 +396,21 @@ patch(Order.prototype, {
             const selectedQty = Number(orderline.selected_qty || 0);
             const comboPrice = round(Number(orderline.combo_price || 0));
 
-            const linePriceWithTax = round(
-                comboPrice * paidQty
-            );
+            const isTopping = !!orderline.allow_quantity;
+            const effectiveQty = isTopping
+                ? (orderline.paid_qty !== undefined ? Number(orderline.paid_qty) : Number(orderline.get_quantity() || 0))
+                : Number(selectedQty || orderline.get_quantity() || 1);
 
-            const isTopping = orderline.allow_quantity || (orderline.extra_price || 0) > 0 || (orderline.combo_price || 0) > 0;
-            const finalQty = isTopping ? paidQty : (selectedQty || orderline.get_quantity() || 1);
+            const linePriceWithTax = round(
+                comboPrice * effectiveQty
+            );
 
             receiptLine.display_qty = selectedQty || orderline.get_quantity() || 1;
             receiptLine.selected_qty = selectedQty || orderline.get_quantity() || 1;
             receiptLine.free_qty = orderline.free_qty;
-            receiptLine.paid_qty = paidQty;
+            receiptLine.paid_qty = isTopping ? paidQty : (comboPrice > 0 ? effectiveQty : 0);
 
-            receiptLine.qty = String(finalQty);
+            receiptLine.qty = String(effectiveQty);
 
             receiptLine.unitPrice =
                 this.env.utils.formatCurrency(comboPrice);
@@ -419,7 +444,12 @@ patch(Order.prototype, {
                 );
 
                 if (childReceipt) {
-                    groupedOrderlines.push(childReceipt);
+                    const comboPrice = round(Number(child.combo_price || 0));
+                    const hasPaidAttributes = Boolean(childReceipt.attributes && childReceipt.attributes.length > 0);
+                    // Only display child items if there is a financial charge / surcharge to justify
+                    if (comboPrice > 0 || hasPaidAttributes) {
+                        groupedOrderlines.push(childReceipt);
+                    }
                 }
             }
         }

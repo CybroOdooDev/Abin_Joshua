@@ -53,13 +53,14 @@ patch(Orderline.prototype, {
         data.selected_qty = this.selected_qty || 0;
         data.free_qty = this.free_qty || 0;
         data.paid_qty = this.paid_qty || 0;
+        data.allow_quantity = Boolean(this.allow_quantity);
         if (this.comboParent) {
             data.display_qty =
                 this.selected_qty || this.get_quantity();
-            data.display_unit_price =
-                this.paid_qty > 0
-                    ? this.combo_price
-                    : 0;
+            const unitPrice = this.allow_quantity
+                ? (this.paid_qty > 0 ? (this.combo_price || 0) : 0)
+                : (this.combo_price || 0);
+            data.display_unit_price = this.env.utils.formatCurrency(unitPrice);
         } else {
             data.display_qty = data.qty;
             data.display_unit_price = data.unitPrice;

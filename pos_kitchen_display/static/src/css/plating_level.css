@@ -50,16 +50,21 @@
     color: #ffffff !important;
 }
 
-/* Hide Plating Level completely from Customer Receipts and Printouts */
+/* Hide Plating Level and Resume Combo Badges completely from Customer Receipts and Printouts */
 .pos-receipt .plating-level-badge,
 .receipt-screen .plating-level-badge,
 .order-receipt .plating-level-badge,
-.pos-receipt-print .plating-level-badge {
+.pos-receipt-print .plating-level-badge,
+.pos-receipt .resume-combo-badge,
+.receipt-screen .resume-combo-badge,
+.order-receipt .resume-combo-badge,
+.pos-receipt-print .resume-combo-badge {
     display: none !important;
 }
 
 @media print {
-    .plating-level-badge {
+    .plating-level-badge,
+    .resume-combo-badge {
         display: none !important;
     }
 }

@@ -16,7 +16,7 @@
     <!-- Keep free/paid info -->
     <xpath expr="//ul[contains(@class,'info-list')]"
            position="inside">
-        <li t-if="line.selected_qty  and line.display_qty != 1">
+        <li t-if="line.allow_quantity and line.selected_qty and line.display_qty != 1">
             Selected:
             <strong><t t-esc="line.selected_qty"/></strong>
             |

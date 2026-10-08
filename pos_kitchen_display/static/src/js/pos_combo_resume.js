@@ -77,6 +77,15 @@ patch(Orderline.prototype, {
         data.isResumeableCombo = this.isResumeableCombo();
         return data;
     },
+
+    getDisplayClasses() {
+        const classes = super.getDisplayClasses(...arguments);
+        const hasChildChange = Boolean(this.comboLines?.some((c) => c && c.hasChange));
+        if (hasChildChange) {
+            classes["has-change text-success border-start border-success border-4"] = true;
+        }
+        return classes;
+    },
 });
 
 // 3. Patch PosStore to handle Reopening / Resuming the Combo Menu
@@ -128,9 +137,9 @@ patch(PosStore.prototype, {
             const comboId = comboLine.combo_id[0];
             const existingChild = existingChildrenByComboId[comboId];
 
+            const comboRecord = this.db.combo_by_id[comboId];
             let platingLevelId = undefined;
             if (this.pos_plating_level && this.pos_plating_level.length) {
-                const comboRecord = this.db.combo_by_id[comboId];
                 const comboName = (comboRecord?.name || "").toLowerCase();
                 const foundLevel = this.pos_plating_level.find(
                     (l) => comboName.includes(l.name.toLowerCase()) || l.name.toLowerCase().includes(comboName)
@@ -140,10 +149,23 @@ patch(PosStore.prototype, {
                 }
             }
 
+            const isTopping = Boolean(comboRecord?.allow_quantity);
+            const parentQty = parentLine.get_quantity() || 1;
+            const lineInitialQty = isTopping
+                ? (comboLine.paid_qty !== undefined ? comboLine.paid_qty : (comboLine.quantity || 1))
+                : parentQty;
+            const lineSelectedQty = isTopping
+                ? (comboLine.quantity || 1)
+                : parentQty;
+            const linePaidQty = isTopping
+                ? (comboLine.paid_qty || 0)
+                : ((comboLine.combo_price || 0) > 0 ? parentQty : 0);
+            const lineFreeQty = isTopping ? (comboLine.free_qty || 0) : 0;
+
             if (existingChild) {
                 // If selection changed
                 if (existingChild.comboLine.id !== comboLine.id) {
-                    currentOrder.removeOrderline(existingChild);
+                    currentOrder._unlinkOrderline(existingChild);
                     const idx = parentLine.comboLines.indexOf(existingChild);
                     if (idx > -1) {
                         parentLine.comboLines.splice(idx, 1);
@@ -152,15 +174,29 @@ patch(PosStore.prototype, {
                     await this.addProductFromUi(
                         this.db.product_by_id[comboLine.product_id[0]],
                         {
+                            quantity: lineInitialQty,
                             price: comboLine.combo_price || 0,
                             comboParent: parentLine,
                             comboLine: comboLine,
+                            combo_price: comboLine.combo_price || 0,
+                            selected_qty: lineSelectedQty,
+                            paid_qty: linePaidQty,
+                            free_qty: lineFreeQty,
+                            allow_quantity: isTopping,
                             plating_level_id: platingLevelId,
                             attribute_value_ids: comboLine.configuration?.attribute_value_ids,
                             attribute_custom_values: comboLine.configuration?.attribute_custom_values,
                             extras: { price_type: "manual" },
                         }
                     );
+                    const newLine = currentOrder.get_selected_orderline();
+                    if (newLine) {
+                        newLine.selected_qty = lineSelectedQty;
+                        newLine.paid_qty = linePaidQty;
+                        newLine.free_qty = lineFreeQty;
+                        newLine.combo_price = comboLine.combo_price || 0;
+                        newLine.allow_quantity = isTopping;
+                    }
                     hasChanges = true;
                 }
                 delete existingChildrenByComboId[comboId];
@@ -169,15 +205,29 @@ patch(PosStore.prototype, {
                 await this.addProductFromUi(
                     this.db.product_by_id[comboLine.product_id[0]],
                     {
+                        quantity: lineInitialQty,
                         price: comboLine.combo_price || 0,
                         comboParent: parentLine,
                         comboLine: comboLine,
+                        combo_price: comboLine.combo_price || 0,
+                        selected_qty: lineSelectedQty,
+                        paid_qty: linePaidQty,
+                        free_qty: lineFreeQty,
+                        allow_quantity: isTopping,
                         plating_level_id: platingLevelId,
                         attribute_value_ids: comboLine.configuration?.attribute_value_ids,
                         attribute_custom_values: comboLine.configuration?.attribute_custom_values,
                         extras: { price_type: "manual" },
                     }
                 );
+                const newLine = currentOrder.get_selected_orderline();
+                if (newLine) {
+                    newLine.selected_qty = lineSelectedQty;
+                    newLine.paid_qty = linePaidQty;
+                    newLine.free_qty = lineFreeQty;
+                    newLine.combo_price = comboLine.combo_price || 0;
+                    newLine.allow_quantity = isTopping;
+                }
                 hasChanges = true;
             }
         }
@@ -185,7 +235,7 @@ patch(PosStore.prototype, {
         // Remove any choice that was deselected
         for (const comboId in existingChildrenByComboId) {
             const removedChild = existingChildrenByComboId[comboId];
-            currentOrder.removeOrderline(removedChild);
+            currentOrder._unlinkOrderline(removedChild);
             const idx = parentLine.comboLines.indexOf(removedChild);
             if (idx > -1) {
                 parentLine.comboLines.splice(idx, 1);
@@ -200,9 +250,8 @@ patch(PosStore.prototype, {
             );
             // Re-select the parent combo line so the numpad works on it
             currentOrder.select_orderline(parentLine);
-            currentOrder.send_to_kitchen = true;
-            if (typeof this.sendOrderInPreparationUpdateLastChange === "function") {
-                await this.sendOrderInPreparationUpdateLastChange(currentOrder);
+            if (typeof currentOrder.getOrderChanges === "function") {
+                currentOrder.getOrderChanges();
             }
         }
     },

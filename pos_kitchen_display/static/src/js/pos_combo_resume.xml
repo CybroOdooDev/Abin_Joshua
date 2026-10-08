@@ -59,9 +59,9 @@
        t-inherit="point_of_sale.Orderline"
        t-inherit-mode="extension">
         <xpath expr="//div[hasclass('product-name')]" position="inside">
-            <t t-if="line and line.isResumeableCombo">
+            <t t-if="line and line.isResumeableCombo and !(props.class and props.class['pe-none'])">
                 <t t-if="line.pendingComboCount > 0">
-                    <span class="badge bg-warning text-dark ms-1 cursor-pointer resume-combo-badge shadow-sm"
+                    <span class="badge bg-warning text-dark ms-1 cursor-pointer resume-combo-badge shadow-sm d-print-none"
                           style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; display: inline-block; vertical-align: middle;"
                           t-on-click.stop="() => this.resumeCombo(line)"
                           title="Click para editar o completar platos pendientes">
@@ -69,7 +69,7 @@
                     </span>
                 </t>
                 <t t-else="">
-                    <span class="badge bg-primary text-white ms-1 cursor-pointer resume-combo-badge shadow-sm"
+                    <span class="badge bg-primary text-white ms-1 cursor-pointer resume-combo-badge shadow-sm d-print-none"
                           style="font-size: 0.72rem; padding: 2px 6px; border-radius: 4px; display: inline-block; vertical-align: middle;"
                           t-on-click.stop="() => this.resumeCombo(line)"
                           title="Click para editar platos del menú">

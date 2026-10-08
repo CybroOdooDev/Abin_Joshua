@@ -24,8 +24,14 @@ patch(ProductScreen.prototype, {
             return;
         }
 
+        const currentSelected = this.currentOrder?.get_selected_orderline();
+        if (currentSelected && !currentSelected.order) {
+            this.numberBuffer.reset();
+            return;
+        }
+
         // Capture combo parent and its qty before super modifies it
-        let comboParentLine = this.currentOrder.get_selected_orderline();
+        let comboParentLine = currentSelected;
         if (comboParentLine?.comboParent) {
             comboParentLine = comboParentLine.comboParent;
         }
@@ -60,9 +66,10 @@ patch(ProductScreen.prototype, {
 
                     line.free_qty = newFree;
                     line.paid_qty = newPaid;
-                    if (line.allow_quantity || line.extra_price > 0 || line.combo_price > 0) {
+                    if (line.allow_quantity) {
                         line.set_quantity(newPaid, true);
                     } else {
+                        line.paid_qty = line.combo_price > 0 ? newParentQty : 0;
                         line.set_quantity(newParentQty, true);
                     }
                 }
