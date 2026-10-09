@@ -251,6 +251,7 @@ patch(ComboConfiguratorPopup.prototype, {
             const comboLine = this.pos.db.combo_line_by_id[lineId];
             payload.push({
                 ...comboLine,
+                configuration: this.state.configuration[comboLine.id],
                 quantity: data.qty,
                 free_qty: data.freeQty,
                 paid_qty: data.paidQty,
@@ -268,6 +269,7 @@ patch(ComboConfiguratorPopup.prototype, {
 
             payload.push({
                 ...comboLine,
+                configuration: this.state.configuration[comboLine.id],
                 quantity: 1,
             });
         }

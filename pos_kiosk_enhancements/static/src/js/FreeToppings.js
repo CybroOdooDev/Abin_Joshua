@@ -111,6 +111,153 @@ patch(CartPage.prototype, {
 
         return round(total);
     },
+    async changeQuantity(line, increase) {
+        const childLines = this.getChildLines(line);
+        const isComboParent = childLines.length > 0 && !line.combo_parent_uuid;
+
+        if (!isComboParent) {
+            return await super.changeQuantity(...arguments);
+        }
+
+        if (!increase && !this.canChangeQuantity(line)) {
+            return;
+        }
+
+        const currentQty = num(line.qty, 1);
+        if (!increase && currentQty <= 1) {
+            return await this.removeLine(line);
+        }
+
+        const newQty = increase ? currentQty + 1 : currentQty - 1;
+
+        const parentOverride = this.selfOrder._comboPriceOverrides?.get(line.uuid);
+        const parentUnitPrice = num(
+            parentOverride?.unitPrice ??
+            parentOverride?.originalUnitPrice ??
+            parentOverride?.price_unit ??
+            line.price_unit ??
+            0
+        );
+        const parentSubtotal = round(parentUnitPrice * newQty);
+
+        line.qty = newQty;
+        line.price_unit = parentUnitPrice;
+        line.discount = 0;
+        line.price_subtotal = parentSubtotal;
+        line.price_subtotal_incl = parentSubtotal;
+
+        if (parentOverride) {
+            parentOverride.qty = newQty;
+            parentOverride.unitQty = 1;
+            parentOverride.unitPrice = parentUnitPrice;
+            parentOverride.originalUnitPrice = parentUnitPrice;
+            parentOverride.price_unit = parentUnitPrice;
+            parentOverride.discount = 0;
+            parentOverride.price_subtotal = parentSubtotal;
+            parentOverride.price_subtotal_incl = parentSubtotal;
+            parentOverride.paidQty = newQty;
+        } else if (this.selfOrder._comboPriceOverrides) {
+            this.selfOrder._comboPriceOverrides.set(line.uuid, {
+                qty: newQty,
+                unitQty: 1,
+                unitPrice: parentUnitPrice,
+                originalUnitPrice: parentUnitPrice,
+                price_unit: parentUnitPrice,
+                discount: 0,
+                price_subtotal: parentSubtotal,
+                price_subtotal_incl: parentSubtotal,
+                freeQty: 0,
+                paidQty: newQty,
+                isComboParent: true,
+            });
+        }
+
+        for (const child of childLines) {
+            let childOverride = this.selfOrder._comboPriceOverrides?.get(child.uuid);
+            const unitQty = num(
+                childOverride?.unitQty,
+                currentQty > 0 ? Math.max(1, Math.round(child.qty / currentQty)) : 1
+            );
+            const unitFree = num(
+                childOverride?.unitFree,
+                childOverride?.paidQty === 0 ? unitQty : 0
+            );
+            const unitPaid = num(
+                childOverride?.unitPaid,
+                Math.max(0, unitQty - unitFree)
+            );
+            const origUnitPrice = num(
+                childOverride?.originalUnitPrice ??
+                childOverride?.unitPrice ??
+                child.price_unit ??
+                0
+            );
+
+            const totalQty = unitQty * newQty;
+            const totalFree = unitFree * newQty;
+            const totalPaid = unitPaid * newQty;
+            const totalPrice = round(totalPaid * origUnitPrice);
+            const avgUnitPrice = totalQty > 0 ? round(totalPrice / totalQty) : 0;
+
+            child.qty = totalQty;
+            child.price_unit = avgUnitPrice;
+            child.discount = 0;
+            child.price_subtotal = totalPrice;
+            child.price_subtotal_incl = totalPrice;
+            child._freeQty = totalFree;
+            child._paidQty = totalPaid;
+
+            if (childOverride) {
+                childOverride.qty = totalQty;
+                childOverride.unitQty = unitQty;
+                childOverride.unitFree = unitFree;
+                childOverride.unitPaid = unitPaid;
+                childOverride.originalUnitPrice = origUnitPrice;
+                childOverride.price_unit = avgUnitPrice;
+                childOverride.discount = 0;
+                childOverride.price_subtotal = totalPrice;
+                childOverride.price_subtotal_incl = totalPrice;
+                childOverride.freeQty = totalFree;
+                childOverride.paidQty = totalPaid;
+            } else if (this.selfOrder._comboPriceOverrides) {
+                this.selfOrder._comboPriceOverrides.set(child.uuid, {
+                    qty: totalQty,
+                    unitQty: unitQty,
+                    unitFree: unitFree,
+                    unitPaid: unitPaid,
+                    originalUnitPrice: origUnitPrice,
+                    price_unit: avgUnitPrice,
+                    discount: 0,
+                    price_subtotal: totalPrice,
+                    price_subtotal_incl: totalPrice,
+                    freeQty: totalFree,
+                    paidQty: totalPaid,
+                    isComboChild: true,
+                    comboParentUuid: line.uuid,
+                });
+            }
+        }
+
+        await this.selfOrder.getPricesFromServer();
+    },
+    async removeLine(line) {
+        const lineObj = typeof line === "string"
+            ? this.selfOrder.currentOrder?.lines?.find(l => l.uuid === line)
+            : line;
+        if (!lineObj) {
+            return;
+        }
+
+        const childLines = this.getChildLines(lineObj);
+        if (this.selfOrder._comboPriceOverrides) {
+            this.selfOrder._comboPriceOverrides.delete(lineObj.uuid);
+            for (const child of childLines) {
+                this.selfOrder._comboPriceOverrides.delete(child.uuid);
+            }
+        }
+
+        await super.removeLine(lineObj);
+    },
 });
 
 patch(ComboPage.prototype, {
@@ -124,6 +271,15 @@ patch(ComboPage.prototype, {
     },
 
     async addToCart() {
+        if (this.selfOrder.editedLine && this.selfOrder._comboPriceOverrides) {
+            this.selfOrder._comboPriceOverrides.delete(this.selfOrder.editedLine.uuid);
+            for (const [uuid, override] of this.selfOrder._comboPriceOverrides.entries()) {
+                if (override.comboParentUuid === this.selfOrder.editedLine.uuid) {
+                    this.selfOrder._comboPriceOverrides.delete(uuid);
+                }
+            }
+        }
+
         const comboSelections = this.selfOrder._comboSelections || {};
         const selections = Object.values(comboSelections).flat();
 
@@ -131,13 +287,15 @@ patch(ComboPage.prototype, {
 
         for (const sel of selections) {
             const productId = sel.product.id;
+            const comboLineId = sel.combo_line_id;
             const qty = num(sel.quantity);
             const freeQty = num(sel.free_qty);
             const paidQty = num(sel.paid_qty);
             const unitPrice = num(sel.price);
 
-            if (!groupedMap.has(productId)) {
-                groupedMap.set(productId, {
+            const mapKey = comboLineId || productId;
+            if (!groupedMap.has(mapKey)) {
+                groupedMap.set(mapKey, {
                     qty: 0,
                     freeQty: 0,
                     paidQty: 0,
@@ -146,11 +304,15 @@ patch(ComboPage.prototype, {
                 });
             }
 
-            const data = groupedMap.get(productId);
+            const data = groupedMap.get(mapKey);
             data.qty += qty;
             data.freeQty += freeQty;
             data.paidQty += paidQty;
             data.totalPrice += paidQty * unitPrice;
+
+            if (comboLineId && !groupedMap.has(productId)) {
+                groupedMap.set(productId, data);
+            }
         }
 
         await super.addToCart(...arguments);
@@ -196,18 +358,49 @@ patch(ComboPage.prototype, {
 
         this.selfOrder._comboPriceOverrides.set(parent.uuid, {
             qty: parentQty,
+            unitQty: 1,
+            unitPrice: parentPrice,
+            originalUnitPrice: parentPrice,
             price_unit: parentPrice,
             discount: 0,
             price_subtotal: parentTotal,
             price_subtotal_incl: parentTotal,
             freeQty: 0,
             paidQty: parentQty,
+            isComboParent: true,
         });
 
         for (const line of childLines) {
-            const data = groupedMap.get(line.product_id);
+            const data = (line.combo_line_id && groupedMap.get(line.combo_line_id)) || groupedMap.get(line.product_id);
             if (!data) {
-                line.qty = parentQty;
+                const unitQty = 1;
+                const totalQty = unitQty * parentQty;
+                const singleUnitPrice = num(line.price_unit, 0);
+                const totalPrice = round(totalQty * singleUnitPrice);
+
+                line.qty = totalQty;
+                line.price_unit = singleUnitPrice;
+                line.discount = 0;
+                line.price_subtotal = totalPrice;
+                line.price_subtotal_incl = totalPrice;
+                line._freeQty = totalQty;
+                line._paidQty = 0;
+
+                this.selfOrder._comboPriceOverrides.set(line.uuid, {
+                    qty: totalQty,
+                    unitQty: unitQty,
+                    unitFree: unitQty,
+                    unitPaid: 0,
+                    originalUnitPrice: singleUnitPrice,
+                    price_unit: singleUnitPrice,
+                    discount: 0,
+                    price_subtotal: totalPrice,
+                    price_subtotal_incl: totalPrice,
+                    freeQty: totalQty,
+                    paidQty: 0,
+                    isComboChild: true,
+                    comboParentUuid: parent.uuid,
+                });
                 continue;
             }
 
@@ -230,6 +423,10 @@ patch(ComboPage.prototype, {
             line._paidQty = totalPaid;
             this.selfOrder._comboPriceOverrides.set(line.uuid, {
                 qty: totalQty,
+                unitQty: unitQty,
+                unitFree: unitFree,
+                unitPaid: unitPaid,
+                originalUnitPrice: singleUnitPrice,
                 price_unit: correctedUnitPrice,
                 discount: 0,
                 price_subtotal: totalPrice,
@@ -237,7 +434,8 @@ patch(ComboPage.prototype, {
                 freeQty: totalFree,
                 paidQty: totalPaid,
                 freeLimit: num(this.currentCombo?.free_limit || 0),
-                originalUnitPrice: singleUnitPrice,
+                isComboChild: true,
+                comboParentUuid: parent.uuid,
             });
         }
         this.selfOrder._applyComboPriceOverrides();

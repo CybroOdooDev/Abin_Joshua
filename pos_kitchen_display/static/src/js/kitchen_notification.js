@@ -32,6 +32,24 @@ patch(PosStore.prototype, {
                 }
             }
         });
+
+        const unlockAudio = () => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                if (ctx.state === "suspended") {
+                    ctx.resume();
+                }
+                const audio = new Audio("/pos_kitchen_display/static/src/sounds/waiter_alert.wav");
+                audio.play().then(() => {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).catch(() => {});
+                this._audioUnlocked = true;
+            } catch (e) {}
+        };
+        window.addEventListener("click", unlockAudio, { once: true });
+        window.addEventListener("touchstart", unlockAudio, { once: true });
+        window.addEventListener("keydown", unlockAudio, { once: true });
     },
     _playWaiterSound() {
         try {
@@ -45,7 +63,9 @@ patch(PosStore.prototype, {
                 this._audioUnlocked = true;
             }
             const audio = new Audio("/pos_kitchen_display/static/src/sounds/waiter_alert.wav");
-            audio.play().catch(() => {});
+            audio.play().catch((e) => {
+                console.warn("[POS] Waiter alert audio play rejected:", e);
+            });
         } catch (e) {
             console.warn("[POS] Sound failed:", e);
         }

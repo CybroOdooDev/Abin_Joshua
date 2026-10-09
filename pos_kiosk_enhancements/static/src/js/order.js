@@ -160,6 +160,7 @@ patch(Order.prototype, {
         const result = [];
         for (const comboLine of (comboLines || [])) {
             const attribute_value_ids = comboLine.configuration?.attribute_value_ids;
+            const attribute_custom_values = comboLine.configuration?.attribute_custom_values;
             const attributesPriceExtra =
                 (attribute_value_ids || [])
                     .map(
@@ -180,6 +181,7 @@ patch(Order.prototype, {
             result.push({
                 comboLine,
                 attribute_value_ids,
+                attribute_custom_values,
                 price: pricePerUnit,
                 quantity: lineQuantity,          // actual charged/saved qty
                 selected_qty: selectedQty,
@@ -219,6 +221,7 @@ patch(Order.prototype, {
                 comboParent,
                 comboLine: line.comboLine,
                 attribute_value_ids: line.attribute_value_ids,
+                attribute_custom_values: line.attribute_custom_values,
                 extras: {
                     price_type: "manual",
                 },
@@ -401,19 +404,23 @@ patch(Order.prototype, {
                 ? (orderline.paid_qty !== undefined ? Number(orderline.paid_qty) : Number(orderline.get_quantity() || 0))
                 : Number(selectedQty || orderline.get_quantity() || 1);
 
-            const linePriceWithTax = round(
-                comboPrice * effectiveQty
-            );
+            const unitDisplayPrice = isTopping
+                ? comboPrice
+                : (typeof orderline.get_unit_display_price === "function" ? orderline.get_unit_display_price() : comboPrice);
+
+            const linePriceWithTax = isTopping
+                ? round(comboPrice * effectiveQty)
+                : (typeof orderline.get_display_price === "function" ? round(orderline.get_display_price()) : round(unitDisplayPrice * effectiveQty));
 
             receiptLine.display_qty = selectedQty || orderline.get_quantity() || 1;
             receiptLine.selected_qty = selectedQty || orderline.get_quantity() || 1;
             receiptLine.free_qty = orderline.free_qty;
-            receiptLine.paid_qty = isTopping ? paidQty : (comboPrice > 0 ? effectiveQty : 0);
+            receiptLine.paid_qty = isTopping ? paidQty : (unitDisplayPrice > 0 ? effectiveQty : 0);
 
             receiptLine.qty = String(effectiveQty);
 
             receiptLine.unitPrice =
-                this.env.utils.formatCurrency(comboPrice);
+                this.env.utils.formatCurrency(unitDisplayPrice);
 
             receiptLine.price =
                 this.env.utils.formatCurrency(linePriceWithTax);
@@ -444,10 +451,10 @@ patch(Order.prototype, {
                 );
 
                 if (childReceipt) {
-                    const comboPrice = round(Number(child.combo_price || 0));
+                    const childPrice = round(Number(typeof child.get_display_price === "function" ? child.get_display_price() : (child.combo_price || 0)));
                     const hasPaidAttributes = Boolean(childReceipt.attributes && childReceipt.attributes.length > 0);
                     // Only display child items if there is a financial charge / surcharge to justify
-                    if (comboPrice > 0 || hasPaidAttributes) {
+                    if (childPrice > 0 || hasPaidAttributes) {
                         groupedOrderlines.push(childReceipt);
                     }
                 }

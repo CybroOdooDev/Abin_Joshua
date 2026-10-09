@@ -58,8 +58,8 @@ patch(Orderline.prototype, {
             data.display_qty =
                 this.selected_qty || this.get_quantity();
             const unitPrice = this.allow_quantity
-                ? (this.paid_qty > 0 ? (this.combo_price || 0) : 0)
-                : (this.combo_price || 0);
+                ? (this.paid_qty > 0 ? (typeof this.get_unit_display_price === "function" ? this.get_unit_display_price() : (this.combo_price || 0)) : 0)
+                : (typeof this.get_unit_display_price === "function" ? this.get_unit_display_price() : (this.combo_price || 0));
             data.display_unit_price = this.env.utils.formatCurrency(unitPrice);
         } else {
             data.display_qty = data.qty;

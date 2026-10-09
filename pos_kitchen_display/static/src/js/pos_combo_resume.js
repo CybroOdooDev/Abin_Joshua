@@ -151,6 +151,12 @@ patch(PosStore.prototype, {
 
             const isTopping = Boolean(comboRecord?.allow_quantity);
             const parentQty = parentLine.get_quantity() || 1;
+            const attribute_value_ids = comboLine.configuration?.attribute_value_ids;
+            const attributesPriceExtra = (attribute_value_ids || [])
+                .map((id) => this.db.attribute_value_by_id[id]?.price_extra || 0)
+                .reduce((acc, price) => acc + price, 0);
+            const lineUnitPrice = (comboLine.combo_price || 0) + attributesPriceExtra;
+
             const lineInitialQty = isTopping
                 ? (comboLine.paid_qty !== undefined ? comboLine.paid_qty : (comboLine.quantity || 1))
                 : parentQty;
@@ -159,7 +165,7 @@ patch(PosStore.prototype, {
                 : parentQty;
             const linePaidQty = isTopping
                 ? (comboLine.paid_qty || 0)
-                : ((comboLine.combo_price || 0) > 0 ? parentQty : 0);
+                : (lineUnitPrice > 0 ? parentQty : 0);
             const lineFreeQty = isTopping ? (comboLine.free_qty || 0) : 0;
 
             if (existingChild) {
@@ -175,7 +181,7 @@ patch(PosStore.prototype, {
                         this.db.product_by_id[comboLine.product_id[0]],
                         {
                             quantity: lineInitialQty,
-                            price: comboLine.combo_price || 0,
+                            price: lineUnitPrice,
                             comboParent: parentLine,
                             comboLine: comboLine,
                             combo_price: comboLine.combo_price || 0,
@@ -206,7 +212,7 @@ patch(PosStore.prototype, {
                     this.db.product_by_id[comboLine.product_id[0]],
                     {
                         quantity: lineInitialQty,
-                        price: comboLine.combo_price || 0,
+                        price: lineUnitPrice,
                         comboParent: parentLine,
                         comboLine: comboLine,
                         combo_price: comboLine.combo_price || 0,

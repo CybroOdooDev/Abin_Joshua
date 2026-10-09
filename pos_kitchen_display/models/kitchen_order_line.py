@@ -52,9 +52,21 @@ class KitchenOrderLine(models.Model):
             return
         last_stage_id = stages[-1].id
 
+        active_lines = order.line_ids.filtered(lambda l: not l.is_cancelled)
+        if order.display_id.product_pos_categ_ids:
+            allowed_cat_ids = set(order.display_id.product_pos_categ_ids.ids)
+            active_lines = active_lines.filtered(
+                lambda l: not l.product_id.pos_categ_ids or any(
+                    cat_id in allowed_cat_ids
+                    for cat_id in l.product_id.pos_categ_ids.ids
+                )
+            )
+        if not active_lines:
+            return
+
         all_done = all(
             line.stage_id.id == last_stage_id
-            for line in order.line_ids
+            for line in active_lines
         )
 
         if all_done:
@@ -80,7 +92,7 @@ class KitchenOrderLine(models.Model):
         if not order:
             return
         display = order.display_id
-        lines = order.line_ids
+        lines = order.line_ids.filtered(lambda l: not l.is_cancelled)
         if display and display.product_pos_categ_ids:
             allowed_cat_ids = set(display.product_pos_categ_ids.ids)
             lines = lines.filtered(
@@ -95,40 +107,45 @@ class KitchenOrderLine(models.Model):
 
     def _send_chat_to_waiter(self, order):
         waiter = order.user_id
+        if not waiter or not waiter.partner_id:
+            return
         bot = self.env.ref("base.user_root")
 
-        get_or_create = getattr(
-            self.env["discuss.channel"].with_user(bot),
-            "_get_or_create_direct_channel",
-            None,
-        )
-        if callable(get_or_create):
-            channel = get_or_create(waiter.partner_id.id)
-        else:
-            channel = self.env["discuss.channel"].with_user(bot).search([
-                ("channel_type", "=", "chat"),
-                ("channel_member_ids.partner_id", "=", waiter.partner_id.id),
-                ("channel_member_ids.partner_id", "=", bot.partner_id.id),
-            ], limit=1)
-            if not channel:
-                channel = self.env["discuss.channel"].with_user(bot).create({
-                    "name": waiter.name,
-                    "channel_type": "chat",
-                    "channel_member_ids": [
-                        (0, 0, {"partner_id": bot.partner_id.id}),
-                        (0, 0, {"partner_id": waiter.partner_id.id}),
-                    ],
-                })
+        try:
+            get_or_create = getattr(
+                self.env["discuss.channel"].with_user(bot),
+                "channel_get",
+                None,
+            )
+            if callable(get_or_create):
+                channel = get_or_create(partners_to=[waiter.partner_id.id])
+            else:
+                channel = self.env["discuss.channel"].with_user(bot).search([
+                    ("channel_type", "=", "chat"),
+                    ("channel_member_ids.partner_id", "=", waiter.partner_id.id),
+                    ("channel_member_ids.partner_id", "=", bot.partner_id.id),
+                ], limit=1)
+                if not channel:
+                    channel = self.env["discuss.channel"].with_user(bot).create({
+                        "name": waiter.name,
+                        "channel_type": "chat",
+                        "channel_member_ids": [
+                            (0, 0, {"partner_id": bot.partner_id.id}),
+                            (0, 0, {"partner_id": waiter.partner_id.id}),
+                        ],
+                    })
 
-        message = _("🍽️ Order %s is ready!") % order.name
-        if order.table_name:
-            message += _(" 🪑 Table: %s") % order.table_name
+            message = _("🍽️ Order %s is ready!") % order.name
+            if order.table_name:
+                message += _(" 🪑 Table: %s") % order.table_name
 
-        channel.with_user(bot).message_post(
-            body=message,
-            message_type="comment",
-            subtype_xmlid="mail.mt_comment",
-        )
+            channel.with_user(bot).message_post(
+                body=message,
+                message_type="comment",
+                subtype_xmlid="mail.mt_comment",
+            )
+        except Exception as e:
+            _logger.warning("[KDS] Failed to send chat message to waiter: %s", e)
 
     def _notify_kds(self):
         for line in self:
@@ -143,7 +160,7 @@ class KitchenOrderLine(models.Model):
     def action_next_stage(self):
         stages_cache = {}
         for line in self:
-            if not line.exists():
+            if not line.exists() or line.is_cancelled:
                 continue
             display_id = line.order_id.display_id.id
             if display_id not in stages_cache:

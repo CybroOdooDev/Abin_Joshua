@@ -88,7 +88,9 @@ export const kitchenService = {
                             const audio = new Audio(
                                 "/pos_kitchen_display/static/src/sounds/kitchenorder_notification.wav"
                             );
-                            audio.play();
+                            audio.play().catch((e) => {
+                                console.warn("Sound play failed:", e);
+                            });
                         } catch (e) {
                             console.warn("Sound play failed:", e);
                         }
@@ -110,7 +112,9 @@ export const kitchenService = {
                         const audio = new Audio(
                             "/pos_kitchen_display/static/src/sounds/reminder.wav"
                         );
-                        audio.play();
+                        audio.play().catch((e) => {
+                            console.warn("Sound play failed:", e);
+                        });
                     } catch (e) {
                         console.warn("Sound play failed:", e);
                     }

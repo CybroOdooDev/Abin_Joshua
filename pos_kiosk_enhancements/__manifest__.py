@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'POS Kiosk Schedule Control',
-    'version': '17.0.1.18.24',
+    'version': '17.0.1.18.25',
     'category': 'Point Of Sale',
     'summary': 'Configure operating hours for POS Self-Order Kiosk availability',
     'description': """This module adds schedule control for the POS Self-Order (Kiosk).
