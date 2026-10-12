@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- POS Network Printer Form View -->
+    <record id="view_pos_network_printer_form" model="ir.ui.view">
+        <field name="name">pos.network.printer.form</field>
+        <field name="model">pos.network.printer</field>
+        <field name="arch" type="xml">
+            <form string="Network Thermal Printer">
+                <header>
+                    <button name="action_test_connection"
+                            string="Test Connection"
+                            type="object"
+                            class="btn-primary"
+                            icon="fa-plug"/>
+                    <button name="action_print_test_page"
+                            string="Print Test Ticket"
+                            type="object"
+                            class="btn-secondary"
+                            icon="fa-print"/>
+                    <field name="last_status" widget="statusbar" statusbar_visible="online,offline"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <div class="oe_title">
+                        <label for="name" string="Printer Name"/>
+                        <h1>
+                            <field name="name" placeholder="e.g. Counter Thermal Printer"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Network Connection (TCP/IP)">
+                            <field name="ip_address" placeholder="192.168.1.150"/>
+                            <field name="port"/>
+                            <field name="connection_timeout"/>
+                            <field name="active" invisible="1"/>
+                        </group>
+                        <group string="Hardware Specifications">
+                            <field name="paper_width"/>
+                            <field name="printer_type"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Diagnostic Status" name="diagnostics">
+                            <group>
+                                <field name="last_checked"/>
+                                <field name="last_status_message" readonly="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- POS Network Printer Tree View -->
+    <record id="view_pos_network_printer_tree" model="ir.ui.view">
+        <field name="name">pos.network.printer.tree</field>
+        <field name="model">pos.network.printer</field>
+        <field name="arch" type="xml">
+            <tree string="Network Thermal Printers">
+                <field name="name"/>
+                <field name="ip_address"/>
+                <field name="port"/>
+                <field name="paper_width"/>
+                <field name="printer_type"/>
+                <field name="last_status"
+                       widget="badge"
+                       decoration-success="last_status == 'online'"
+                       decoration-danger="last_status == 'offline'"
+                       decoration-muted="last_status == 'unknown'"/>
+                <field name="last_checked"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- POS Network Printer Action -->
+    <record id="action_pos_network_printer" model="ir.actions.act_window">
+        <field name="name">Network Printers</field>
+        <field name="res_model">pos.network.printer</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Configure your first Local Network Thermal Printer!
+            </p>
+            <p>
+                Connect directly to receipt and kitchen thermal printers on your local network
+                (TCP Port 9100) without requiring an IoT Box or ePOS printer.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menu Item under POS Configuration -->
+    <menuitem id="menu_pos_network_printer"
+              name="Network Printers"
+              parent="point_of_sale.menu_point_config_product"
+              action="action_pos_network_printer"
+              sequence="55"/>
+</odoo>

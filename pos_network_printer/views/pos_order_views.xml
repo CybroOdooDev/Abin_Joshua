@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_pos_order_form_inherit_network_printer" model="ir.ui.view">
+        <field name="name">pos.order.form.inherit.network.printer</field>
+        <field name="model">pos.order</field>
+        <field name="inherit_id" ref="point_of_sale.view_pos_pos_form"/>
+        <field name="arch" type="xml">
+            <!-- Add Reprint Ticket button in header -->
+            <xpath expr="//header" position="inside">
+                <button name="action_reprint_ticket"
+                        string="Reprint Network Ticket"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-print"
+                        invisible="state not in ['paid', 'done', 'invoiced']"/>
+            </xpath>
+
+            <!-- Add notebook tab for Printed Tickets History -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Printed Tickets History" name="printed_tickets">
+                    <field name="printed_ticket_ids" readonly="1">
+                        <tree string="Printed Tickets">
+                            <field name="print_date"/>
+                            <field name="printer_name"/>
+                            <field name="user_id"/>
+                            <field name="print_type"
+                                   widget="badge"
+                                   decoration-info="print_type == 'first_print'"
+                                   decoration-warning="print_type == 'reprint'"/>
+                            <field name="status"
+                                   widget="badge"
+                                   decoration-success="status == 'success'"
+                                   decoration-danger="status == 'failed'"/>
+                            <button name="action_reprint"
+                                    string="Reprint"
+                                    type="object"
+                                    icon="fa-print"
+                                    title="Reprint this exact snapshot"/>
+                        </tree>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

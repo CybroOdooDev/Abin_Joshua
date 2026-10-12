@@ -168,7 +168,7 @@ export class PosScanPaymentPopup extends AbstractAwaitablePopup {
 
     async processCashSecurityPayment(method, amount, orderId) {
         const config = this.pos.config || {};
-        const baseUrl = (config.cash_security_url || "http://localhost:5001/api/main").replace(/\/$/, "");
+            const baseUrl = (config.cash_security_url || "http://localhost:5001/api/main").replace(/\/$/, "");
         const isDojo = this.isDojoPayment(method);
 
         if (isDojo && !config.dojo_terminal_id) {
@@ -199,7 +199,7 @@ export class PosScanPaymentPopup extends AbstractAwaitablePopup {
             },
             body: formBody,
         });
-
+        console.log(response.json(),'popop')
         if (!response.ok) {
             throw new Error(`CashSecurity HTTP error: ${response.status}`);
         }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="pos_config_view_form_network_printer" model="ir.ui.view">
+        <field name="name">pos.config.view.form.network.printer</field>
+        <field name="model">pos.config</field>
+        <field name="inherit_id" ref="point_of_sale.pos_config_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="inside">
+                <div class="network_printing_config" name="network_printing_config">
+                    <group string="Local Network Ticket Printing (No IoT Box)">
+                        <div class="text-muted mb-3" colspan="2">
+                            Direct printing to thermal receipt and preparation printers over the local network via TCP Port 9100.
+                        </div>
+                        <group>
+                            <field name="enable_network_printing"/>
+                            <field name="network_printer_id"
+                                   invisible="not enable_network_printing"/>
+                            <field name="auto_print_on_payment"
+                                   invisible="not enable_network_printing"/>
+                        </group>
+                        <group invisible="not enable_network_printing">
+                            <field name="kitchen_network_printer_id"/>
+                        </group>
+                    </group>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>
