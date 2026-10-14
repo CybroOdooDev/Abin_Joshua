@@ -43,6 +43,9 @@ class PosOrder(models.Model):
             printer = self.env['pos.network.printer'].browse(printer_id)
         if not printer or not printer.exists():
             printer = order.config_id.network_printer_id
+        if not printer or not printer.exists():
+            # Fallback to the first available active printer in system
+            printer = self.env['pos.network.printer'].search([], limit=1)
 
         if not printer:
             return {

@@ -3,6 +3,7 @@
 import { patch } from "@web/core/utils/patch";
 import { ReceiptScreen } from "@point_of_sale/app/screens/receipt_screen/receipt_screen";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
+import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { onMounted } from "@odoo/owl";
@@ -40,22 +41,38 @@ patch(ReceiptScreen.prototype, {
         }
 
         try {
-            // Render the exact receipt component to high-resolution JPEG image
-            const imageBase64 = await this.renderer.toJpeg(
-                OrderReceipt,
-                {
+            // Render receipt image directly without triggering remote webfont embedding (avoids font 404s)
+            let receiptEl = document.querySelector(".pos-receipt");
+            if (!receiptEl && this.renderer) {
+                receiptEl = await this.renderer.toHtml(OrderReceipt, {
                     data: {
                         ...order.export_for_printing(),
                         isBill: this.isBill,
                     },
                     formatCurrency: this.env.utils.formatCurrency,
-                }
-            );
+                });
+            }
 
-            // Fetch server order ID (if already synced, order.server_id or order.id)
-            let serverOrderId = order.server_id || order.id;
+            if (!receiptEl) {
+                throw new Error(_t("Receipt element could not be found or rendered."));
+            }
 
-            // If order only exists in offline/local indexedDB, sync draft or get id
+            const dataUrl = await toJpeg(receiptEl, {
+                skipFonts: true,
+                backgroundColor: "#ffffff",
+                pixelRatio: 2,
+                quality: 0.95,
+            });
+            const imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
+
+            // Fetch server order ID
+            const orderName = typeof order.get_name === "function" ? order.get_name() : order.name;
+            let serverOrderId =
+                (this.pos.validated_orders_name_server_id_map && this.pos.validated_orders_name_server_id_map[orderName]) ||
+                order.server_id ||
+                order.id;
+
+            // If order only exists locally, sync draft or push to get server ID
             if (!serverOrderId || typeof serverOrderId !== "number") {
                 const synced = await this.pos.push_single_order(order);
                 if (synced && synced.length) {

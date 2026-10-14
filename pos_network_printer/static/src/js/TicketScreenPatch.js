@@ -3,6 +3,7 @@
 import { patch } from "@web/core/utils/patch";
 import { ReprintReceiptButton } from "@point_of_sale/app/screens/ticket_screen/reprint_receipt_button/reprint_receipt_button";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
+import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 
@@ -48,10 +49,25 @@ patch(ReprintReceiptButton.prototype, {
             }
 
             // Fallback: If no prior snapshot exists, render the receipt now and print
-            const imageBase64 = await this.renderer.toJpeg(OrderReceipt, {
-                data: order.export_for_printing(),
-                formatCurrency: this.env.utils.formatCurrency,
+            let receiptEl = document.querySelector(".pos-receipt");
+            if (!receiptEl && this.renderer) {
+                receiptEl = await this.renderer.toHtml(OrderReceipt, {
+                    data: order.export_for_printing(),
+                    formatCurrency: this.env.utils.formatCurrency,
+                });
+            }
+
+            if (!receiptEl) {
+                throw new Error(_t("Receipt element could not be found or rendered."));
+            }
+
+            const dataUrl = await toJpeg(receiptEl, {
+                skipFonts: true,
+                backgroundColor: "#ffffff",
+                pixelRatio: 2,
+                quality: 0.95,
             });
+            const imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
 
             if (serverId && typeof serverId === "number") {
                 const res = await this.orm.call(

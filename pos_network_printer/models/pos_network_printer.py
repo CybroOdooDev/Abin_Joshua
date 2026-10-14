@@ -21,7 +21,6 @@ class PosNetworkPrinter(models.Model):
     ip_address = fields.Char(
         string='IP Address / Hostname',
         required=True,
-        default='192.168.1.100',
         help='Local network IP address of the thermal printer (e.g. 192.168.1.150)',
     )
     port = fields.Integer(
