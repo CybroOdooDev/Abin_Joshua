@@ -4,6 +4,8 @@ import { Dialog } from "@web/core/dialog/dialog";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { renderToString } from "@web/core/utils/render";
+import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
+import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
 
 export class KioskPaymentMethodPopup extends Component {
     static template = "agr_kiosk_pay.KioskPaymentMethodPopup";
@@ -28,6 +30,7 @@ export class KioskPaymentMethodPopup extends Component {
         this.orm = useService("orm");
         this.router = useService("router");
         this.printer = useService("printer");
+        this.renderer = useService("renderer");
 
         onWillStart(async () => {
             try {
@@ -141,7 +144,41 @@ export class KioskPaymentMethodPopup extends Component {
             },
         };
 
-         // --- NEW LOCAL PRINTING LOGIC ---
+        const pos_config = this.props.selfOrder?.config;
+        if (pos_config && pos_config.enable_network_printing && pos_config.auto_print_on_payment !== false) {
+            try {
+                const selfOrder = this.props.selfOrder;
+                const exportData = selfOrder.export_for_printing(order);
+                const receiptEl = await this.renderer.toHtml(OrderReceipt, {
+                    data: exportData,
+                    formatCurrency: selfOrder.formatMonetary,
+                });
+                if (receiptEl) {
+                    const dataUrl = await toJpeg(receiptEl, {
+                        skipFonts: true,
+                        backgroundColor: "#ffffff",
+                        pixelRatio: 2,
+                        quality: 0.95,
+                    });
+                    const imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
+                    const res = await selfOrder.rpc("/pos/kiosk-print-receipt", {
+                        order_id: order.id,
+                        access_token: order.access_token,
+                        image_base64: imageBase64,
+                        config_id: selfOrder.pos_config_id || pos_config.id,
+                    });
+                    if (res && res.success) {
+                        order._network_printed = true;
+                        console.info("[Kiosk Network Printer] Receipt printed successfully via network printer.");
+                        return;
+                    }
+                }
+            } catch (netErr) {
+                console.error("[Kiosk Network Printer] Direct print failed, falling back to QZ:", netErr);
+            }
+        }
+
+        // --- FALLBACK LOCAL PRINTING LOGIC ---
         await this._printWithQZ(receiptData);
     }
 

@@ -20,7 +20,7 @@ class PosPrintedTicket(models.Model):
     order_id = fields.Many2one(
         'pos.order',
         string='POS Order',
-        required=True,
+        required=False,
         ondelete='cascade',
         index=True,
     )
@@ -58,6 +58,9 @@ class PosPrintedTicket(models.Model):
     print_type = fields.Selection(
         [
             ('first_print', 'Original Ticket'),
+            ('bill', 'Pre-Payment Bill'),
+            ('invoice', 'Formal Invoice'),
+            ('kitchen', 'Kitchen Ticket'),
             ('reprint', 'Reprint'),
         ],
         string='Print Type',

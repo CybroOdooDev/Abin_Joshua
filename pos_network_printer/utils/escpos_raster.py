@@ -133,3 +133,95 @@ def generate_test_ticket(printer_name, ip_address, port, paper_width='80mm'):
         CUT_PAPER,
     ]
     return b''.join(lines)
+
+
+def generate_kitchen_ticket(order, paper_width='80mm'):
+    """
+    Generates a high-contrast thermal preparation ticket for kitchen/bar printers.
+    Formats courses/plating levels, quantities, and customer notes clearly.
+    """
+    TXT_RESET = ESC + b'!\x00'
+    TXT_BOLD = ESC + b'E\x01'
+    TXT_BOLD_OFF = ESC + b'E\x00'
+    TXT_DOUBLE_SIZE = ESC + b'!\x30'
+    ALIGN_LEFT = ESC + b'a\x00'
+    ALIGN_CENTER = ESC + b'a\x01'
+
+    table_name = order.table_id.name if getattr(order, 'table_id', None) else ""
+    is_takeaway = getattr(order, 'take_away', False)
+    tracking = str(getattr(order, 'tracking_number', '') or order.name or '')
+    user_name = order.user_id.name if getattr(order, 'user_id', None) else ""
+    date_str = str(order.date_order)[:19] if getattr(order, 'date_order', None) else ""
+
+    ticket = [
+        INIT_PRINTER,
+        ALIGN_CENTER,
+        TXT_BOLD,
+        b"================================\n",
+        b"***  PEDIDO DE COCINA  ***\n",
+        b"================================\n\n",
+        TXT_BOLD_OFF,
+    ]
+
+    # Big Table / Order Header
+    ticket.append(TXT_DOUBLE_SIZE)
+    if is_takeaway:
+        ticket.append(b"PARA LLEVAR\n")
+    elif table_name:
+        ticket.append(f"MESA: {table_name}\n".encode('utf-8'))
+    ticket.append(f"ORDEN #{tracking}\n".encode('utf-8'))
+    ticket.append(TXT_RESET)
+
+    # Order Metadata
+    ticket.extend([
+        ALIGN_LEFT,
+        b"--------------------------------\n",
+        f"Camarero: {user_name}\n".encode('utf-8'),
+        f"Fecha: {date_str}\n".encode('utf-8'),
+        b"--------------------------------\n\n",
+    ])
+
+    # Group lines by course / plating level if applicable
+    courses = {}
+    for line in order.lines:
+        course_name = ""
+        if hasattr(line, 'plating_level_id') and line.plating_level_id:
+            course_name = line.plating_level_id.name
+        courses.setdefault(course_name, []).append(line)
+
+    for course, lines in courses.items():
+        if course:
+            ticket.extend([
+                TXT_BOLD,
+                f"[{course.upper()}]\n".encode('utf-8'),
+                TXT_BOLD_OFF,
+            ])
+
+        for line in lines:
+            qty = int(line.qty) if line.qty == int(line.qty) else line.qty
+            product_name = line.product_id.name if line.product_id else ""
+            if hasattr(line, '_get_kitchen_product_name'):
+                product_name = line._get_kitchen_product_name()
+
+            ticket.extend([
+                TXT_BOLD,
+                f"  [{qty}x] {product_name}\n".encode('utf-8'),
+                TXT_BOLD_OFF,
+            ])
+
+            # Customer cooking / preparation notes
+            note = getattr(line, 'customer_note', False) or getattr(line, 'note', False)
+            if note:
+                ticket.append(f"       >> {note}\n".encode('utf-8'))
+
+        ticket.append(b"\n")
+
+    ticket.extend([
+        ALIGN_CENTER,
+        b"--------------------------------\n",
+        FEED_LINES_4,
+        CUT_PAPER,
+    ])
+
+    return b''.join(ticket)
+

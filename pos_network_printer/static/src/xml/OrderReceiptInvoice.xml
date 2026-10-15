@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_network_printer.OrderReceiptInvoice" t-inherit="point_of_sale.OrderReceipt" t-inherit-mode="extension">
+        <xpath expr="//ReceiptHeader" position="after">
+            <!-- Formal Legal Invoice Header (Factura Completa) -->
+            <t t-if="props.data.is_to_invoice and props.data.partner">
+                <div class="pos-receipt-invoice-box my-2 p-2 border-top border-bottom text-start" style="border-width: 2px !important; border-color: #000 !important; font-size: 13px;">
+                    <div class="text-center fw-bold fs-4 mb-1" style="text-transform: uppercase; letter-spacing: 1px;">
+                        FACTURA
+                    </div>
+                    <div t-if="props.data.invoice_number" class="fw-bold mb-1">
+                        Nº Factura: <span t-esc="props.data.invoice_number"/>
+                    </div>
+                    <div class="fw-bold mb-1" style="text-decoration: underline;">DATOS DEL CLIENTE:</div>
+                    <div><strong>Nombre:</strong> <t t-esc="props.data.partner.name"/></div>
+                    <div t-if="props.data.partner.vat"><strong>NIF/CIF:</strong> <t t-esc="props.data.partner.vat"/></div>
+                    <div t-if="props.data.partner.address"><strong>Dirección:</strong> <t t-esc="props.data.partner.address"/></div>
+                </div>
+            </t>
+            <!-- Simplified Ticket Header -->
+            <t t-elif="!props.data.isBill">
+                <div class="text-center fw-bold fs-6 my-1" style="letter-spacing: 0.5px;">
+                    FACTURA SIMPLIFICADA
+                </div>
+            </t>
+        </xpath>
+    </t>
+
+</templates>

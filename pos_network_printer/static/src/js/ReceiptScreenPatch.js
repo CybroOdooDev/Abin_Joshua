@@ -16,6 +16,7 @@ patch(ReceiptScreen.prototype, {
         onMounted(() => {
             // Auto-print receipt upon reaching the ReceiptScreen if enabled in POS settings
             if (
+                !this.isBill &&
                 this.pos.config.enable_network_printing &&
                 this.pos.config.auto_print_on_payment &&
                 !this.currentOrder._network_printed
@@ -70,24 +71,25 @@ patch(ReceiptScreen.prototype, {
             let serverOrderId =
                 (this.pos.validated_orders_name_server_id_map && this.pos.validated_orders_name_server_id_map[orderName]) ||
                 order.server_id ||
-                order.id;
+                (typeof order.id === "number" ? order.id : false);
 
-            // If order only exists locally, sync draft or push to get server ID
-            if (!serverOrderId || typeof serverOrderId !== "number") {
+            // If order only exists locally and this is NOT a bill, sync or push to get server ID
+            if (!this.isBill && (!serverOrderId || typeof serverOrderId !== "number")) {
                 const synced = await this.pos.push_single_order(order);
                 if (synced && synced.length) {
                     serverOrderId = synced[0].id;
                 }
             }
 
-            if (!serverOrderId) {
+            if (!this.isBill && !serverOrderId) {
                 throw new Error(_t("Could not synchronize order ID to send to network printer."));
             }
 
+            const printType = this.isBill ? "bill" : (order.is_to_invoice?.() ? "invoice" : "first_print");
             const result = await this.orm.call(
                 "pos.order",
                 "print_network_receipt_from_ui",
-                [serverOrderId, imageBase64, this.pos.config.network_printer_id?.[0]]
+                [serverOrderId || 0, imageBase64, this.pos.config.network_printer_id?.[0], printType]
             );
 
             if (result.success) {

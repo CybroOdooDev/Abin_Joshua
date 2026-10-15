@@ -30,6 +30,7 @@ class PosConfig(models.Model):
         """Export network printer configuration to POS Self-Order / Kiosk."""
         data = super()._get_self_ordering_data()
         data["config"]["enable_network_printing"] = self.enable_network_printing
+        data["config"]["auto_print_on_payment"] = self.auto_print_on_payment
         if self.network_printer_id:
             data["config"]["network_printer_id"] = self.network_printer_id.id
             data["config"]["network_printer_name"] = self.network_printer_id.name

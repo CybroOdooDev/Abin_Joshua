@@ -37,7 +37,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['point_of_sale', 'pos_restaurant'],
+    'depends': ['point_of_sale', 'pos_restaurant', 'pos_self_order'],
     'data': [
         'security/ir.model.access.csv',
         'views/pos_network_printer_views.xml',
@@ -51,6 +51,12 @@
             'pos_network_printer/static/src/js/NetworkPrinterService.js',
             'pos_network_printer/static/src/js/ReceiptScreenPatch.js',
             'pos_network_printer/static/src/js/TicketScreenPatch.js',
+            'pos_network_printer/static/src/js/PrintBillPatch.js',
+            'pos_network_printer/static/src/js/OrderPatch.js',
+            'pos_network_printer/static/src/xml/OrderReceiptInvoice.xml',
+        ],
+        'pos_self_order.assets': [
+            'pos_network_printer/static/src/js/KioskConfirmationPatch.js',
         ],
     },
     'license': 'LGPL-3',
