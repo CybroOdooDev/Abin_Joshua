@@ -4,6 +4,7 @@ import { patch } from "@web/core/utils/patch";
 import { ConfirmationPage } from "@pos_self_order/app/pages/confirmation_page/confirmation_page";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
 import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
+import { loadAllImages } from "@point_of_sale/utils";
 import { useService } from "@web/core/utils/hooks";
 import { onMounted } from "@odoo/owl";
 
@@ -13,17 +14,9 @@ patch(ConfirmationPage.prototype, {
         this.renderer = useService("renderer");
 
         onMounted(() => {
-            const config = this.selfOrder?.config || {};
-            const autoPrint = config.auto_print_on_payment !== false;
-            if (
-                config.self_ordering_mode === "kiosk" &&
-                config.enable_network_printing &&
-                autoPrint
-            ) {
-                // Execute auto-print to the local network thermal printer
-                setTimeout(() => {
-                    this.printKioskNetworkReceipt();
-                }, 600);
+            // Auto-print receipt upon reaching the kiosk ConfirmationPage
+            if (this.selfOrder.config.enable_network_printing && this.selfOrder.config.auto_print_on_payment) {
+                this.printKioskNetworkReceipt();
             }
         });
     },
@@ -49,31 +42,70 @@ patch(ConfirmationPage.prototype, {
                 return;
             }
 
-            // Convert to high-contrast monochrome-ready JPEG without remote font download 404s
-            const dataUrl = await toJpeg(receiptEl, {
-                skipFonts: true,
-                backgroundColor: "#ffffff",
-                pixelRatio: 2,
-                quality: 0.95,
-            });
-            const imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
+            let imageBase64 = null;
+            if (this.renderer && this.renderer.whenMounted) {
+                imageBase64 = await this.renderer.whenMounted({
+                    el: receiptEl,
+                    callback: async (mountedEl) => {
+                        mountedEl.classList.add("pos-receipt-print");
+                        try {
+                            await loadAllImages(mountedEl);
+                        } catch (_) {}
+                        const dataUrl = await toJpeg(mountedEl, {
+                            skipFonts: true,
+                            backgroundColor: "#ffffff",
+                            pixelRatio: 2,
+                            quality: 0.95,
+                        });
+                        return dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
+                    },
+                });
+            } else {
+                const wrapper = document.createElement("div");
+                wrapper.style.position = "fixed";
+                wrapper.style.left = "-1000px";
+                wrapper.style.top = "0";
+                wrapper.style.width = "380px";
+                wrapper.style.opacity = "0";
+                wrapper.style.pointerEvents = "none";
+                receiptEl.classList.add("pos-receipt-print");
+                wrapper.appendChild(receiptEl);
+                (document.querySelector(".pos-receipt-container") || document.body).appendChild(wrapper);
+                try {
+                    try {
+                        await loadAllImages(receiptEl);
+                    } catch (_) {}
+                    const dataUrl = await toJpeg(receiptEl, {
+                        skipFonts: true,
+                        backgroundColor: "#ffffff",
+                        pixelRatio: 2,
+                        quality: 0.95,
+                    });
+                    imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
+                } finally {
+                    wrapper.remove();
+                }
+            }
+
+            if (!imageBase64 || imageBase64.length < 100) {
+                throw new Error("Failed to capture kiosk receipt image.");
+            }
 
             // Dispatch to network printer via public Kiosk controller
             const result = await this.selfOrder.rpc("/pos/kiosk-print-receipt", {
                 order_id: order.id,
                 access_token: order.access_token,
                 image_base64: imageBase64,
-                config_id: this.selfOrder.pos_config_id || this.selfOrder.config?.id,
             });
 
             if (result && result.success) {
                 order._network_printed = true;
-                console.info("[Kiosk Network Printer] Receipt successfully dispatched to printer:", result.printer_name);
+                console.info("[Kiosk Network Printer] Auto-printed ticket successfully on", result.printer_name);
             } else {
-                console.warn("[Kiosk Network Printer] Printing failed:", result?.message);
+                console.warn("[Kiosk Network Printer] Auto-print ticket failed:", (result && result.message) || "");
             }
         } catch (err) {
-            console.error("[Kiosk Network Printer] Error during kiosk print:", err);
+            console.error("[Kiosk Network Printer] Error during kiosk ticket auto-print:", err);
         }
     },
 });

@@ -27,9 +27,18 @@ def image_to_escpos_raster(image_input, paper_width='80mm', cut=True, drawer=Fal
         # Strip data URL prefix if present (e.g. 'data:image/png;base64,...')
         if ',' in image_input:
             image_input = image_input.split(',', 1)[1]
-        image_bytes = base64.b64decode(image_input)
+        if not image_input or len(image_input.strip()) < 50:
+            raise ValueError("Empty or invalid receipt image data received from POS frontend.")
+        try:
+            image_bytes = base64.b64decode(image_input)
+        except Exception as e:
+            raise ValueError(f"Failed to decode receipt base64 image: {e}")
+        if not image_bytes:
+            raise ValueError("Decoded receipt image payload is empty.")
         img = Image.open(io.BytesIO(image_bytes))
     elif isinstance(image_input, bytes):
+        if not image_input:
+            raise ValueError("Receipt image payload is empty.")
         img = Image.open(io.BytesIO(image_input))
     elif isinstance(image_input, Image.Image):
         img = image_input

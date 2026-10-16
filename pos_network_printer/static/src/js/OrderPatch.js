@@ -24,7 +24,7 @@ patch(Order.prototype, {
         }
 
         // Invoice reference if available
-        res.invoice_number = this.account_move?.name || null;
+        res.invoice_number = this.account_move_name || (this.account_move && this.account_move.name) || (typeof this.account_move === "string" ? this.account_move : null);
 
         return res;
     },

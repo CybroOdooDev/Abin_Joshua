@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Square Wood Table Top -->
+  <rect x="10" y="10" width="80" height="80" rx="8" fill="#a47148" stroke="#684120" stroke-width="3"/>
+  <!-- Bevel Inner Rect -->
+  <rect x="18" y="18" width="64" height="64" rx="4" fill="#b98256" stroke="#8c582f" stroke-width="1.5"/>
+  <!-- Wood Planks Lines -->
+  <line x1="34" y1="18" x2="34" y2="82" stroke="#8c582f" stroke-width="1.5"/>
+  <line x1="50" y1="18" x2="50" y2="82" stroke="#8c582f" stroke-width="1.5"/>
+  <line x1="66" y1="18" x2="66" y2="82" stroke="#8c582f" stroke-width="1.5"/>
+  <!-- Center Centerpiece Mat -->
+  <rect x="40" y="40" width="20" height="20" rx="3" fill="#ffffff" opacity="0.8"/>
+  <circle cx="50" cy="50" r="4" fill="#38a169"/>
+</svg>

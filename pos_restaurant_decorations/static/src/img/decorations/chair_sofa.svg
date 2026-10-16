@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 70" width="100%" height="100%">
+  <!-- Wide 2-3 Seater Chesterfield Lounge Sofa -->
+  <path d="M16,55 L16,22 Q16,10 60,10 Q104,10 104,22 L104,55" fill="none" stroke="#742a2a" stroke-width="12" stroke-linecap="round"/>
+  <!-- Two Large Cushion Pads -->
+  <rect x="24" y="22" width="34" height="36" rx="6" fill="#9b2c2c" stroke="#63171b" stroke-width="2"/>
+  <rect x="62" y="22" width="34" height="36" rx="6" fill="#9b2c2c" stroke="#63171b" stroke-width="2"/>
+  <circle cx="41" cy="40" r="2.5" fill="#4a1515"/>
+  <circle cx="79" cy="40" r="2.5" fill="#4a1515"/>
+</svg>

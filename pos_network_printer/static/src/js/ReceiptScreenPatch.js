@@ -4,6 +4,7 @@ import { patch } from "@web/core/utils/patch";
 import { ReceiptScreen } from "@point_of_sale/app/screens/receipt_screen/receipt_screen";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
 import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
+import { loadAllImages } from "@point_of_sale/utils";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { onMounted } from "@odoo/owl";
@@ -37,35 +38,22 @@ patch(ReceiptScreen.prototype, {
         const order = this.currentOrder;
         if (!order) return;
 
-        if (this.buttonPrintReceipt?.el) {
+        if (this.buttonPrintReceipt && this.buttonPrintReceipt.el) {
             this.buttonPrintReceipt.el.className = "fa fa-fw fa-spin fa-circle-o-notch";
         }
 
+        const applyStandardReceiptStyles = (el) => {
+            el.style.width = "330px";
+            el.style.maxWidth = "330px";
+            el.style.minWidth = "330px";
+            el.style.boxSizing = "border-box";
+            el.style.margin = "0 auto";
+            el.style.padding = "10px 15px";
+            el.style.backgroundColor = "#ffffff";
+            el.style.fontSize = "16px";
+        };
+
         try {
-            // Render receipt image directly without triggering remote webfont embedding (avoids font 404s)
-            let receiptEl = document.querySelector(".pos-receipt");
-            if (!receiptEl && this.renderer) {
-                receiptEl = await this.renderer.toHtml(OrderReceipt, {
-                    data: {
-                        ...order.export_for_printing(),
-                        isBill: this.isBill,
-                    },
-                    formatCurrency: this.env.utils.formatCurrency,
-                });
-            }
-
-            if (!receiptEl) {
-                throw new Error(_t("Receipt element could not be found or rendered."));
-            }
-
-            const dataUrl = await toJpeg(receiptEl, {
-                skipFonts: true,
-                backgroundColor: "#ffffff",
-                pixelRatio: 2,
-                quality: 0.95,
-            });
-            const imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
-
             // Fetch server order ID
             const orderName = typeof order.get_name === "function" ? order.get_name() : order.name;
             let serverOrderId =
@@ -85,11 +73,118 @@ patch(ReceiptScreen.prototype, {
                 throw new Error(_t("Could not synchronize order ID to send to network printer."));
             }
 
-            const printType = this.isBill ? "bill" : (order.is_to_invoice?.() ? "invoice" : "first_print");
+            const isInvoice = typeof order.is_to_invoice === "function" ? order.is_to_invoice() : false;
+
+            // If this is an invoice and invoice_number is not yet set on order, fetch it from backend
+            if (isInvoice && !order.account_move_name && serverOrderId) {
+                try {
+                    const invInfo = await this.orm.call(
+                        "pos.order",
+                        "get_order_invoice_info",
+                        [serverOrderId]
+                    );
+                    if (invInfo && invInfo.invoice_number) {
+                        order.account_move_name = invInfo.invoice_number;
+                    }
+                } catch (e) {
+                    console.warn("Could not fetch invoice sequence number:", e);
+                }
+            }
+
+            let imageBase64 = null;
+            let receiptEl = document.querySelector(".pos-receipt");
+
+            // If isInvoice, only reuse DOM element if it already includes the invoice sequence number
+            const domHasInvoiceNumber = Boolean(
+                receiptEl &&
+                receiptEl.isConnected &&
+                (!isInvoice || (order.account_move_name && receiptEl.textContent.includes(order.account_move_name)))
+            );
+
+            // 1. If .pos-receipt is already rendered and up-to-date in the screen DOM, capture directly
+            if (domHasInvoiceNumber) {
+                applyStandardReceiptStyles(receiptEl);
+                try {
+                    await loadAllImages(receiptEl);
+                } catch (_) {}
+                const dataUrl = await toJpeg(receiptEl, {
+                    skipFonts: true,
+                    backgroundColor: "#ffffff",
+                    pixelRatio: 2,
+                    quality: 0.95,
+                });
+                if (dataUrl && dataUrl !== "data:," && dataUrl.length >= 100) {
+                    imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
+                }
+            }
+
+            // 2. If not already mounted, outdated, or capture failed, render cleanly via renderer
+            if (!imageBase64 && this.renderer) {
+                const generatedEl = await this.renderer.toHtml(OrderReceipt, {
+                    data: {
+                        ...order.export_for_printing(),
+                        isBill: this.isBill,
+                    },
+                    formatCurrency: this.env.utils.formatCurrency,
+                });
+
+                if (generatedEl) {
+                    if (this.renderer.whenMounted) {
+                        imageBase64 = await this.renderer.whenMounted({
+                            el: generatedEl,
+                            callback: async (mountedEl) => {
+                                applyStandardReceiptStyles(mountedEl);
+                                try {
+                                    await loadAllImages(mountedEl);
+                                } catch (_) {}
+                                const dataUrl = await toJpeg(mountedEl, {
+                                    skipFonts: true,
+                                    backgroundColor: "#ffffff",
+                                    pixelRatio: 2,
+                                    quality: 0.95,
+                                });
+                                return dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
+                            },
+                        });
+                    } else {
+                        const wrapper = document.createElement("div");
+                        wrapper.style.position = "fixed";
+                        wrapper.style.left = "-1000px";
+                        wrapper.style.top = "0";
+                        wrapper.style.width = "330px";
+                        wrapper.style.opacity = "0";
+                        wrapper.style.pointerEvents = "none";
+                        applyStandardReceiptStyles(generatedEl);
+                        wrapper.appendChild(generatedEl);
+                        (document.querySelector(".pos") || document.body).appendChild(wrapper);
+                        try {
+                            try {
+                                await loadAllImages(generatedEl);
+                            } catch (_) {}
+                            const dataUrl = await toJpeg(generatedEl, {
+                                skipFonts: true,
+                                backgroundColor: "#ffffff",
+                                pixelRatio: 2,
+                                quality: 0.95,
+                            });
+                            imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
+                        } finally {
+                            wrapper.remove();
+                        }
+                    }
+                }
+            }
+
+            if (!imageBase64 || imageBase64.length < 100) {
+                throw new Error(_t("Failed to capture receipt image."));
+            }
+
+            const printType = this.isBill ? "bill" : (isInvoice ? "invoice" : "first_print");
+            const printerId = this.pos.config.network_printer_id ? this.pos.config.network_printer_id[0] : false;
             const result = await this.orm.call(
                 "pos.order",
                 "print_network_receipt_from_ui",
-                [serverOrderId || 0, imageBase64, this.pos.config.network_printer_id?.[0], printType]
+                [serverOrderId || 0, imageBase64, printerId, printType]
             );
 
             if (result.success) {
@@ -100,18 +195,18 @@ patch(ReceiptScreen.prototype, {
                 );
             } else {
                 this.notification.add(
-                    _t("Network Printer: %s", result.message || _t("Failed to print")),
-                    { type: "warning", sticky: true }
+                    _t("Network printer error: %s", result.message || ""),
+                    { type: "danger" }
                 );
             }
-        } catch (error) {
-            console.error("Network print failed:", error);
+        } catch (err) {
+            console.error("printNetworkReceipt error:", err);
             this.notification.add(
-                _t("Network print error: %s", error.message || error),
+                _t("Network printer error: %s", err.message || err),
                 { type: "danger" }
             );
         } finally {
-            if (this.buttonPrintReceipt?.el) {
+            if (this.buttonPrintReceipt && this.buttonPrintReceipt.el) {
                 this.buttonPrintReceipt.el.className = "fa fa-print";
             }
         }

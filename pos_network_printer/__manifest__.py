@@ -52,6 +52,7 @@
             'pos_network_printer/static/src/js/ReceiptScreenPatch.js',
             'pos_network_printer/static/src/js/TicketScreenPatch.js',
             'pos_network_printer/static/src/js/PrintBillPatch.js',
+            'pos_network_printer/static/src/js/PosStorePatch.js',
             'pos_network_printer/static/src/js/OrderPatch.js',
             'pos_network_printer/static/src/xml/OrderReceiptInvoice.xml',
         ],

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Barrel Wood Body with Bulge -->
+  <path d="M28,16 Q14,50 28,84 L72,84 Q86,50 72,16 Z" fill="#8b5a2b" stroke="#5c3a1e" stroke-width="2.5"/>
+  <!-- Top Flat Ellipse -->
+  <ellipse cx="50" cy="16" rx="22" ry="6" fill="#a06d3b" stroke="#5c3a1e" stroke-width="2"/>
+  <!-- Bottom Ellipse curve -->
+  <ellipse cx="50" cy="84" rx="22" ry="6" fill="#6d441e" stroke="#5c3a1e" stroke-width="2"/>
+  <!-- Metal Hoops / Bands -->
+  <path d="M23,28 Q18,50 23,72" fill="none"/>
+  <ellipse cx="50" cy="30" rx="25" ry="6" fill="none" stroke="#333" stroke-width="3"/>
+  <ellipse cx="50" cy="46" rx="28" ry="6.5" fill="none" stroke="#333" stroke-width="3.5"/>
+  <ellipse cx="50" cy="56" rx="28" ry="6.5" fill="none" stroke="#333" stroke-width="3.5"/>
+  <ellipse cx="50" cy="72" rx="25" ry="6" fill="none" stroke="#333" stroke-width="3"/>
+  <!-- Vertical Stave Lines -->
+  <path d="M38,18 Q30,50 38,82" fill="none" stroke="#5c3a1e" stroke-width="1.5"/>
+  <path d="M62,18 Q70,50 62,82" fill="none" stroke="#5c3a1e" stroke-width="1.5"/>
+  <line x1="50" y1="20" x2="50" y2="82" stroke="#5c3a1e" stroke-width="1.5"/>
+</svg>

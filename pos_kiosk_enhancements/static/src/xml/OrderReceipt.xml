@@ -14,17 +14,26 @@
                 font-size:16px;
                 margin-bottom:8px;
             ">
-                SIMPLIFIED INVOICE
+                <t t-if="props.data.is_to_invoice">FACTURA</t>
+                <t t-else="">FACTURA SIMPLIFICADA</t>
             </div>
 
             <div style="
                 text-align:center;
                 margin-bottom:12px;
             ">
-                Ticket Number:
-                <strong>
-                    <t t-esc="props.data.name"/>
-                </strong>
+                <t t-if="props.data.is_to_invoice and props.data.invoice_number">
+                    Nº Factura:
+                    <strong>
+                        <t t-esc="props.data.invoice_number"/>
+                    </strong>
+                </t>
+                <t t-else="">
+                    Ticket Number:
+                    <strong>
+                        <t t-esc="props.data.name"/>
+                    </strong>
+                </t>
             </div>
 
         </xpath>
@@ -77,7 +86,7 @@
 
         <!-- Display Customer Details if present -->
         <xpath expr="//ReceiptHeader" position="after">
-            <t t-if="props.data.partner">
+            <t t-if="props.data.partner and !props.data.is_to_invoice">
                 <div class="pos-receipt-customer" style="margin: 8px 0; font-size: 13px;">
                     <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
                     <div>

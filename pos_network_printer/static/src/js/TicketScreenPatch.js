@@ -49,6 +49,14 @@ patch(ReprintReceiptButton.prototype, {
             }
 
             // Fallback: If no prior snapshot exists, render the receipt now and print
+            if (order.is_to_invoice && order.is_to_invoice() && !order.account_move_name && serverId) {
+                try {
+                    const invInfo = await this.orm.call("pos.order", "get_order_invoice_info", [serverId]);
+                    if (invInfo && invInfo.invoice_number) {
+                        order.account_move_name = invInfo.invoice_number;
+                    }
+                } catch (_) {}
+            }
             let receiptEl = document.querySelector(".pos-receipt");
             if (!receiptEl && this.renderer) {
                 receiptEl = await this.renderer.toHtml(OrderReceipt, {
@@ -69,11 +77,12 @@ patch(ReprintReceiptButton.prototype, {
             });
             const imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
 
+            const printerId = this.pos.config.network_printer_id ? this.pos.config.network_printer_id[0] : false;
             if (serverId && typeof serverId === "number") {
                 const res = await this.orm.call(
                     "pos.order",
                     "print_network_receipt_from_ui",
-                    [serverId, imageBase64, this.pos.config.network_printer_id?.[0]]
+                    [serverId, imageBase64, printerId]
                 );
                 if (res.success) {
                     this.notification.add(

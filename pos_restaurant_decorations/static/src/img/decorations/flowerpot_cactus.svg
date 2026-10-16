@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Round Bowl Planter -->
+  <path d="M28,68 Q28,90 50,90 Q72,90 72,68 Z" fill="#dd6b20" stroke="#9c4221" stroke-width="2"/>
+  <!-- Main Cactus Stem -->
+  <rect x="44" y="24" width="12" height="46" rx="6" fill="#38a169"/>
+  <!-- Left Arm -->
+  <path d="M44,48 L32,48 L32,34" fill="none" stroke="#38a169" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Right Arm -->
+  <path d="M56,42 L68,42 L68,30" fill="none" stroke="#38a169" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Flower Blossom on Top -->
+  <circle cx="50" cy="22" r="5" fill="#e53e3e"/>
+  <circle cx="50" cy="22" r="2" fill="#fbd38d"/>
+</svg>

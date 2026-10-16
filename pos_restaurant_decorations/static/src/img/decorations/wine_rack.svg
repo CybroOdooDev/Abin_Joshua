@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <!-- Wooden Rack Frame -->
+  <rect x="15" y="15" width="70" height="70" rx="4" fill="#654321" stroke="#3d2813" stroke-width="3"/>
+  <line x1="15" y1="50" x2="85" y2="50" stroke="#3d2813" stroke-width="3"/>
+  <line x1="50" y1="15" x2="50" y2="85" stroke="#3d2813" stroke-width="3"/>
+  <!-- Wine Bottle Tops in Slots -->
+  <circle cx="32" cy="32" r="10" fill="#742a2a" stroke="#4a1515" stroke-width="2"/>
+  <circle cx="32" cy="32" r="4" fill="#d4af37"/>
+  <circle cx="68" cy="32" r="10" fill="#2d4a22" stroke="#182c12" stroke-width="2"/>
+  <circle cx="68" cy="32" r="4" fill="#d4af37"/>
+  <circle cx="32" cy="68" r="10" fill="#742a2a" stroke="#4a1515" stroke-width="2"/>
+  <circle cx="32" cy="68" r="4" fill="#d4af37"/>
+  <circle cx="68" cy="68" r="10" fill="#2a3a4a" stroke="#14202c" stroke-width="2"/>
+  <circle cx="68" cy="68" r="4" fill="#d4af37"/>
+</svg>

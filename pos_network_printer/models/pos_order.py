@@ -28,6 +28,25 @@ class PosOrder(models.Model):
             order.printed_ticket_count = len(order.printed_ticket_ids)
 
     @api.model
+    def create_from_ui(self, orders, draft=False):
+        res = super().create_from_ui(orders, draft=draft)
+        for order_data in res:
+            if order_data.get('account_move'):
+                move = self.env['account.move'].browse(order_data['account_move'])
+                order_data['account_move_name'] = move.name or False
+        return res
+
+    @api.model
+    def get_order_invoice_info(self, server_order_id):
+        order = self.browse(server_order_id)
+        if order.exists() and order.account_move:
+            return {
+                'invoice_id': order.account_move.id,
+                'invoice_number': order.account_move.name or '',
+            }
+        return {'invoice_id': False, 'invoice_number': ''}
+
+    @api.model
     def print_network_receipt_from_ui(self, order_id, image_base64, printer_id=None, print_type='first_print'):
         """
         Invoked from POS frontend (or Kiosk) upon order completion, pre-bill print, or manual reprint.
@@ -139,8 +158,13 @@ class PosOrder(models.Model):
 
             # Check if kitchen printer is configured
             if order.config_id.kitchen_network_printer_id:
-                data = order_payload.get("data", {})
-                if data.get("send_to_kitchen") or any(l.get("customer_note") or l.get("plating_level_id") for l in data.get("lines", [])):
+                data = order_payload.get("data", {}) if isinstance(order_payload, dict) else {}
+                should_print_kitchen = (
+                    data.get("send_to_kitchen")
+                    or any(bool(line.note or getattr(line, 'plating_level_id', False)) for line in order.lines)
+                    or order.config_id.self_ordering_mode == "kiosk"
+                )
+                if should_print_kitchen:
                     try:
                         order._print_kitchen_network_ticket()
                     except Exception as e:

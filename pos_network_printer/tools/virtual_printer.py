@@ -64,6 +64,43 @@ def run_virtual_printer(host=HOST, port=PORT):
             with open(bin_filename, "wb") as f:
                 f.write(data)
 
+            # If raster graphics are present, decode to PNG for visual preview
+            if has_raster:
+                try:
+                    from PIL import Image
+                    matches = [m.start() for m in re.finditer(b'\x1dv0', data)]
+                    slices = []
+                    total_h = 0
+                    width_px = 576
+
+                    for m in matches:
+                        if len(data) > m + 8:
+                            xL, xH = data[m+4], data[m+5]
+                            yL, yH = data[m+6], data[m+7]
+                            w_bytes = xL + (xH * 256)
+                            width_px = w_bytes * 8
+                            h_dots = yL + (yH * 256)
+                            p_len = w_bytes * h_dots
+                            raw = data[m+8 : m+8+p_len]
+                            if len(raw) == p_len:
+                                inv = bytes([~b & 0xFF for b in raw])
+                                slice_img = Image.frombytes('1', (width_px, h_dots), inv, 'raw')
+                                slices.append(slice_img)
+                                total_h += h_dots
+
+                    if slices:
+                        full_img = Image.new('RGB', (width_px, total_h), (255, 255, 255))
+                        curr_y = 0
+                        for s in slices:
+                            full_img.paste(s.convert('RGB'), (0, curr_y))
+                            curr_y += s.height
+
+                        png_filename = os.path.join(output_dir, f"job_{job_counter}.png")
+                        full_img.save(png_filename)
+                        print(f"   🖼️  Complete Visual PNG saved ({width_px}x{total_h}px): {png_filename}")
+                except Exception as err:
+                    print(f"   ⚠️ Could not render PNG: {err}")
+
             # Extract readable text if present
             printable_text = re.sub(rb'[^\x20-\x7E\n\r\t]', rb'', data).decode('ascii', errors='ignore').strip()
             if printable_text:

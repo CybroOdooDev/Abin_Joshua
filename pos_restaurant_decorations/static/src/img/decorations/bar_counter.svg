@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="barTop" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#4a3728"/>
+      <stop offset="50%" stop-color="#7c5c43"/>
+      <stop offset="100%" stop-color="#4a3728"/>
+    </linearGradient>
+    <linearGradient id="barBody" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2018"/>
+      <stop offset="100%" stop-color="#19130e"/>
+    </linearGradient>
+  </defs>
+  <!-- Bar Base Body -->
+  <rect x="15" y="35" width="90" height="60" rx="8" fill="url(#barBody)" stroke="#554030" stroke-width="2"/>
+  <line x1="20" y1="55" x2="100" y2="55" stroke="#3d2c1e" stroke-width="2"/>
+  <line x1="20" y1="75" x2="100" y2="75" stroke="#3d2c1e" stroke-width="2"/>
+  <!-- Bar Countertop -->
+  <rect x="10" y="28" width="100" height="15" rx="5" fill="url(#barTop)" stroke="#a37b5a" stroke-width="1.5"/>
+  <!-- Bottle 1 (Wine) -->
+  <rect x="25" y="10" width="8" height="18" rx="2" fill="#2d5a3f"/>
+  <rect x="27.5" y="5" width="3" height="6" fill="#8c6d46"/>
+  <!-- Bottle 2 (Liquor) -->
+  <rect x="37" y="12" width="9" height="16" rx="2" fill="#c47a2b"/>
+  <rect x="40" y="7" width="3" height="5" fill="#333"/>
+  <!-- Cocktail Glass -->
+  <polygon points="54,12 66,12 60,20" fill="#a0d8ef" opacity="0.8"/>
+  <line x1="60" y1="20" x2="60" y2="27" stroke="#a0d8ef" stroke-width="1.5"/>
+  <line x1="56" y1="27" x2="64" y2="27" stroke="#a0d8ef" stroke-width="2"/>
+  <!-- Beer Tap on Bar -->
+  <rect x="75" y="14" width="5" height="14" fill="#c0c0c0"/>
+  <path d="M75,17 Q70,17 70,22" stroke="#d4af37" stroke-width="3" fill="none"/>
+  <circle cx="77.5" cy="12" r="3" fill="#111"/>
+  <!-- Footrest Rail -->
+  <line x1="18" y1="88" x2="102" y2="88" stroke="#d4af37" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="25" cy="88" r="3" fill="#a6841e"/>
+  <circle cx="95" cy="88" r="3" fill="#a6841e"/>
+</svg>
