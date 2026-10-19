@@ -5,7 +5,7 @@
         <field name="name">dashboard.mail.view.form</field>
         <field name="model">dashboard.mail</field>
         <field name="arch" type="xml">
-            <form string="Sent Mail">
+            <form string="Send Mail">
                 <group>
                     <field name="user_ids" widget="many2many_tags"/>
                     <field name="base64code" invisible="1"/>

@@ -1,10 +1,9 @@
-/** @odoo-module **/
 import { registry } from "@web/core/registry";
 import { loadJS } from '@web/core/assets';
 import { DynamicDashboardTile } from './dynamic_dashboard_tile';
 import { DynamicDashboardChart } from './dynamic_dashboard_chart';
 import { useService } from "@web/core/utils/hooks";
-import { Component, signal, mount, onWillStart, onMounted } from "@odoo/owl";
+import { Component, signal, mount, onWillStart, onMounted, useState } from "@odoo/owl";
 import { rpc } from "@web/core/network/rpc";
 
 
@@ -15,15 +14,20 @@ export class AdvancedDynamicDashboard extends Component {
         this.action = useService("action");
         this.orm = useService("orm");
         this.dialog = useService("dialog");
-        this.actionId = this.props.actionId
+        this.actionId = this.props.actionId;
+        this.state = useState({
+            isDarkMode: false,
+            isEditingLayout: false,
+            showModeText: false,
+        });
         onWillStart(async () => {
-            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js")
-            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js")
-            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js")
-        })
+            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js");
+            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js");
+        });
         onMounted(() => {
             this.renderDashboard();
-        })
+        });
     }
 
     onChangeTheme() {
@@ -78,80 +82,76 @@ export class AdvancedDynamicDashboard extends Component {
                 var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
                 // translate the element
                 target.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
-                // update the posiion attributes
+                // update the position attributes
                 target.setAttribute('data-x', x)
                 target.setAttribute('data-y', y)
             }
-            // this function is used later in the resizingx
             window.dragMoveListener = dragMoveListener
         });
     }
 
     async renderDashboard() {
         /* Function for rendering the dashboard */
-        var self = this;
-        document.getElementById("save_layout").style.display = 'none';
-        await this.orm.call('dashboard.theme', 'get_records', [[]]).then(function (response) {
+        await this.orm.call('dashboard.theme', 'get_records', [[]]).then((response) => {
             response.forEach((ev) => {
                 const options = document.createElement("option");
                 options.value = ev.style;
                 options.text = ev.name;
-                self.ThemeSelector()?.append(options)
+                this.ThemeSelector()?.append(options);
             });
-        })
-        await this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId]).then(function (response) {
+        });
+        await this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId]).then((response) => {
+            const container = document.querySelector('.items');
+            if (!container) return;
             for (let i = 0; i < response.length; i++) {
                 if (response[i].type === 'tile') {
-                    mount(DynamicDashboardTile, document.getElementsByClassName('items')[0], {
+                    mount(DynamicDashboardTile, container, {
                         props: {
-                            widget: response[i], doAction: self.action, dialog: self.dialog, orm: self.orm
+                            widget: response[i], doAction: this.action, dialog: this.dialog, orm: this.orm
                         }
                     });
                 }
                 else {
-                    mount(DynamicDashboardChart, document.getElementsByClassName('items')[0], {
+                    mount(DynamicDashboardChart, container, {
                         props: {
-                            widget: response[i], doAction: self.action, rpc: self.rpc, dialog: self.dialog, orm: self.orm
+                            widget: response[i], doAction: this.action, dialog: this.dialog, orm: this.orm
                         }
                     });
                 }
             }
-        })
+        });
     }
 
     editLayout(ev) {
         /* Function for editing the layout , it enables resizing and dragging functionality */
         document.querySelectorAll('.resize-drag').forEach((element) => {
-            interact(element).draggable(true)
-            interact(element).resizable(true)
+            interact(element).draggable(true);
+            interact(element).resizable(true);
         });
         ev.stopPropagation();
         ev.preventDefault();
-        document.getElementById("edit_layout").style.display = 'none';
-        document.getElementById("save_layout").style.display = '';
-        this.ResizeDrag()
+        this.state.isEditingLayout = true;
+        this.ResizeDrag();
     }
 
     saveLayout(ev) {
         /* Function for saving the layout */
-        var self = this;
         ev.stopPropagation();
         ev.preventDefault();
-        document.getElementById("edit_layout").style.display = '';
-        document.getElementById("save_layout").style.display = 'none';
-        var data_list = []
+        this.state.isEditingLayout = false;
+        var data_list = [];
         document.querySelectorAll('.resize-drag').forEach((element) => {
-            interact(element).draggable(false)
-            interact(element).resizable(false)
+            interact(element).draggable(false);
+            interact(element).resizable(false);
             data_list.push({
                 'id': element.dataset['id'],
                 'data-x': element.dataset['x'],
                 'data-y': element.dataset['y'],
                 'height': element.clientHeight,
                 'width': element.clientWidth,
-            })
+            });
         });
-        self.orm.call('dashboard.block', 'get_save_layout', [[], data_list]).then(function (response) {
+        this.orm.call('dashboard.block', 'get_save_layout', [[], data_list]).then(() => {
             window.location.reload();
         });
     }
@@ -160,71 +160,12 @@ export class AdvancedDynamicDashboard extends Component {
         /* Function for changing the mode of the view */
         ev.stopPropagation();
         ev.preventDefault();
-        const currentMode = document.getElementsByClassName("mode")[0].getAttribute("mode");
-        if (currentMode == "light") {
-            document.getElementsByClassName('theme')[0].setAttribute('style', 'display: none;')
-            document.querySelector(".o_advanced_dynamic_dashboard")?.setAttribute('style', 'background-color: #383E45;min-height:-webkit-fill-available !important;')
-            document.getElementsByClassName("mode")[0].setAttribute("mode", "dark")
-            document.getElementsByClassName("bi-moon-stars-fill")[0].setAttribute('class', 'bi bi-cloud-sun-fill view-mode-icon')
-            document.getElementsByClassName("bi-cloud-sun-fill")[0].setAttribute('style', 'color:black;margin-left:10px;')
-            document.getElementsByClassName("mode")[0].setAttribute('style', 'display: none !important');
-            document.getElementById("search-input-chart").setAttribute('style', 'background-color: white !important;')
-            document.getElementById("dropdownMenuButton").setAttribute('style', 'background-color: #03DAC5;margin-top:-4px !important;')
-            document.getElementById("text_add").setAttribute('style', 'color: black !important;')
-            document.querySelectorAll(".date-label").forEach((el) => {
-                el.setAttribute('style', 'color: black;font-family:monospace !important;')
-            });
-            document.querySelectorAll(".block_setting").forEach((el) => {
-                el.setAttribute('style', 'color: white !important;')
-            });
-            document.querySelectorAll(".block_delete").forEach((el) => {
-                el.setAttribute('style', 'color: #ffffff !important;')
-            });
-            document.querySelectorAll(".block_image").forEach((el) => {
-                el.setAttribute('style', 'color: #03DAC5 !important;')
-            });
-            document.querySelectorAll(".block_pdf").forEach((el) => {
-                el.setAttribute('style', 'color: #03DAC5 !important;')
-            });
-            document.querySelectorAll(".block_csv").forEach((el) => {
-                el.setAttribute('style', 'color: #03DAC5 !important;')
-            });
-            document.querySelectorAll(".block_xlsx").forEach((el) => {
-                el.setAttribute('style', 'color: #03DAC5 !important;')
-            });
-        }
-        else {
-            document.getElementsByClassName('theme')[0].setAttribute('style', 'display: block;')
-            document.querySelector(".o_advanced_dynamic_dashboard")?.setAttribute('style', (this.ThemeSelector()?.value || "") + 'min-height:-webkit-fill-available;')
-            document.getElementsByClassName("mode")[0].setAttribute("mode", "light")
-            document.getElementsByClassName("bi-cloud-sun-fill")[0].setAttribute('class', 'bi bi-moon-stars-fill view-mode-icon')
-            document.getElementsByClassName("view-mode-icon")[0].setAttribute('style', 'color:black;margin-left:10px !important;')
-            document.getElementsByClassName("mode")[0].setAttribute('style', 'display: none !important');
-            document.getElementsByClassName("mode")[0].setAttribute('style', 'color: white !important');
-            document.getElementById("search-input-chart").setAttribute('style', 'background-color: transparent !important;')
-            document.getElementById("dropdownMenuButton").setAttribute('style', 'background-color: none;margin-top:-4px !important;')
-            document.getElementById("text_add").setAttribute('style', 'color: white !important;')
-            document.querySelectorAll(".date-label").forEach((el) => {
-                el.setAttribute('style', 'color: black !important;font-family:monospace !important;')
-            });
-            document.querySelectorAll(".block_setting").forEach((el) => {
-                el.setAttribute('style', 'color: black !important;')
-            });
-            document.querySelectorAll(".block_delete").forEach((el) => {
-                el.setAttribute('style', 'color: black !important;')
-            });
-            document.querySelectorAll(".block_image").forEach((el) => {
-                el.setAttribute('style', 'color: black !important;')
-            });
-            document.querySelectorAll(".block_pdf").forEach((el) => {
-                el.setAttribute('style', 'color: black !important;')
-            });
-            document.querySelectorAll(".block_csv").forEach((el) => {
-                el.setAttribute('style', 'color: black !important;')
-            });
-            document.querySelectorAll(".block_xlsx").forEach((el) => {
-                el.setAttribute('style', 'color: black !important;')
-            });
+        this.state.isDarkMode = !this.state.isDarkMode;
+        const dashboard = document.querySelector(".o_advanced_dynamic_dashboard");
+        if (this.state.isDarkMode) {
+            dashboard?.setAttribute('style', 'background-color: #383E45;min-height:-webkit-fill-available !important;');
+        } else {
+            dashboard?.setAttribute('style', (this.ThemeSelector()?.value || "") + 'min-height:-webkit-fill-available;');
         }
     }
 
@@ -232,7 +173,6 @@ export class AdvancedDynamicDashboard extends Component {
         /* Function for adding tiles and charts */
         event.stopPropagation();
         event.preventDefault();
-        self = this;
         var type = event.target.getAttribute('data-type');
         if (type == 'graph') {
             var chart_type = event.target.getAttribute('data-chart_type');
@@ -254,7 +194,7 @@ export class AdvancedDynamicDashboard extends Component {
                     'default_text_color': '#FFFFFF',
                     'default_val_color': '#F3F3F3',
                     'default_fa_icon': 'fa fa-bar-chart',
-                    'default_client_action_id': parseInt(self.actionId)
+                    'default_client_action_id': parseInt(this.actionId)
                 }
             })
         }
@@ -272,7 +212,7 @@ export class AdvancedDynamicDashboard extends Component {
                     'default_width': '588px',
                     'default_graph_type': chart_type,
                     'default_fa_icon': 'fa fa-bar-chart',
-                    'default_client_action_id': parseInt(self.actionId)
+                    'default_client_action_id': parseInt(this.actionId)
                 },
             })
         }
@@ -280,34 +220,29 @@ export class AdvancedDynamicDashboard extends Component {
 
     dateFilter() {
         /* Function for filtering the data based on the creation date */
-        var start_date = document.getElementById("start-date").value;
-        var end_date = document.getElementById("end-date").value;
-        var self = this;
-        if (!start_date) {
-            start_date = "null"
-        }
-        if (!end_date) {
-            end_date = "null"
-        }
-        this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId, start_date, end_date]).then(function (response) {
-            document.getElementsByClassName('items')[0].innerHTML = ''
+        var start_date = document.getElementById("start-date")?.value || "null";
+        var end_date = document.getElementById("end-date")?.value || "null";
+        this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId, start_date, end_date]).then((response) => {
+            const container = document.querySelector('.items');
+            if (!container) return;
+            container.innerHTML = '';
             for (let i = 0; i < response.length; i++) {
                 if (response[i].type === 'tile') {
-                    mount(DynamicDashboardTile, document.getElementsByClassName('items')[0], {
+                    mount(DynamicDashboardTile, container, {
                         props: {
-                            widget: response[i], doAction: self.action, dialog: self.dialog, orm: self.orm
+                            widget: response[i], doAction: this.action, dialog: this.dialog, orm: this.orm
                         }
                     });
                 }
                 else {
-                    mount(DynamicDashboardChart, document.getElementsByClassName('items')[0], {
+                    mount(DynamicDashboardChart, container, {
                         props: {
-                            widget: response[i], doAction: self.action, rpc: self.rpc, dialog: self.dialog, orm: self.orm
+                            widget: response[i], doAction: this.action, dialog: this.dialog, orm: this.orm
                         }
                     });
                 }
             }
-        })
+        });
     }
 
     input_change() {
@@ -318,7 +253,7 @@ export class AdvancedDynamicDashboard extends Component {
     async clickSearch() {
         /* Function for searching the blocks with their names */
         var input = document.getElementById("search-input-chart").value;
-        rpc('/custom_dashboard/search_input_chart', { 'search_input': input }).then(function (response) {
+        rpc('/custom_dashboard/search_input_chart', { 'search_input': input }).then((response) => {
             var blocks = document.querySelectorAll(".items .resize-drag");
             blocks.forEach((element) => {
                 var dataId = JSON.parse(element.getAttribute('data-id'));
@@ -328,29 +263,18 @@ export class AdvancedDynamicDashboard extends Component {
                 else {
                     element.style.visibility = "hidden";
                 }
-            })
-        })
+            });
+        });
     }
 
     showViewMode(ev) {
         /* Function for showing the mode text */
-        const modeElement = document.querySelector('.mode');
-        const currentMode = modeElement.getAttribute("mode");
-
-        if (currentMode == "light") {
-            modeElement.textContent = "Dark Mode";
-        } else {
-            modeElement.textContent = "Light Mode";
-        }
-
-        modeElement.style.color = "black";
-        modeElement.classList.add('show');
+        this.state.showModeText = true;
     }
 
     hideViewMode(ev) {
         /* Function for hiding the mode text */
-        const modeElement = document.querySelector('.mode');
-        modeElement.classList.remove('show');
+        this.state.showModeText = false;
     }
     clearSearch() {
         /* Function for clearing the search input */

@@ -454,7 +454,42 @@ input:checked + .slider:before {
         flex: 1 1 auto;
     }
 
-    #search-input-chart {
-        width: 100%;
-    }
+}
+
+/* Dark Mode Styling */
+.o_advanced_dynamic_dashboard.o_dark_mode {
+    background-color: #383E45 !important;
+}
+
+.o_advanced_dynamic_dashboard.o_dark_mode #search-input-chart {
+    background-color: white !important;
+}
+
+.o_advanced_dynamic_dashboard.o_dark_mode #dropdownMenuButton {
+    background-color: #03DAC5 !important;
+    margin-top: -4px !important;
+}
+
+.o_advanced_dynamic_dashboard.o_dark_mode #text_add {
+    color: black !important;
+}
+
+.o_advanced_dynamic_dashboard.o_dark_mode .date-label {
+    color: black !important;
+    font-family: monospace !important;
+}
+
+.o_advanced_dynamic_dashboard.o_dark_mode .block_setting {
+    color: white !important;
+}
+
+.o_advanced_dynamic_dashboard.o_dark_mode .block_delete {
+    color: #ffffff !important;
+}
+
+.o_advanced_dynamic_dashboard.o_dark_mode .block_image,
+.o_advanced_dynamic_dashboard.o_dark_mode .block_pdf,
+.o_advanced_dynamic_dashboard.o_dark_mode .block_csv,
+.o_advanced_dynamic_dashboard.o_dark_mode .block_xlsx {
+    color: #03DAC5 !important;
 }

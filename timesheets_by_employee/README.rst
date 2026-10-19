@@ -24,36 +24,53 @@ Key Features
 ------------
 
 * Print detailed timesheet PDF reports filtered by employee and date range.
-* View recorded hours grouped by project, task, and date.
-* Clear summaries of billable and total hours worked.
+* View recorded hours by project and date.
+* Clear summary of total working hours logged.
 
 Installation
 ------------
-No external dependencies.
+
+No external Python dependencies are required.
 
 Configuration
 -------------
-No additional configuration is required. Access via Timesheets -> Reporting.
+
+No additional configuration is required. Access via Timesheets -> Reporting -> Employee Timesheet.
+
+Usage
+-----
+
+* Navigate to Timesheets -> Reporting -> Employee Timesheet.
+* Select an employee and optionally specify starting and ending dates.
+* Click 'Print Timesheet' to generate and download the PDF report.
 
 Company
 -------
+
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
 License
 -------
+
 Lesser General Public License, Version 3 (LGPL v3).
 (http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
+Credits
+-------
+
+* Cybrosys Techno Solutions <https://cybrosys.com/>
+
 Contacts
 --------
-* Mail Contact : odoo@cybrosys.com
-* Website : https://cybrosys.com
+
+* Mail Contact: odoo@cybrosys.com
+* Website: https://cybrosys.com
 
 Maintainer
-==========
+----------
+
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
-
 
 This module is maintained by Cybrosys Technologies.
 

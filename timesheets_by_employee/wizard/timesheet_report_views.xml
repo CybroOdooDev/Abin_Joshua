@@ -14,14 +14,14 @@
                         <field name="from_date"/>
                         <field name="to_date"/>
                     </group>
-                    <footer>
-                        <button string="Print Timesheet"
-                                name="print_timesheet" type="object"
-                                class="btn-primary"/>
-                        <button string="Discard" class="btn-default"
-                                special="cancel"/>
-                    </footer>
                 </group>
+                <footer>
+                    <button string="Print Timesheet"
+                            name="print_timesheet" type="object"
+                            class="btn-primary"/>
+                    <button string="Discard" class="btn-secondary"
+                            special="cancel"/>
+                </footer>
             </form>
         </field>
     </record>

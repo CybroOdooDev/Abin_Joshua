@@ -15,14 +15,13 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import models
 from odoo.tools import SQL
 
 
-def get_query(self, args, operation, field, start_date=None, end_date=None,
-              group_by=False, apply_ir_rules=False):
+def get_query(model, args, operation, field, start_date=None, end_date=None,
+              group_by=False, apply_ir_rules=True):
     """ Dashboard block Query Creation """
-    query = self._search(
+    query = model._search(
         domain=args,
         offset=0,
         limit=None,
@@ -39,37 +38,39 @@ def get_query(self, args, operation, field, start_date=None, end_date=None,
         if op_str not in ('SUM', 'AVG', 'COUNT', 'MAX', 'MIN'):
             op_str = 'COUNT'
         field_name = field.name if field else 'id'
-        select_value = SQL("COALESCE(%s(%s), 0) AS value", SQL(op_str), SQL.identifier(self._table, field_name))
+        select_value = SQL("COALESCE(%s(%s), 0) AS value", SQL(op_str), SQL.identifier(model._table, field_name))
 
         if group_by:
-            if group_by.ttype == 'many2one' and group_by.relation in self.env:
-                rel_model = self.env[group_by.relation]
+            if group_by.ttype == 'many2one' and group_by.relation in model.env:
+                rel_model = model.env[group_by.relation]
                 rel_table = rel_model._table
+                rel_alias = f"rel_{group_by.name}"
                 rec_name = rel_model._rec_name_fallback()
-                join_sql = SQL("INNER JOIN %s ON %s = %s",
+                join_sql = SQL("INNER JOIN %s AS %s ON %s = %s",
                                SQL.identifier(rel_table),
-                               SQL.identifier(rel_table, 'id'),
-                               SQL.identifier(self._table, group_by.name))
+                               SQL.identifier(rel_alias),
+                               SQL.identifier(rel_alias, 'id'),
+                               SQL.identifier(model._table, group_by.name))
                 select_sql = SQL("%s, %s AS %s",
                                  select_value,
-                                 SQL.identifier(rel_table, rec_name),
+                                 SQL.identifier(rel_alias, rec_name),
                                  SQL.identifier(group_by.name))
-                group_by_sql = SQL("GROUP BY %s", SQL.identifier(rel_table, rec_name))
+                group_by_sql = SQL("GROUP BY %s", SQL.identifier(rel_alias, rec_name))
             else:
                 select_sql = SQL("%s, %s AS %s",
                                  select_value,
-                                 SQL.identifier(self._table, group_by.name),
+                                 SQL.identifier(model._table, group_by.name),
                                  SQL.identifier(group_by.name))
-                group_by_sql = SQL("GROUP BY %s", SQL.identifier(self._table, str(group_by.name)))
+                group_by_sql = SQL("GROUP BY %s", SQL.identifier(model._table, str(group_by.name)))
         else:
             select_sql = select_value
     else:
-        select_sql = SQL("%s AS id", SQL.identifier(self._table, 'id'))
+        select_sql = SQL("%s AS id", SQL.identifier(model._table, 'id'))
 
     if start_date and start_date != 'null':
-        query.add_where(SQL('%s >= %s', SQL.identifier(self._table, 'create_date'), start_date))
+        query.add_where(SQL('%s >= %s', SQL.identifier(model._table, 'create_date'), start_date))
     if end_date and end_date != 'null':
-        query.add_where(SQL('%s <= %s', SQL.identifier(self._table, 'create_date'), end_date))
+        query.add_where(SQL('%s <= %s', SQL.identifier(model._table, 'create_date'), end_date))
 
     from_clause = SQL("%s %s", query.from_clause, join_sql) if join_sql else query.from_clause
     where_clause = SQL("WHERE %s", query.where_clause) if query._where_clauses else SQL("")
@@ -80,6 +81,3 @@ def get_query(self, args, operation, field, start_date=None, end_date=None,
                       where_clause,
                       group_by_sql or SQL(""))
     return final_query
-
-
-models.BaseModel.get_query = get_query

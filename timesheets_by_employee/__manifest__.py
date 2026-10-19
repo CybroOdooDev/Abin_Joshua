@@ -17,9 +17,9 @@
 #############################################################################
 {
     'name': 'Timesheet PDF Report',
-    'version': '19.5.1.0.0',
-    "category": "Project",
-    'summary': 'Timesheet PDF Report of Employees',
+    'version': '20.0.1.0.0',
+    'category': 'Services/Timesheets',
+    'summary': 'Timesheet PDF report for employees.',
     'description': 'Comprehensive timesheet PDF report summarizing employee '
                    'work hours and activities for efficient tracking and '
                    'management.',
@@ -27,7 +27,7 @@
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['hr','hr_timesheet'],
+    'depends': ['hr_timesheet'],
     'data': [
         'security/ir.access.csv',
         'report/timesheet_templates.xml',
@@ -36,7 +36,4 @@
     ],
     'images': ['static/description/banner.jpg'],
     'license': 'LGPL-3',
-    'installable': True,
-    'auto_install': False,
-    'application': False,
 }

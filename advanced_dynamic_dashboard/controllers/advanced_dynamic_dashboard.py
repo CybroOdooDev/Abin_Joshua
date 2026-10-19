@@ -23,7 +23,7 @@ class DynamicDashboard(http.Controller):
     """Class to search and filter values in dashboard"""
 
     @http.route('/custom_dashboard/search_input_chart', type='jsonrpc',
-                auth="public", website=True)
+                auth="user")
     def dashboard_search_input_chart(self, search_input):
         """Function to filter search input in dashboard"""
         return request.env['dashboard.block'].search([

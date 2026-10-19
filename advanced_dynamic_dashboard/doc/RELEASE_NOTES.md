@@ -1,6 +1,7 @@
-## Module <advanced_dynamic_dashboard>
+## Module advanced_dynamic_dashboard
 
-#### 14.09.2026
+#### 2026-10-17
 #### Version 20.0.1.0.0
-##### ADD
-- Initial commit for Advanced Dynamic Dashboard
+#### ADD
+
+- Initial release for Odoo 20: Create configurable dynamic dashboards with KPI tiles and visual charts.

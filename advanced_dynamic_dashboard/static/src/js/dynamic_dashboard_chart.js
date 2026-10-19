@@ -1,4 +1,3 @@
-/** @odoo-module **/
 import { loadJS } from '@web/core/assets';
 import { getColor } from "@web/core/colors/colors";
 import { _t } from "@web/core/l10n/translation";

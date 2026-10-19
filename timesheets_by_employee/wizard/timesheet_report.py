@@ -15,7 +15,7 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import fields, models
+from odoo import _, fields, models
 from odoo.exceptions import UserError
 
 
@@ -27,7 +27,8 @@ class TimesheetReport(models.TransientModel):
     user_id = fields.Many2one(
         'res.users',
         string="Employee",
-        required=True, help="You can select the employee")
+        required=True,
+        help="You can select the employee")
     from_date = fields.Date(
         string="Starting Date",
         help="You can select the starting dates for the PDF report")
@@ -36,19 +37,23 @@ class TimesheetReport(models.TransientModel):
         help="You can select the ending dates for the PDF report")
 
     def print_timesheet(self):
-        """Redirects to the report with the values obtained from the wizard
-        'data['form']': name of employee and the date duration"""
-        today = fields.Date.today()
-        if self.from_date and self.to_date:
-            if self.from_date > self.to_date:
-                raise UserError("Start date cannot be after end date.")
-            if self.from_date > today or self.to_date > today:
-                raise UserError("Start date and end date cannot be in the future.")
+        """Redirects to the report with the values obtained from the wizard.
+
+        Returns:
+            dict: The report action dictionary with employee and date parameters.
+        """
+        today = fields.Date.context_today(self)
+        if self.from_date and self.from_date > today:
+            raise UserError(_("The start date cannot be in the future."))
+        if self.to_date and self.to_date > today:
+            raise UserError(_("The end date cannot be in the future."))
+        if self.from_date and self.to_date and self.from_date > self.to_date:
+            raise UserError(_("The start date cannot be after the end date."))
         data = {
             'employee': self.user_id.id,
             'start_date': self.from_date,
             'end_date': self.to_date,
         }
         return self.env.ref(
-            'timesheets_by_employee.action_report_print_timesheets'). \
-            report_action(self, data=data)
+            'timesheets_by_employee.action_report_print_timesheets'
+        ).report_action(self, data=data)

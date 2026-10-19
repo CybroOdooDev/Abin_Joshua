@@ -15,6 +15,7 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
+import base64
 from odoo import fields, models
 
 
@@ -44,9 +45,10 @@ class DashboardMail(models.TransientModel):
                 'email_to': user.email,
             }
             mail_id = self.env['mail.mail'].create(mail_values)
+            raw_data = base64.b64decode(self.base64code) if self.base64code else b''
             attachment_values = {
                 'name': 'Dashboard.pdf',
-                'datas': self.base64code,
+                'raw': raw_data,
                 'type': 'binary',
                 'res_model': 'mail.mail',
                 'res_id': mail_id.id,

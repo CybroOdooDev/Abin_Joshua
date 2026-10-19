@@ -41,11 +41,11 @@ class ReportTimesheet(models.AbstractModel):
         company_id = user.company_id
         period = None
         if from_date and to_date:
-            period = "From " + str(from_date) + " To " + str(to_date)
+            period = f"From {from_date} To {to_date}"
         elif from_date:
-            period = "From " + str(from_date)
+            period = f"From {from_date}"
         elif to_date:
-            period = "To " + str(to_date)
+            period = f"To {to_date}"
 
         data.update({
             'employee_name': employee.name if employee else user.name,

@@ -17,7 +17,8 @@
 #############################################################################
 from ast import literal_eval
 from odoo import api, fields, models
-from  odoo.fields import Domain as expression
+from odoo.fields import Domain as expression
+from .domain_to_sql import get_query
 
 
 class DashboardBlock(models.Model):
@@ -34,11 +35,10 @@ class DashboardBlock(models.Model):
             return action_id.id
         return False
 
-    name = fields.Char(string="Name", help='Name of the block')
+    name = fields.Char(help='Name of the block')
     fa_icon = fields.Char(string="Icon", help="Add icon for tile")
     operation = fields.Selection(
         selection=[("sum", "Sum"), ("avg", "Average"), ("count", "Count")],
-        string="Operation",
         help='Tile Operation that needs to bring values for tile',
         required=True)
     graph_type = fields.Selection(
@@ -47,19 +47,17 @@ class DashboardBlock(models.Model):
                    ("doughnut", "Doughnut")],
         string="Chart Type", help='Type of Chart')
     measured_field_id = fields.Many2one("ir.model.fields",
-                                        string="Measured Field",
                                         help="Select the Measured")
     client_action_id = fields.Many2one('ir.actions.client',
-                                       string="Client action",
-                                       default=get_default_action,
+                                       default=lambda self: self.get_default_action(),
                                        help="Client action")
     type = fields.Selection(
         selection=[("graph", "Chart"), ("tile", "Tile")],
-        string="Type", help='Type of Block ie, Chart or Tile')
+        help='Type of Block ie, Chart or Tile')
     x_axis = fields.Char(string="X-Axis", help="Chart X-axis")
     y_axis = fields.Char(string="Y-Axis", help="Chart Y-axis")
-    height = fields.Char(string="Height ", help="Height of the block")
-    width = fields.Char(string="Width", help="Width of the block")
+    height = fields.Char(help="Height of the block")
+    width = fields.Char(help="Width of the block")
     translate_x = fields.Char(string="Translate_X",
                               help="x value for the style transform translate")
     translate_y = fields.Char(string="Translate_Y",
@@ -69,17 +67,17 @@ class DashboardBlock(models.Model):
     group_by_id = fields.Many2one("ir.model.fields", store=True,
                                   string="Group by(Y-Axis)",
                                   help='Field value for Y-Axis')
-    tile_color = fields.Char(string="Tile Color", help='Primary Color of Tile')
-    text_color = fields.Char(string="Text Color", help='Text Color of Tile')
+    tile_color = fields.Char(help='Primary Color of Tile')
+    text_color = fields.Char(help='Text Color of Tile')
     val_color = fields.Char(string="Value Color", help='Value Color of Tile')
     fa_color = fields.Char(string="Icon Color", help='Icon Color of Tile')
-    filter = fields.Char(string="Filter", help="Add filter")
-    model_id = fields.Many2one('ir.model', string='Model',
+    filter = fields.Char(help="Add filter")
+    model_id = fields.Many2one('ir.model',
                                help="Select the module name")
-    model_name = fields.Char(related='model_id.model', string="Model Name",
+    model_name = fields.Char(related='model_id.model',
+                             string="Model Technical Name",
                              help="Added model_id model")
-    edit_mode = fields.Boolean(string="Edit Mode",
-                               help="Enable to edit chart and tile",
+    edit_mode = fields.Boolean(help="Enable to edit chart and tile",
                                default=False)
 
     @api.onchange('model_id')
@@ -92,15 +90,18 @@ class DashboardBlock(models.Model):
     def get_dashboard_vals(self, action_id, start_date=None, end_date=None):
         """Fetch block values from js and create chart"""
         block_id = []
-        for rec in self.env['dashboard.block'].sudo().search(
-                [('client_action_id', '=', int(action_id))]):
-            if rec.filter is False:
-                rec.filter = "[]"
-            filter_list = literal_eval(rec.filter)
-            filter_list = [filter_item for filter_item in filter_list if not (
-                    isinstance(filter_item, tuple) and filter_item[
-                0] == 'create_date')]
-            rec.filter = repr(filter_list)
+        for rec in self.search([('client_action_id', '=', int(action_id))]):
+            filter_raw = rec.filter or "[]"
+            try:
+                filter_list = literal_eval(filter_raw)
+            except (ValueError, SyntaxError):
+                filter_list = []
+            if not isinstance(filter_list, list):
+                filter_list = []
+            filter_list = [
+                filter_item for filter_item in filter_list
+                if not (isinstance(filter_item, (tuple, list)) and len(filter_item) > 0 and filter_item[0] == 'create_date')
+            ]
             icon_name = (rec.fa_icon or 'fa-bar-chart').strip()
             if not icon_name.startswith('fa '):
                 if not icon_name.startswith('fa-'):
@@ -122,23 +123,21 @@ class DashboardBlock(models.Model):
                     'data_y': rec.data_y,
                     'domain': filter_list,
                     }
-            domain = []
-            if rec.filter:
-                domain = expression.AND([literal_eval(rec.filter)])
+            domain = expression.AND([filter_list]) if filter_list else []
             if rec.model_name:
                 if rec.type == 'graph':
-                    self._cr.execute(self.env[rec.model_name].get_query(domain,
-                                                                        rec.operation,
-                                                                        rec.measured_field_id,
-                                                                        start_date,
-                                                                        end_date,
-                                                                        group_by=rec.group_by_id))
-                    records = self._cr.dictfetchall()
+                    self.env.cr.execute(get_query(self.env[rec.model_name],
+                                               domain,
+                                               rec.operation,
+                                               rec.measured_field_id,
+                                               start_date,
+                                               end_date,
+                                               group_by=rec.group_by_id))
+                    records = self.env.cr.dictfetchall()
                     x_axis = []
                     for record in records:
-                        if record.get('name') and type(
-                                record.get('name')) == dict:
-                            x_axis.append(record.get('name')[self._context.get(
+                        if isinstance(record.get('name'), dict):
+                            x_axis.append(record.get('name')[self.env.context.get(
                                 'lang') or 'en_US'])
                         else:
                             x_axis.append(record.get(rec.group_by_id.name))
@@ -147,12 +146,13 @@ class DashboardBlock(models.Model):
                         y_axis.append(record.get('value'))
                     vals.update({'x_axis': x_axis, 'y_axis': y_axis})
                 else:
-                    self._cr.execute(self.env[rec.model_name].get_query(domain,
-                                                                        rec.operation,
-                                                                        rec.measured_field_id,
-                                                                        start_date,
-                                                                        end_date))
-                    records = self._cr.dictfetchall()
+                    self.env.cr.execute(get_query(self.env[rec.model_name],
+                                               domain,
+                                               rec.operation,
+                                               rec.measured_field_id,
+                                               start_date,
+                                               end_date))
+                    records = self.env.cr.dictfetchall()
                     magnitude = 0
                     total = (records[0].get('value') or 0) if records else 0
                     while abs(total) >= 1000 and magnitude < 5:

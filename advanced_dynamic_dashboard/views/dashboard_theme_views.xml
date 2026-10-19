@@ -31,7 +31,7 @@
     </record>
 
     <!--list view of the dashboard block theme-->
-    <record id="dashboard_theme_view_tree" model="ir.ui.view">
+    <record id="dashboard_theme_view_list" model="ir.ui.view">
         <field name="name">dashboard.theme.view.list</field>
         <field name="model">dashboard.theme</field>
         <field name="arch" type="xml">

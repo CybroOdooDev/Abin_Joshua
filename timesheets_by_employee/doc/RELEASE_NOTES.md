@@ -1,7 +1,8 @@
-## Module <timesheets_by_employee>
+## Module timesheets_by_employee
 
-#### 04.09.2026
+#### 2026-10-19
 #### Version 20.0.1.0.0
-##### ADD
-- Initial commit for Timesheet PDF Report
+#### ADD
+
+- Initial release for Odoo 20: Timesheet PDF report for employees.
 
