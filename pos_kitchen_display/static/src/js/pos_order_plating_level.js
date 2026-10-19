@@ -74,7 +74,36 @@ patch(Orderline.prototype, {
 patch(Order.prototype, {
     setup() {
         super.setup(...arguments);
-        this.selected_plating_level_id = this.selected_plating_level_id || null;
+        this.selected_plating_level_id = undefined;
+    },
+
+    export_as_JSON() {
+        const json = super.export_as_JSON(...arguments);
+        json.selected_plating_level_id = this.selected_plating_level_id;
+        return json;
+    },
+
+    init_from_JSON(json) {
+        super.init_from_JSON(...arguments);
+        this.selected_plating_level_id = json.selected_plating_level_id;
+    },
+
+    get_default_plating_level_id() {
+        if (!this.pos?.config?.enable_plating_level) return null;
+        const levels = this.pos?.pos_plating_level || [];
+        const defaultRec = levels.find(l => l.is_default);
+        return defaultRec ? defaultRec.id : null;
+    },
+
+    get_selected_plating_level_id() {
+        if (this.selected_plating_level_id === undefined) {
+            this.selected_plating_level_id = this.get_default_plating_level_id();
+        }
+        return this.selected_plating_level_id;
+    },
+
+    set_selected_plating_level(levelId) {
+        this.selected_plating_level_id = levelId || null;
     },
 
     set_orderline_options(orderline, options) {
@@ -86,11 +115,7 @@ patch(Order.prototype, {
             orderline.set_plating_level(options.plating_level_id);
         } else if (!orderline.plating_level_id) {
             // Inherit from combo parent or use order's active course
-            let levelId = options?.comboParent?.plating_level_id || this.selected_plating_level_id;
-            if (!levelId && this.pos.pos_plating_level && this.pos.pos_plating_level.length) {
-                const defaultRec = this.pos.pos_plating_level.find(l => l.is_default);
-                levelId = defaultRec ? defaultRec.id : this.pos.pos_plating_level[0].id;
-            }
+            const levelId = options?.comboParent?.plating_level_id || this.get_selected_plating_level_id();
             if (levelId) {
                 orderline.set_plating_level(levelId);
             }

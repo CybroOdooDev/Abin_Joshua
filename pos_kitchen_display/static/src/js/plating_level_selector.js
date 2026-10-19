@@ -25,23 +25,26 @@ export class PlatingLevelSelector extends Component {
     get defaultLevelId() {
         if (!this.platingLevels.length) return null;
         const defaultRec = this.platingLevels.find(l => l.is_default);
-        return defaultRec ? defaultRec.id : this.platingLevels[0].id;
+        return defaultRec ? defaultRec.id : null;
     }
 
     get activePlatingLevelId() {
         if (!this.pos.config.enable_plating_level) return null;
         const order = this.currentOrder;
-        if (!order) return this.defaultLevelId;
-        if (!order.selected_plating_level_id) {
-            order.selected_plating_level_id = this.defaultLevelId;
-        }
-        return order.selected_plating_level_id;
+        if (!order) return null;
+        return order.get_selected_plating_level_id ? order.get_selected_plating_level_id() : (order.selected_plating_level_id || null);
     }
 
     setPlatingLevel(levelId) {
         const order = this.currentOrder;
         if (!order) return;
-        order.selected_plating_level_id = levelId;
-        this.state.activeLevelId = levelId;
+        const current = order.get_selected_plating_level_id ? order.get_selected_plating_level_id() : order.selected_plating_level_id;
+        const next = current === levelId ? null : levelId;
+        if (order.set_selected_plating_level) {
+            order.set_selected_plating_level(next);
+        } else {
+            order.selected_plating_level_id = next;
+        }
+        this.state.activeLevelId = next;
     }
 }

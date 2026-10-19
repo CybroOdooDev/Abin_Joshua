@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     "name": "POS Kitchen Display",
-    "version": "17.0.1.14.16",
+    "version": "17.0.1.14.17",
     "category": "Point of Sale",
     "depends": ["agr_kiosk_pay", "pos_kiosk_enhancements", "pos_restaurant", "bus", "mail", "point_of_sale", "stock_sms", "web", "website"],
     "data": [

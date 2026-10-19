@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="pos_restaurant.EditBar" t-inherit-mode="extension">
+        <!-- Add Decor Button directly next to + Table -->
+        <xpath expr="//span[contains(@class,'edit-button')][1]" position="after">
+            <span role="button" class="edit-button btn-decor-add text-center d-flex flex-column btn btn-light text-uppercase"
+                  t-on-click.stop="props.addDecor">
+                <i class="fa fa-paint-brush icon-button" role="img" aria-label="Decor" title="Add Decor"></i>
+                <span class="text-button d-block">Decor</span>
+            </span>
+        </xpath>
+
+        <!-- Decorate / Customize Table Button next to Rename -->
+        <xpath expr="//span[contains(@class,'edit-button')][span[text()='Rename']]" position="before">
+            <span role="button" class="edit-button btn-decor-customize text-center d-flex flex-column btn btn-light text-uppercase"
+                  t-att-class="{ disabled: props.selectedTables.length !== 1 }"
+                  t-on-click.stop="props.customizeTable">
+                <i class="fa fa-sliders icon-button" role="img" aria-label="Customize" title="Customize Decor"></i>
+                <span class="text-button d-block">Decorate</span>
+            </span>
+        </xpath>
+
+        <!-- Disable shape change for decor and custom image items -->
+        <xpath expr="//span[contains(@class,'button-option') and contains(@class,'round')]" position="attributes">
+            <attribute name="t-att-class">{ disabled: isShapeChangeDisabled() }</attribute>
+            <attribute name="t-on-click.stop">onChangeToCircle</attribute>
+        </xpath>
+        <xpath expr="//span[contains(@class,'button-option') and contains(@class,'square')]" position="attributes">
+            <attribute name="t-att-class">{ disabled: isShapeChangeDisabled() }</attribute>
+            <attribute name="t-on-click.stop">onChangeToSquare</attribute>
+        </xpath>
+    </t>
+</templates>

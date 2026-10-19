@@ -24,6 +24,12 @@
                                     </t>
                                 </button>
                             </t>
+                            <t t-if="currentPlatingLevelId">
+                                <button class="btn btn-outline-danger d-flex align-items-center justify-content-center p-2 mt-2"
+                                        t-on-click="() => this.selectLevel(null)">
+                                    <i class="fa fa-trash me-2"/> Clear Plating Level
+                                </button>
+                            </t>
                         </div>
                     </div>
                     <div class="modal-footer">

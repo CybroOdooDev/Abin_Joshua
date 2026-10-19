@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-name="pos_restaurant_decorations.DecorPresetPopup">
+        <div class="popup decor-picker-popup">
+            <header class="modal-header decor-picker-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="fa fa-paint-brush fs-4 text-warning"></i>
+                    <h4 class="modal-title m-0 fw-bold text-white"><t t-esc="props.title"/></h4>
+                </div>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm"
+                            t-attf-class="{{ state.activeTab === 'presets' ? 'btn-primary' : 'btn-outline-light' }}"
+                            t-on-click="() => this.state.activeTab = 'presets'">
+                        <i class="fa fa-th-large me-1"></i> Preset Library
+                    </button>
+                    <button type="button" class="btn btn-sm"
+                            t-attf-class="{{ state.activeTab === 'custom' ? 'btn-primary' : 'btn-outline-light' }}"
+                            t-on-click="() => this.state.activeTab = 'custom'">
+                        <i class="fa fa-upload me-1"></i> Custom Upload
+                    </button>
+                </div>
+            </header>
+
+            <!-- TAB 1: PRESETS -->
+            <t t-if="state.activeTab === 'presets'">
+                <!-- Categories Bar -->
+                <nav class="decor-categories-nav">
+                    <t t-foreach="categories" t-as="cat" t-key="cat.id">
+                        <button type="button" class="decor-category-btn"
+                                t-att-class="{ 'active': state.selectedCategory === cat.id }"
+                                t-on-click="() => this.selectCategory(cat.id)">
+                            <i t-attf-class="fa {{ cat.icon }} me-1"></i>
+                            <t t-esc="cat.name"/>
+                        </button>
+                    </t>
+                </nav>
+
+                <!-- Search Bar -->
+                <div class="px-3 pt-3 bg-white">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fa fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0 ps-0"
+                               placeholder="Search decorations, tables, chairs, bar items..."
+                               t-model="state.searchWord"/>
+                    </div>
+                </div>
+
+                <!-- Presets Grid -->
+                <main class="decor-items-grid">
+                    <t t-if="filteredPresets.length === 0">
+                        <div class="col-12 py-5 text-center text-muted">
+                            <i class="fa fa-info-circle fs-3 mb-2 d-block"></i>
+                            <span>No items match your search.</span>
+                        </div>
+                    </t>
+                    <t t-foreach="filteredPresets" t-as="preset" t-key="preset.id">
+                        <div class="decor-card"
+                             t-att-class="{ 'selected': state.selectedPresetId === preset.id }"
+                             t-on-click="() => this.selectPreset(preset.id)"
+                             t-on-dblclick="() => this.onPresetDoubleClick(preset.id)">
+                            <div class="decor-card-preview">
+                                <img t-att-src="getPresetImgUrl(preset)" t-att-alt="preset.name" loading="lazy"/>
+                            </div>
+                            <div class="decor-card-name" t-esc="preset.name" t-att-title="preset.name"/>
+                            <div class="decor-card-badges">
+                                <span class="decor-card-badge badge-scenery" t-if="preset.is_decoration">Scenery</span>
+                                <span class="decor-card-badge badge-seats" t-else="">
+                                    <i class="fa fa-user me-1"></i><t t-esc="preset.seats"/>
+                                </span>
+                                <span class="decor-card-badge badge-dims">
+                                    <t t-esc="preset.width"/>x<t t-esc="preset.height"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </main>
+            </t>
+
+            <!-- TAB 2: CUSTOM UPLOAD -->
+            <t t-else="">
+                <main class="p-4 bg-white" style="min-height: 380px;">
+                    <div class="row g-4">
+                        <div class="col-md-6 d-flex flex-column align-items-center justify-content-center p-4 border rounded-3 bg-light">
+                            <t t-if="state.customImagePreview">
+                                <div class="position-relative mb-3">
+                                    <img t-att-src="state.customImagePreview" alt="Custom Preview"
+                                         style="max-width: 180px; max-height: 180px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));"/>
+                                    <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle"
+                                            title="Remove Image" t-on-click="clearCustomImage">
+                                        <i class="fa fa-times"></i>
+                                    </button>
+                                </div>
+                                <span class="badge bg-success">Image Loaded</span>
+                            </t>
+                            <t t-else="">
+                                <i class="fa fa-cloud-upload text-muted display-4 mb-2"></i>
+                                <p class="text-muted text-center mb-3">Upload your custom graphic (PNG, JPG, or SVG)</p>
+                            </t>
+                            <input type="file" accept="image/*" class="form-control mt-2" t-ref="file-input-ref" t-on-change="onFileSelected"/>
+                        </div>
+
+                        <div class="col-md-6 d-flex flex-column justify-content-center">
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Item Name</label>
+                                <input type="text" class="form-control" placeholder="e.g. Vintage Tapestry, Plant Pot..." t-model="state.customName"/>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="customIsDecorSwitch" t-model="state.customIsDecoration"/>
+                                    <label class="form-check-label fw-semibold" for="customIsDecorSwitch">
+                                        Visual Floor Scenery (Non-orderable)
+                                    </label>
+                                </div>
+                                <small class="text-muted">If enabled, clicking this item will not open a customer order or guest prompt.</small>
+                            </div>
+                            <t t-if="!state.customIsDecoration">
+                                <div class="mb-3">
+                                    <label class="form-label fw-bold">Customer Seats</label>
+                                    <input type="number" min="1" max="50" class="form-control" t-model.number="state.customSeats"/>
+                                </div>
+                            </t>
+                        </div>
+                    </div>
+                </main>
+            </t>
+
+            <footer class="footer modal-footer bg-light p-3 border-top d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-secondary px-4" t-on-click="cancel">
+                    <t t-esc="props.cancelText"/>
+                </button>
+                <button type="button" class="btn btn-primary px-4 fw-bold" t-on-click="confirm"
+                        t-att-disabled="state.activeTab === 'custom' and !state.customImageBase64">
+                    <t t-esc="props.confirmText"/>
+                </button>
+            </footer>
+        </div>
+    </t>
+
+</templates>

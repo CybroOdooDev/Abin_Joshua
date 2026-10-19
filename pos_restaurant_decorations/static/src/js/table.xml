@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="pos_restaurant.Table" t-inherit-mode="extension">
+        <xpath expr="//div[contains(@class,'table')]" position="attributes">
+            <attribute name="t-attf-class">{{ tableDecorClass }}</attribute>
+        </xpath>
+        <xpath expr="//div[contains(@class,'table')]" position="inside">
+            <t t-if="decorImageUrl">
+                <div class="table-decor-image-container position-absolute w-100 h-100 top-0 start-0 d-flex align-items-center justify-content-center overflow-hidden">
+                    <img class="table-decor-image" t-att-src="decorImageUrl" alt="Decor" loading="lazy"/>
+                </div>
+            </t>
+            <t t-if="props.table.is_decoration and pos.isEditMode and (!props.table.seats or props.table.seats === 0)">
+                <span class="decor-scenery-pill">Decor</span>
+            </t>
+        </xpath>
+        <xpath expr="//span[contains(@class,'label')]" position="attributes">
+            <attribute name="t-attf-class">{{ !isLabelVisible ? 'd-none' : '' }}</attribute>
+        </xpath>
+        <xpath expr="//span[contains(@class,'table-seats')]" position="attributes">
+            <attribute name="t-attf-class">{{ !isSeatsVisible ? 'd-none' : '' }}</attribute>
+        </xpath>
+    </t>
+</templates>

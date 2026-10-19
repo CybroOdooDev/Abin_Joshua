@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-inherit="pos_restaurant.FloorScreen" t-inherit-mode="extension">
+        <xpath expr="//EditBar" position="attributes">
+            <attribute name="addDecor.bind">addDecor</attribute>
+            <attribute name="customizeTable.bind">customizeTable</attribute>
+        </xpath>
+    </t>
+</templates>

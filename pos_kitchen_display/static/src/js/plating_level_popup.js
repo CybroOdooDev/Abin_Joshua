@@ -26,7 +26,8 @@ export class PlatingLevelPopup extends Component {
                 const lineUuid = this.props.line.uuid;
                 const orderline = currentOrder.get_orderlines().find(l => l.uuid === lineUuid);
                 if (orderline && orderline.set_plating_level) {
-                    orderline.set_plating_level(level.id);
+                    const newId = level ? (level.id === this.currentPlatingLevelId ? null : level.id) : null;
+                    orderline.set_plating_level(newId);
                 }
             }
         }

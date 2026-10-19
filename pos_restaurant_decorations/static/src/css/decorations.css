@@ -1,0 +1,392 @@
+/* POS Restaurant Customizable Decorations & Tables Styling */
+
+/* =========================================================
+   1. Table & Decor Element Rendering
+   ========================================================= */
+
+.table.has-decor-image {
+    background-color: transparent !important;
+    border-color: rgba(255, 255, 255, 0.45) !important;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.table.has-decor-image:hover {
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.22) !important;
+}
+
+.table.is-decor-scenery {
+    cursor: default;
+}
+
+.table-decor-image-container {
+    pointer-events: none;
+    z-index: 1;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.table-decor-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+    transition: transform 0.2s ease;
+}
+
+/* Ensure labels & counts remain readable on top of rich artwork */
+.table.has-decor-image .infos,
+.table.has-decor-image .label,
+.table.has-decor-image .drag-handle {
+    z-index: 3;
+    position: relative;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 5px rgba(0, 0, 0, 0.8);
+    font-weight: 700;
+}
+
+.table.has-decor-image .table-seats {
+    z-index: 3;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.55) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.table.has-decor-image .badge.order-count {
+    z-index: 4;
+}
+
+/* Handles in edit mode sit above image */
+.table .table-handle {
+    z-index: 5;
+}
+
+/* Scenery toast / badge for non-orderable items */
+.decor-scenery-pill {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+    padding: 2px 5px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.6);
+    color: #fff;
+    z-index: 3;
+    pointer-events: none;
+}
+
+/* =========================================================
+   2. EditBar Decor Actions
+   ========================================================= */
+
+.edit-button.btn-decor-add {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    color: #ffffff !important;
+    border: none;
+}
+
+.edit-button.btn-decor-add:hover {
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+.edit-button.btn-decor-customize {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: #ffffff !important;
+    border: none;
+}
+
+.edit-button.btn-decor-customize:hover {
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+    color: #ffffff !important;
+    transform: translateY(-1px);
+}
+
+/* =========================================================
+   3. Decor Preset Picker Modal & Customization Modal
+   ========================================================= */
+
+.decor-picker-popup {
+    max-width: 920px !important;
+    width: 92vw !important;
+    max-height: 90vh !important;
+    border-radius: 18px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35) !important;
+}
+
+.decor-picker-header {
+    background: #0f172a !important;
+    color: #f8fafc !important;
+    padding: 16px 24px !important;
+    border-bottom: 1px solid #334155 !important;
+}
+
+.decor-picker-header .modal-title,
+.table-customization-popup .modal-title {
+    color: #ffffff !important;
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em !important;
+}
+
+.decor-categories-nav {
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 12px 20px;
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.decor-category-btn {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #334155;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.decor-category-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.decor-category-btn.active {
+    background: #2563eb !important;
+    color: #ffffff !important;
+    border-color: #2563eb !important;
+    box-shadow: 0 3px 8px rgba(37, 99, 235, 0.35) !important;
+}
+
+.decor-picker-popup .input-group {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.decor-picker-popup .input-group input {
+    font-size: 14px;
+    padding: 10px 14px;
+}
+
+.decor-picker-popup .input-group-text {
+    padding: 0 14px;
+}
+
+.decor-items-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+    gap: 16px !important;
+    padding: 20px !important;
+    max-height: 52vh !important;
+    overflow-y: auto !important;
+    background: #f8fafc !important;
+}
+
+.decor-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 14px 10px 12px 10px !important;
+    background: #ffffff !important;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 14px !important;
+    cursor: pointer !important;
+    transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    text-align: center !important;
+    position: relative !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+    box-sizing: border-box !important;
+    min-height: 168px !important;
+}
+
+.decor-card:hover {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 10px 20px rgba(59, 130, 246, 0.16) !important;
+    transform: translateY(-3px) !important;
+}
+
+.decor-card.selected {
+    border-color: #2563eb !important;
+    background: #f0f7ff !important;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3) !important;
+}
+
+.decor-card.selected::after {
+    content: "✓";
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 20px;
+    height: 20px;
+    background: #2563eb;
+    color: #ffffff;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 20px;
+}
+
+.decor-card-preview {
+    width: 72px !important;
+    height: 72px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-bottom: 8px !important;
+    background: #f8fafc !important;
+    border-radius: 12px !important;
+    border: 1px solid #f1f5f9 !important;
+    padding: 6px !important;
+    flex-shrink: 0 !important;
+    transition: all 0.2s ease !important;
+}
+
+.decor-card:hover .decor-card-preview {
+    background: #eff6ff !important;
+    border-color: #dbeafe !important;
+    transform: scale(1.04) !important;
+}
+
+.decor-card-preview img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+    filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.12)) !important;
+}
+
+.decor-card-name {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #0f172a !important;
+    line-height: 1.3 !important;
+    margin-bottom: 6px !important;
+    width: 100% !important;
+    min-height: 34px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    word-break: break-word !important;
+}
+
+.decor-card-badges {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    margin-top: auto !important;
+}
+
+.decor-card-badge {
+    font-size: 11px !important;
+    padding: 2px 6px !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    line-height: 1.2 !important;
+}
+
+.decor-card-badge.badge-scenery {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+}
+
+.decor-card-badge.badge-seats {
+    background: #dcfce7 !important;
+    color: #15803d !important;
+}
+
+.decor-card-badge.badge-dims {
+    background: #f1f5f9 !important;
+    color: #64748b !important;
+}
+
+/* =========================================================
+   4. Mobile & Tablet Responsiveness
+   ========================================================= */
+
+@media (max-width: 768px) {
+    .decor-picker-popup {
+        width: 96vw !important;
+        max-height: 94vh !important;
+        border-radius: 12px !important;
+    }
+
+    .decor-items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)) !important;
+        gap: 10px !important;
+        padding: 12px !important;
+        max-height: 56vh !important;
+    }
+
+    .decor-card {
+        min-height: 145px !important;
+        padding: 10px 6px !important;
+    }
+
+    .decor-card-preview {
+        width: 58px !important;
+        height: 58px !important;
+    }
+
+    .decor-card-name {
+        font-size: 11px !important;
+        min-height: 28px !important;
+    }
+
+    .decor-card-badge {
+        font-size: 9px !important;
+        padding: 2px 4px !important;
+    }
+
+    /* Auto scale floor map on phones */
+    .floor-screen .floor-map {
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-x pan-y pinch-zoom;
+    }
+
+    /* Touch handles enhancement */
+    .table-handle {
+        width: 24px !important;
+        height: 24px !important;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    /* Tablet optimizations */
+    .decor-picker-popup {
+        width: 94vw !important;
+    }
+
+    .decor-items-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+        gap: 12px !important;
+    }
+}
+
+/* Smooth scaling and viewport transform */
+.floor-screen .floor-map [t-ref="map"],
+.floor-screen .floor-map > div {
+    transform: scale(var(--scale, 1));
+    transform-origin: 0 0;
+    transition: transform 0.08s ease-out;
+}
