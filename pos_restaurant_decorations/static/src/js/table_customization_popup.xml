@@ -2,100 +2,80 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="pos_restaurant_decorations.TableCustomizationPopup">
-        <div class="popup table-customization-popup" style="max-width: 650px; width: 90vw;">
+        <div class="popup table-customization-popup" style="max-width: 600px; width: 90vw;">
             <header class="modal-header bg-dark text-white p-3 d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-2">
                     <i class="fa fa-sliders fs-4 text-info"></i>
-                    <h4 class="modal-title m-0 fw-bold text-white"><t t-esc="props.title"/></h4>
+                    <h4 class="modal-title m-0 fw-bold text-white"><t t-esc="modalTitle"/></h4>
                 </div>
             </header>
 
             <main class="modal-body p-4 bg-white">
-                <!-- Current Icon / Image Display -->
-                <div class="d-flex align-items-center gap-4 p-3 bg-light rounded-3 mb-4 border">
-                    <div class="d-flex align-items-center justify-content-center bg-white rounded-3 border"
-                         style="width: 80px; height: 80px; overflow: hidden; flex-shrink: 0;">
+                <!-- Current Item Visual Banner -->
+                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-4 border">
+                    <div class="d-flex align-items-center justify-content-center bg-white rounded-3 border shadow-sm"
+                         style="width: 72px; height: 72px; overflow: hidden; flex-shrink: 0; padding: 4px;">
                         <t t-if="state.imagePreview">
-                            <img t-att-src="state.imagePreview" alt="Icon Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;"/>
+                            <img t-att-src="state.imagePreview" alt="Item Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;"/>
                         </t>
                         <t t-else="">
-                            <i class="fa fa-square text-muted fs-2"></i>
+                            <i class="fa fa-cutlery text-muted fs-2"></i>
                         </t>
                     </div>
 
                     <div class="flex-grow-1">
-                        <div class="d-flex gap-2 mb-2 flex-wrap">
-                            <button type="button" class="btn btn-sm btn-outline-primary"
-                                    t-on-click="() => this.state.showPresetPicker = !this.state.showPresetPicker">
-                                <i class="fa fa-th me-1"></i> Choose Icon / Graphic
-                            </button>
-                            <label class="btn btn-sm btn-outline-secondary mb-0 cursor-pointer">
-                                <i class="fa fa-upload me-1"></i> Upload Image
-                                <input type="file" accept="image/*" class="d-none" t-ref="custom-file-input" t-on-change="onFileSelected"/>
-                            </label>
-                            <button type="button" class="btn btn-sm btn-outline-danger" t-if="state.imagePreview"
-                                    t-on-click="removeIcon">
-                                <i class="fa fa-trash"></i> Clear Icon
-                            </button>
+                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                            <h5 class="m-0 fw-bold text-dark"><t t-esc="state.name || 'Floor Item'"/></h5>
+                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><t t-esc="itemCategoryBadge"/></span>
                         </div>
-                        <small class="text-muted d-block">Add realistic visuals (tables, chairs, bar items, plants, barrels, or decorations)</small>
+                        <small class="text-muted d-block">
+                            <t t-if="isDiningTable">Configure dining table identity, customer seats, and floor visibility.</t>
+                            <t t-else="">Configure decorative floor item identity, scenery options, and floor visibility.</t>
+                        </small>
                     </div>
                 </div>
-
-                <!-- Sub-selector for Preset icons if toggled -->
-                <t t-if="state.showPresetPicker">
-                    <div class="p-3 mb-4 border rounded bg-white" style="max-height: 220px; overflow-y: auto;">
-                        <span class="fw-bold mb-2 d-block text-secondary">Click an item below to apply:</span>
-                        <div class="d-flex flex-wrap gap-2">
-                            <t t-foreach="presets" t-as="preset" t-key="preset.id">
-                                <div class="p-2 border rounded-3 text-center cursor-pointer hover-shadow"
-                                     style="width: 82px; font-size: 11px; background: #fff;"
-                                     t-att-class="{ 'border-primary bg-primary-subtle shadow-sm': state.decor_preset_id === preset.id }"
-                                     t-on-click="() => this.selectPreset(preset)">
-                                    <div style="width: 48px; height: 48px; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
-                                        <img t-att-src="getPresetImgUrl(preset)" style="max-width: 100%; max-height: 100%; object-fit: contain;" alt="preset"/>
-                                    </div>
-                                    <span class="d-block text-truncate mt-1 fw-bold text-dark" t-esc="preset.name" t-att-title="preset.name"/>
-                                </div>
-                            </t>
-                        </div>
-                    </div>
-                </t>
 
                 <!-- Name & Seats Controls -->
                 <div class="row g-3 mb-3">
-                    <div class="col-8">
-                        <label class="form-label fw-bold">Name / Identification</label>
+                    <div t-attf-class="{{ state.is_decoration ? 'col-12' : 'col-8' }}">
+                        <label class="form-label fw-bold"><t t-esc="nameLabelText"/></label>
                         <input type="text" class="form-control" t-model="state.name"/>
                     </div>
-                    <div class="col-4">
-                        <label class="form-label fw-bold">Seats</label>
-                        <input type="number" min="0" max="50" class="form-control"
-                               t-model.number="state.seats"
-                               t-att-disabled="state.is_decoration"/>
-                    </div>
+                    <t t-if="!state.is_decoration">
+                        <div class="col-4">
+                            <label class="form-label fw-bold">Customer Seats</label>
+                            <input type="number" min="1" max="50" class="form-control" t-model.number="state.seats"/>
+                        </div>
+                    </t>
                 </div>
 
-                <!-- Toggles for Clean Display -->
+                <!-- Toggles for Clean Display & Scenery -->
                 <div class="p-3 bg-light rounded-3 border">
                     <span class="fw-bold text-dark d-block mb-2">Display &amp; Ordering Options</span>
 
+                    <!-- Dynamic Name/Label Toggle -->
                     <div class="form-check form-switch mb-2">
                         <input class="form-check-input" type="checkbox" id="showLabelSwitch" t-model="state.show_label"/>
                         <label class="form-check-label" for="showLabelSwitch">
-                            Show Table Name / Label on floor map
+                            <t t-esc="showNameToggleText"/>
                         </label>
                     </div>
 
-                    <div class="form-check form-switch mb-2">
-                        <input class="form-check-input" type="checkbox" id="showSeatsSwitch" t-model="state.show_seats"/>
-                        <label class="form-check-label" for="showSeatsSwitch">
-                            Show Seats Count badge on floor map
-                        </label>
-                    </div>
+                    <!-- Show Seats Toggle (Only visible for dining tables with seating) -->
+                    <t t-if="!state.is_decoration">
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="showSeatsSwitch" t-model="state.show_seats"/>
+                            <label class="form-check-label" for="showSeatsSwitch">
+                                Show Seats Count badge on floor map
+                            </label>
+                        </div>
+                    </t>
 
+                    <!-- Scenery Mode Switch -->
                     <div class="form-check form-switch">
-                        <input class="form-check-input" type="checkbox" id="isDecorSwitch" t-model="state.is_decoration"/>
+                        <input class="form-check-input" type="checkbox" id="isDecorSwitch"
+                               t-att-checked="state.is_decoration"
+                               t-on-change="onToggleIsDecoration"/>
                         <label class="form-check-label" for="isDecorSwitch">
                             <strong>Visual Scenery Mode (Non-orderable)</strong>
                         </label>

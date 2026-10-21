@@ -6,34 +6,25 @@ class PosConfig(models.Model):
     _inherit = 'pos.config'
 
     enable_network_printing = fields.Boolean(
-        string='Enable Local Network Printing',
+        string='Enable Local Printing (QZ Tray)',
         default=True,
-        help='Enables direct printing to network thermal receipt printers via TCP port 9100 without IoT Box',
+        help='Enables direct local printing to thermal receipt printers via QZ Tray without IoT Box',
     )
-    network_printer_id = fields.Many2one(
-        'pos.network.printer',
-        string='Receipt Network Printer',
-        help='Default network thermal printer for customer receipts',
-    )
-    kitchen_network_printer_id = fields.Many2one(
-        'pos.network.printer',
-        string='Kitchen Network Printer',
-        help='Network thermal printer for kitchen/bar preparation tickets',
+    qz_printer_name = fields.Char(
+        string='Receipt Printer Name (QZ Tray)',
+        default='POS-80',
+        help='Exact name of the printer in QZ Tray (e.g. Bitaspain, POS-80). Leave blank to use system default printer.',
     )
     auto_print_on_payment = fields.Boolean(
         string='Auto-Print Receipt After Payment',
         default=True,
-        help='Automatically dispatches customer receipt to network printer when order is paid',
+        help='Automatically sends customer receipt to QZ Tray when order is paid',
     )
 
     def _get_self_ordering_data(self):
-        """Export network printer configuration to POS Self-Order / Kiosk."""
+        """Export local printer configuration to POS Self-Order / Kiosk."""
         data = super()._get_self_ordering_data()
         data["config"]["enable_network_printing"] = self.enable_network_printing
         data["config"]["auto_print_on_payment"] = self.auto_print_on_payment
-        if self.network_printer_id:
-            data["config"]["network_printer_id"] = self.network_printer_id.id
-            data["config"]["network_printer_name"] = self.network_printer_id.name
-            data["config"]["network_printer_ip"] = self.network_printer_id.ip_address
-            data["config"]["network_printer_port"] = self.network_printer_id.port
+        data["config"]["qz_printer_name"] = self.qz_printer_name or self.printer_name or ""
         return data

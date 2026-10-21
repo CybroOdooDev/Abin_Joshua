@@ -7,6 +7,7 @@ import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
 import { loadAllImages } from "@point_of_sale/utils";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
+import { qzPrinterService } from "./QZPrinterService";
 
 patch(PrintBillButton.prototype, {
     setup() {
@@ -127,27 +128,38 @@ patch(PrintBillButton.prototype, {
                 order.server_id ||
                 (typeof order.id === "number" ? order.id : 0);
 
-            const printerId = this.pos.config.network_printer_id ? this.pos.config.network_printer_id[0] : false;
-            const result = await this.orm.call(
-                "pos.order",
-                "print_network_receipt_from_ui",
-                [serverOrderId || 0, imageBase64, printerId, "bill"]
+            // Dispatch print directly to local QZ Tray
+            const preferredPrinter = this.pos.config.qz_printer_name || this.pos.config.printer_name || "";
+            const printResult = await qzPrinterService.printReceiptImage(imageBase64, preferredPrinter);
+
+            this.notification.add(
+                _t("Pre-payment bill printed via QZ Tray (%s)", printResult.printer_name || ""),
+                { type: "success" }
             );
 
-            if (result && result.success) {
-                this.notification.add(
-                    _t("Pre-payment bill printed on %s", result.printer_name || ""),
-                    { type: "success" }
+            // Archive visual snapshot in backend
+            try {
+                await this.orm.call(
+                    "pos.order",
+                    "log_printed_ticket",
+                    [
+                        serverOrderId || 0,
+                        imageBase64,
+                        "bill",
+                        printResult.printer_name || preferredPrinter,
+                        "success",
+                        false,
+                    ]
                 );
-            } else {
-                this.notification.add(
-                    _t("Network Printer: %s", (result && result.message) || _t("Could not print bill")),
-                    { type: "warning" }
-                );
-                this.pos.showTempScreen("BillScreen");
+            } catch (err) {
+                console.warn("Could not archive printed bill ticket in backend:", err);
             }
         } catch (err) {
-            console.error("PrintBillButton network print failed:", err);
+            console.error("PrintBillButton QZ Tray print failed:", err);
+            this.notification.add(
+                _t("QZ Tray Print Error: %s", err.message || err),
+                { type: "danger" }
+            );
             return await super.click(...arguments);
         }
     },

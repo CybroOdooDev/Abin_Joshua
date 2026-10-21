@@ -35,13 +35,7 @@ class PosPrintedTicket(models.Model):
         related='order_id.pos_reference',
         store=True,
     )
-    printer_id = fields.Many2one(
-        'pos.network.printer',
-        string='Network Printer',
-        ondelete='set null',
-    )
     printer_name = fields.Char(string='Printer Name', readonly=True)
-    printer_ip = fields.Char(string='Printer IP:Port', readonly=True)
 
     print_date = fields.Datetime(
         string='Print Date & Time',
@@ -58,21 +52,20 @@ class PosPrintedTicket(models.Model):
     print_type = fields.Selection(
         [
             ('first_print', 'Original Ticket'),
+            ('reprint', 'Reprint Copy'),
             ('bill', 'Pre-Payment Bill'),
-            ('invoice', 'Formal Invoice'),
-            ('kitchen', 'Kitchen Ticket'),
-            ('reprint', 'Reprint'),
+            ('invoice', 'Formal Legal Invoice'),
+            ('kitchen', 'Kitchen Preparation'),
         ],
-        string='Print Type',
+        string='Print Purpose',
         default='first_print',
         required=True,
     )
-    reprint_count = fields.Integer(string='Reprint Times', default=0)
-
     receipt_snapshot = fields.Text(
-        string='Original Receipt Snapshot',
-        help='Preserved high-resolution image base64 snapshot of the original ticket',
+        string='Ticket Snapshot (Base64)',
+        help='High-resolution visual snapshot of the printed ticket preserving exact layout and Veri*Factu QR',
     )
+    reprint_count = fields.Integer(string='Reprint Times', default=0)
     status = fields.Selection(
         [
             ('success', 'Printed Successfully'),
@@ -85,49 +78,18 @@ class PosPrintedTicket(models.Model):
     error_message = fields.Text(string='Error Diagnostic')
 
     def action_reprint(self):
-        """
-        Reprints this exact ticket to the network printer, preserving the
-        original ticket layout and format.
-        """
+        """Notifies user that reprinting is executed via QZ Tray in POS."""
         self.ensure_one()
         if not self.receipt_snapshot:
             raise UserError(_("No visual snapshot is available for this ticket to reprint."))
-
-        # Find printer: target printer, or fall back to POS config printer
-        printer = self.printer_id
-        if not printer:
-            printer = self.order_id.config_id.network_printer_id
-        if not printer:
-            raise UserError(_("No network printer configured to reprint this ticket."))
-
-        success, message = printer.print_image(self.receipt_snapshot, cut=True, drawer=False)
-
-        # Log this reprint action as a new history record
-        self.env['pos.printed.ticket'].create({
-            'name': f"{self.name} (Reprint #{self.reprint_count + 1})",
-            'order_id': self.order_id.id,
-            'printer_id': printer.id,
-            'printer_name': printer.name,
-            'printer_ip': f"{printer.ip_address}:{printer.port}",
-            'print_type': 'reprint',
-            'receipt_snapshot': self.receipt_snapshot,
-            'status': 'success' if success else 'failed',
-            'error_message': message if not success else False,
-        })
-        self.reprint_count += 1
-
-        if not success:
-            raise UserError(_("Reprint failed: %s") % message)
 
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _('Ticket Reprinted'),
-                'message': _('Original ticket reprinted on %s (%s).') % (
-                    printer.name, printer.ip_address
-                ),
-                'type': 'success',
-                'sticky': False,
+                'title': _('Reprint from POS'),
+                'message': _('To reprint this ticket directly to your thermal printer via QZ Tray, open the POS screen and click "Reprint Receipt" on the order.'),
+                'type': 'info',
+                'sticky': True,
             },
         }

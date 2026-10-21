@@ -20,27 +20,27 @@
 #
 #############################################################################
 {
-    'name': 'POS Local Network Ticket Printing System',
+    'name': 'POS Local Ticket Printing System (QZ Tray)',
     'version': '17.0.1.0.0',
     'category': 'Point Of Sale',
-    'summary': 'Direct local network printing for POS tickets without IoT Box or ePOS printers',
+    'summary': 'Direct local thermal ticket printing for POS receipts, bills, and legal invoices via QZ Tray',
     'description': """
-        Local Network Ticket Printing System for Odoo 17 POS:
+        Local Ticket Printing System for Odoo 17 POS:
         ======================================================
-        - Direct printing to standard network thermal printers via RAW TCP/IP (Port 9100).
-        - Replaces the need for Odoo IoT Box and expensive ePOS printers.
-        - Preserves 100% of the POS ticket layout and styling using high-fidelity ESC/POS raster graphics.
+        - Direct printing to local thermal receipt printers via QZ Tray without IoT Box.
+        - Works across cloud deployments (no public/private IP routing issues).
+        - Preserves 100% of the POS ticket layout and styling using high-fidelity 80mm raster capture.
+        - Full Spanish Veri*Factu and Formal Invoice (Factura Completa) support.
         - Records a complete history and visual snapshot of every printed ticket.
-        - Allows exact reprinting of historical tickets from both POS frontend and backend order view.
+        - Allows exact reprinting of historical tickets from POS Ticket Screen.
     """,
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['point_of_sale', 'pos_restaurant', 'pos_self_order'],
+    'depends': ['point_of_sale', 'pos_restaurant', 'pos_self_order', 'pos_kiosk_enhancements'],
     'data': [
         'security/ir.model.access.csv',
-        'views/pos_network_printer_views.xml',
         'views/pos_printed_ticket_views.xml',
         'views/pos_config_views.xml',
         'views/pos_order_views.xml',
@@ -48,7 +48,7 @@
     'assets': {
         'point_of_sale._assets_pos': [
             'web_editor/static/lib/html2canvas.js',
-            'pos_network_printer/static/src/js/NetworkPrinterService.js',
+            'pos_network_printer/static/src/js/QZPrinterService.js',
             'pos_network_printer/static/src/js/ReceiptScreenPatch.js',
             'pos_network_printer/static/src/js/TicketScreenPatch.js',
             'pos_network_printer/static/src/js/PrintBillPatch.js',

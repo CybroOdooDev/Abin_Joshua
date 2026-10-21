@@ -30,9 +30,7 @@
                         </group>
                         <group string="Print Execution Details">
                             <field name="print_date" readonly="1"/>
-                            <field name="printer_id"/>
                             <field name="printer_name"/>
-                            <field name="printer_ip"/>
                             <field name="print_type" widget="badge"/>
                             <field name="reprint_count"/>
                         </group>

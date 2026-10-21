@@ -116,20 +116,23 @@ export class DecorPresetPopup extends AbstractAwaitablePopup {
         const preset = getPresetById(this.state.selectedPresetId);
         if (!preset) return null;
 
+        const isTable = preset.category === "table";
+        const isDecor = preset.is_decoration !== undefined ? preset.is_decoration : !isTable;
+
         return {
             isCustom: false,
             preset,
             decor_preset_id: preset.id,
             table_type: preset.table_type,
-            is_decoration: preset.is_decoration,
+            is_decoration: isDecor,
             name: preset.name,
             width: preset.width,
             height: preset.height,
             shape: preset.shape,
-            seats: preset.seats,
+            seats: isDecor ? 0 : (preset.seats || 4),
             image_url: getPresetUrl(preset.file),
-            show_label: !preset.is_decoration,
-            show_seats: !preset.is_decoration,
+            show_label: true,
+            show_seats: !isDecor,
         };
     }
 }

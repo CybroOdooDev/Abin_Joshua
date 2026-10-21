@@ -6,6 +6,7 @@ import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/
 import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
+import { qzPrinterService } from "./QZPrinterService";
 
 patch(ReprintReceiptButton.prototype, {
     setup() {
@@ -26,25 +27,30 @@ patch(ReprintReceiptButton.prototype, {
 
         const order = this.props.order;
         const serverId = order.server_id || order.id || order.backendId;
+        const preferredPrinter = this.pos.config.qz_printer_name || this.pos.config.printer_name || "";
 
         try {
             // First attempt: Reprint the exact preserved snapshot from pos.printed.ticket
             if (serverId && typeof serverId === "number") {
                 try {
-                    const reprintResult = await this.orm.call(
+                    const ticket = await this.orm.call(
                         "pos.order",
-                        "action_reprint_ticket",
-                        [[serverId]]
+                        "get_latest_ticket_snapshot",
+                        [serverId]
                     );
-                    if (reprintResult) {
+                    if (ticket && ticket.receipt_snapshot) {
+                        const printResult = await qzPrinterService.printReceiptImage(
+                            ticket.receipt_snapshot,
+                            preferredPrinter
+                        );
                         this.notification.add(
-                            _t("Original ticket reprinted via network printer."),
+                            _t("Original ticket reprinted via QZ Tray (%s)", printResult.printer_name || ""),
                             { type: "success" }
                         );
                         return;
                     }
                 } catch (e) {
-                    console.info("No prior snapshot found, rendering new image to print", e);
+                    console.info("No prior snapshot found in database, rendering fresh receipt:", e);
                 }
             }
 
@@ -57,6 +63,7 @@ patch(ReprintReceiptButton.prototype, {
                     }
                 } catch (_) {}
             }
+
             let receiptEl = document.querySelector(".pos-receipt");
             if (!receiptEl && this.renderer) {
                 receiptEl = await this.renderer.toHtml(OrderReceipt, {
@@ -77,26 +84,39 @@ patch(ReprintReceiptButton.prototype, {
             });
             const imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
 
-            const printerId = this.pos.config.network_printer_id ? this.pos.config.network_printer_id[0] : false;
+            const printResult = await qzPrinterService.printReceiptImage(imageBase64, preferredPrinter);
+            this.notification.add(
+                _t("Ticket reprinted via QZ Tray (%s)", printResult.printer_name || ""),
+                { type: "success" }
+            );
+
+            // Archive reprint in backend
             if (serverId && typeof serverId === "number") {
-                const res = await this.orm.call(
-                    "pos.order",
-                    "print_network_receipt_from_ui",
-                    [serverId, imageBase64, printerId]
-                );
-                if (res.success) {
-                    this.notification.add(
-                        _t("Ticket printed on %s", res.printer_name || ""),
-                        { type: "success" }
+                try {
+                    await this.orm.call(
+                        "pos.order",
+                        "log_printed_ticket",
+                        [
+                            serverId,
+                            imageBase64,
+                            "reprint",
+                            printResult.printer_name || preferredPrinter,
+                            "success",
+                            false,
+                        ]
                     );
-                    return;
-                }
+                } catch (_) {}
             }
+            return;
         } catch (err) {
-            console.error("Network reprint error:", err);
+            console.error("QZ Tray reprint error:", err);
+            this.notification.add(
+                _t("QZ Tray Reprint Error: %s", err.message || err),
+                { type: "danger" }
+            );
         }
 
-        // If network print fails, fallback to standard behavior
+        // If local QZ print fails, fallback to standard behavior
         return await super.click(...arguments);
     },
 });

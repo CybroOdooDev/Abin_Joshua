@@ -8,6 +8,7 @@ import { loadAllImages } from "@point_of_sale/utils";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { onMounted } from "@odoo/owl";
+import { qzPrinterService } from "./QZPrinterService";
 
 patch(ReceiptScreen.prototype, {
     setup() {
@@ -70,7 +71,7 @@ patch(ReceiptScreen.prototype, {
             }
 
             if (!this.isBill && !serverOrderId) {
-                throw new Error(_t("Could not synchronize order ID to send to network printer."));
+                throw new Error(_t("Could not synchronize order ID with the server."));
             }
 
             const isInvoice = typeof order.is_to_invoice === "function" ? order.is_to_invoice() : false;
@@ -179,30 +180,38 @@ patch(ReceiptScreen.prototype, {
                 throw new Error(_t("Failed to capture receipt image."));
             }
 
-            const printType = this.isBill ? "bill" : (isInvoice ? "invoice" : "first_print");
-            const printerId = this.pos.config.network_printer_id ? this.pos.config.network_printer_id[0] : false;
-            const result = await this.orm.call(
-                "pos.order",
-                "print_network_receipt_from_ui",
-                [serverOrderId || 0, imageBase64, printerId, printType]
+            // Dispatch print directly to local QZ Tray
+            const preferredPrinter = this.pos.config.qz_printer_name || this.pos.config.printer_name || "";
+            const printResult = await qzPrinterService.printReceiptImage(imageBase64, preferredPrinter);
+
+            order._network_printed = true;
+            this.notification.add(
+                _t("Receipt printed via QZ Tray (%s)", printResult.printer_name || ""),
+                { type: "success" }
             );
 
-            if (result.success) {
-                order._network_printed = true;
-                this.notification.add(
-                    _t("Receipt sent to printer: %s", result.printer_name || ""),
-                    { type: "success" }
+            // Archive visual snapshot in backend pos.printed.ticket
+            try {
+                const printType = this.isBill ? "bill" : (isInvoice ? "invoice" : "first_print");
+                await this.orm.call(
+                    "pos.order",
+                    "log_printed_ticket",
+                    [
+                        serverOrderId || 0,
+                        imageBase64,
+                        printType,
+                        printResult.printer_name || preferredPrinter,
+                        "success",
+                        false,
+                    ]
                 );
-            } else {
-                this.notification.add(
-                    _t("Network printer error: %s", result.message || ""),
-                    { type: "danger" }
-                );
+            } catch (err) {
+                console.warn("Could not archive printed ticket in backend:", err);
             }
         } catch (err) {
             console.error("printNetworkReceipt error:", err);
             this.notification.add(
-                _t("Network printer error: %s", err.message || err),
+                _t("QZ Tray Print Error: %s", err.message || err),
                 { type: "danger" }
             );
         } finally {
