@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'POS Local Ticket Printing System (QZ Tray)',
-    'version': '17.0.1.0.0',
+    'version': '17.0.1.0.1',
     'category': 'Point Of Sale',
     'summary': 'Direct local thermal ticket printing for POS receipts, bills, and legal invoices via QZ Tray',
     'description': """

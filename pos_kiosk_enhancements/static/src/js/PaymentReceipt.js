@@ -375,6 +375,53 @@ patch(KioskPaymentMethodPopup.prototype, {
         } catch (e) {
             console.warn("Barcode generation failed", e);
         }
+
+        let verifactu_qr_base64 = "";
+        if (config.show_verifactu_qr) {
+            try {
+                let verifactuBarcodeUrl = "";
+                if (order.id) {
+                    try {
+                        const [serverOrder] = await this.orm.read(
+                            "pos.order",
+                            [order.id],
+                            ["l10n_es_edi_verifactu_qr_code"]
+                        );
+                        if (serverOrder && serverOrder.l10n_es_edi_verifactu_qr_code) {
+                            verifactuBarcodeUrl = serverOrder.l10n_es_edi_verifactu_qr_code;
+                        }
+                    } catch (e) {
+                        console.warn("Could not read l10n_es_edi_verifactu_qr_code from server", e);
+                    }
+                }
+                if (!verifactuBarcodeUrl) {
+                    const company = this.props.selfOrder.company || {};
+                    const rawVat = company.vat || "";
+                    const vat = rawVat.replace(/^[A-Z]{2}/, "").trim();
+                    const numserie = order.pos_reference || order.name || order.tracking_number || "";
+                    const now = new Date();
+                    const day = String(now.getDate()).padStart(2, "0");
+                    const month = String(now.getMonth() + 1).padStart(2, "0");
+                    const year = now.getFullYear();
+                    const fecha = `${day}-${month}-${year}`;
+                    const importe = Number(correctTotal || 0).toFixed(2);
+                    const endpoint = config.l10n_es_edi_verifactu_test_environment
+                        ? "https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR"
+                        : "https://www2.agenciatributaria.gob.es/wlpl/TIKE-CONT/ValidarQR";
+                    const qrUrl = `${endpoint}?nif=${encodeURIComponent(vat)}&numserie=${encodeURIComponent(numserie)}&fecha=${encodeURIComponent(fecha)}&importe=${encodeURIComponent(importe)}`;
+                    verifactuBarcodeUrl = `/report/barcode/?barcode_type=QR&value=${encodeURIComponent(qrUrl)}&barLevel=M&width=180&height=180`;
+                }
+                if (verifactuBarcodeUrl) {
+                    const fullUrl = verifactuBarcodeUrl.startsWith("http")
+                        ? verifactuBarcodeUrl
+                        : `${baseUrl}${verifactuBarcodeUrl}`;
+                    verifactu_qr_base64 = await this._getBase64FromUrl(fullUrl);
+                }
+            } catch (e) {
+                console.warn("VeriFactu QR generation failed", e);
+            }
+        }
+
         const company = this.props.selfOrder.company || {};
         const receiptData = {
             order: {
@@ -409,10 +456,12 @@ patch(KioskPaymentMethodPopup.prototype, {
 
             qr_base64,
             barcode_base64,
+            verifactu_qr_base64,
             config_flags: {
                 show_qr: config.show_qr,
                 show_barcode: config.show_barcode,
                 show_both: config.show_both,
+                show_verifactu_qr: config.show_verifactu_qr,
                 takeaway_enabled: config.self_ordering_takeaway,
             },
         };

@@ -89,26 +89,30 @@
             <t t-if="props.data.partner and !props.data.is_to_invoice">
                 <div class="pos-receipt-customer" style="margin: 8px 0; font-size: 13px;">
                     <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+                    <div style="font-weight: bold; margin-bottom: 4px; text-decoration: underline;">
+                        <t t-esc="props.data.partner.labels ? props.data.partner.labels.header : 'Customer Details:'"/>
+                    </div>
                     <div>
-                        <strong>Customer: </strong>
-                        <t t-esc="props.data.partner.name"/>
+                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.customer : 'Customer:'"/> </strong><t t-esc="props.data.partner.name"/>
                     </div>
                     <div t-if="props.data.partner.vat">
-                        <strong>VAT: </strong>
-                        <t t-esc="props.data.partner.vat"/>
+                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.vat : 'VAT:'"/> </strong><t t-esc="props.data.partner.vat"/>
                     </div>
                     <div t-if="props.data.partner.phone">
-                        <strong>Tel: </strong>
-                        <t t-esc="props.data.partner.phone"/>
+                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.phone : 'Phone:'"/> </strong><t t-esc="props.data.partner.phone"/>
                     </div>
                     <div t-if="props.data.partner.email">
-                        <strong>Email: </strong>
-                        <t t-esc="props.data.partner.email"/>
+                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.email : 'Email:'"/> </strong><t t-esc="props.data.partner.email"/>
                     </div>
-                    <div t-if="props.data.partner.street or props.data.partner.city">
-                        <strong>Address: </strong>
-                        <t t-if="props.data.partner.street"><t t-esc="props.data.partner.street"/>, </t>
-                        <t t-if="props.data.partner.city"><t t-esc="props.data.partner.city"/></t>
+                    <div t-if="props.data.partner.address or props.data.partner.street or props.data.partner.city">
+                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.address : 'Address:'"/> </strong>
+                        <t t-if="props.data.partner.address">
+                            <t t-esc="props.data.partner.address"/>
+                        </t>
+                        <t t-else="">
+                            <t t-if="props.data.partner.street"><t t-esc="props.data.partner.street"/>, </t>
+                            <t t-if="props.data.partner.city"><t t-esc="props.data.partner.city"/></t>
+                        </t>
                     </div>
                     <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
                 </div>

@@ -58,6 +58,13 @@ class PosConfig(models.Model):
     show_both = fields.Boolean(
         string="Show Both QR and Barcode"
     )
+    show_verifactu_qr = fields.Boolean(
+        string="VeriFactu QR",
+        compute="_compute_show_verifactu_qr",
+        store=True,
+        readonly=False,
+        help="Display Veri*Factu QR code on kiosk receipts. Activates automatically when Veri*Factu is enabled.",
+    )
     printer_name =  fields.Char(
         string="USB Printer",
         help="Name of the USB Printer",)
@@ -67,6 +74,11 @@ class PosConfig(models.Model):
         string="Draft Orders",
         readonly=True,
     )
+
+    @api.depends("company_id")
+    def _compute_show_verifactu_qr(self):
+        for rec in self:
+            rec.show_verifactu_qr = bool(getattr(rec.company_id, "l10n_es_edi_verifactu_required", False))
 
     def _get_self_ordering_data(self):
         """The function is used to load the fields"""
@@ -79,6 +91,10 @@ class PosConfig(models.Model):
         data["config"]["show_barcode"] = self.show_barcode
         data["config"]["show_both"] = self.show_both
         data["config"]["show_qr"] = self.show_qr
+        data["config"]["show_verifactu_qr"] = self.show_verifactu_qr
+        data["config"]["l10n_es_edi_verifactu_test_environment"] = bool(
+            getattr(self.company_id, "l10n_es_edi_verifactu_test_environment", False)
+        )
         data["config"]["printer_name"] = self.printer_name
 
         configured_categs = self._get_available_categories()

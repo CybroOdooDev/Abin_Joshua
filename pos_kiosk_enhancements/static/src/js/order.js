@@ -341,15 +341,29 @@ patch(Order.prototype, {
     export_for_printing() {
         const result = super.export_for_printing(...arguments);
         const partner = this.get_partner();
-        result.partner = partner ? {
-            name: partner.name,
-            vat: partner.vat,
-            phone: partner.phone || partner.mobile,
-            email: partner.email,
-            street: partner.street,
-            city: partner.city,
-            zip: partner.zip,
-        } : null;
+        if (partner) {
+            const addrParts = [partner.street, partner.street2, partner.zip, partner.city].filter(Boolean);
+            result.partner = {
+                name: partner.name,
+                vat: partner.vat,
+                phone: partner.phone || partner.mobile,
+                email: partner.email,
+                street: partner.street,
+                city: partner.city,
+                zip: partner.zip,
+                address: addrParts.join(", "),
+                labels: {
+                    header: _t("Customer Details:"),
+                    customer: _t("Customer:"),
+                    vat: _t("VAT:"),
+                    phone: _t("Phone:"),
+                    email: _t("Email:"),
+                    address: _t("Address:"),
+                },
+            };
+        } else {
+            result.partner = null;
+        }
 
         const allOrderlines = this.get_orderlines();
         for (let i = 0; i < result.orderlines.length; i++) {

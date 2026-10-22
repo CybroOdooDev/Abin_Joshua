@@ -36,6 +36,7 @@
                             <field name="show_qr"/>
                             <field name="show_barcode"/>
                             <field name="show_both"/>
+                            <field name="show_verifactu_qr"/>
                         </group>
                     </group>
                 </div>

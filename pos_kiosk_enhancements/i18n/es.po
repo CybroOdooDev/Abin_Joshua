@@ -859,3 +859,56 @@ msgid ""
 msgstr ""
 "|\n"
 "            Pagada:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/order.js:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#, python-format
+msgid "Customer Details:"
+msgstr "DATOS DEL CLIENTE:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/order.js:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#, python-format
+msgid "Customer:"
+msgstr "Cliente:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/order.js:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#, python-format
+msgid "VAT:"
+msgstr "NIF/CIF:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/order.js:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#, python-format
+msgid "Phone:"
+msgstr "Teléfono:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/order.js:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#, python-format
+msgid "Email:"
+msgstr "Email:"
+
+#. module: pos_kiosk_enhancements
+#. odoo-javascript
+#: code:addons/pos_kiosk_enhancements/static/src/js/order.js:0
+#: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
+#, python-format
+msgid "Address:"
+msgstr "Dirección:"
+
+#. module: pos_kiosk_enhancements
+#: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__show_verifactu_qr
+msgid "VeriFactu QR"
+msgstr "QR Veri*Factu"

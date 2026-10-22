@@ -2,6 +2,7 @@
 
 import { patch } from "@web/core/utils/patch";
 import { Order } from "@point_of_sale/app/store/models";
+import { _t } from "@web/core/l10n/translation";
 
 patch(Order.prototype, {
     export_for_printing() {
@@ -14,10 +15,20 @@ patch(Order.prototype, {
             res.partner = {
                 name: partner.name,
                 vat: partner.vat || "",
+                phone: partner.phone || partner.mobile || "",
+                email: partner.email || "",
                 street: partner.street || "",
                 city: partner.city || "",
                 zip: partner.zip || "",
                 address: addrParts.join(", "),
+                labels: {
+                    header: _t("Customer Details:"),
+                    customer: _t("Customer:"),
+                    vat: _t("VAT:"),
+                    phone: _t("Phone:"),
+                    email: _t("Email:"),
+                    address: _t("Address:"),
+                },
             };
         } else {
             res.partner = null;
