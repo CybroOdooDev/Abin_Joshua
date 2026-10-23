@@ -84,11 +84,18 @@ patch(ReprintReceiptButton.prototype, {
             });
             const imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
 
-            const printResult = await qzPrinterService.printReceiptImage(imageBase64, preferredPrinter);
-            this.notification.add(
-                _t("Ticket reprinted via QZ Tray (%s)", printResult.printer_name || ""),
-                { type: "success" }
-            );
+            if (this.pos.config.simulation_mode) {
+                this.notification.add(
+                    _t("Ticket reprint simulated (Simulation Mode: physical print skipped)"),
+                    { type: "info" }
+                );
+            } else {
+                const printResult = await qzPrinterService.printReceiptImage(imageBase64, preferredPrinter);
+                this.notification.add(
+                    _t("Ticket reprinted via QZ Tray (%s)", printResult.printer_name || preferredPrinter),
+                    { type: "success" }
+                );
+            }
 
             // Archive reprint in backend
             if (serverId && typeof serverId === "number") {

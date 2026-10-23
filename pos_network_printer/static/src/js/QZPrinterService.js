@@ -133,6 +133,7 @@ class QZPrinterService {
             size: { width: 80 },
             units: "mm",
             margins: 0,
+            scaleContent: false,
             colorType: "blackwhite",
             rasterize: true,
         });

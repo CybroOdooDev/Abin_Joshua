@@ -63,6 +63,8 @@ class PosOrder(models.Model):
             ticket_name = f"{ticket_name} (Factura)"
         elif print_type == 'reprint':
             ticket_name = f"{ticket_name} (Copia)"
+        elif print_type == 'kitchen':
+            ticket_name = f"{ticket_name} (Cocina)"
 
         ticket_record = self.env['pos.printed.ticket'].create({
             'name': ticket_name,

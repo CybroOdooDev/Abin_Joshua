@@ -55,6 +55,9 @@
             'pos_network_printer/static/src/js/PosStorePatch.js',
             'pos_network_printer/static/src/js/OrderPatch.js',
             'pos_network_printer/static/src/xml/OrderReceiptInvoice.xml',
+            'pos_network_printer/static/src/xml/KitchenOrderReceipt.xml',
+            'pos_network_printer/static/src/js/KitchenOrderReceipt.js',
+            'pos_network_printer/static/src/js/KitchenPrintingPatch.js',
         ],
         'pos_self_order.assets': [
             'pos_network_printer/static/src/js/KioskConfirmationPatch.js',

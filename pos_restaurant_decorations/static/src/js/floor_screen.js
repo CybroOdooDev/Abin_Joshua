@@ -8,6 +8,10 @@ import { TableCustomizationPopup } from "@pos_restaurant_decorations/js/table_cu
 patch(FloorScreen.prototype, {
     setup() {
         super.setup();
+        this.pos.floorPlanStyle = "default";
+        try {
+            localStorage.setItem("floorPlanStyle", "default");
+        } catch (_) {}
         this._onWindowResize = () => {
             this.autoFitFloorMap();
         };
@@ -26,11 +30,11 @@ patch(FloorScreen.prototype, {
 
     selectFloor(floor) {
         super.selectFloor(floor);
-        setTimeout(() => this.autoFitFloorMap(), 50);
+        this.autoFitFloorMap();
     },
 
     autoFitFloorMap() {
-        if (!this.floorMapRef || !this.floorMapRef.el || !this.map || !this.map.el) return;
+        if (!this.map || !this.map.el || !this.floorMapRef || !this.floorMapRef.el) return;
         const container = this.floorMapRef.el;
         const cWidth = container.clientWidth;
         const cHeight = container.clientHeight;
@@ -54,16 +58,25 @@ patch(FloorScreen.prototype, {
         maxRight += 40;
         maxBottom += 40;
 
-        // Auto-scale on smaller screens (mobile / tablet) to keep all items visible
+        // Auto-scale so that the customized floor plan layout fits and stays intact on screen
         if (maxRight > cWidth || maxBottom > cHeight) {
             const scaleX = cWidth / maxRight;
             const scaleY = cHeight / maxBottom;
             const fitScale = Math.min(scaleX, scaleY);
-            const finalScale = Math.max(0.35, Math.min(1, fitScale));
+            const finalScale = Math.max(0.4, Math.min(1, fitScale));
             this.setScale(finalScale);
         } else {
             this.setScale(1);
         }
+    },
+
+    async onSaveTable(table) {
+        if (!table || !table.id) return;
+        table.active = true;
+        if (this.pos.tables_by_id[table.id]) {
+            this.pos.tables_by_id[table.id].active = true;
+        }
+        await this._save(table);
     },
 
     async addDecor() {
@@ -84,18 +97,31 @@ patch(FloorScreen.prototype, {
     },
 
     async createDecorTable(payload) {
-        const existingTable = this.activeTables;
-        let posV = 20;
-        let posH = 20;
+        const existingTable = this.activeTables || [];
+        let posH = 40;
+        let posV = 40;
 
-        if (existingTable && existingTable.length > 0) {
-            const last = existingTable[existingTable.length - 1];
-            posH = ((last.position_h || 20) + (payload.width || 70) + 15) % Math.max(300, (window.innerWidth - 150));
-            posV = last.position_v || 20;
-            if (posH < 30) {
-                posH = 20;
-                posV = ((last.position_v || 20) + (payload.height || 70) + 15) % Math.max(300, (window.innerHeight - 180));
-            }
+        // Position new item relative to current scroll viewport so it appears in front of user
+        if (this.floorMapRef && this.floorMapRef.el) {
+            const scrollLeft = this.floorMapRef.el.scrollLeft || 0;
+            const scrollTop = this.floorMapRef.el.scrollTop || 0;
+            posH = Math.max(30, scrollLeft + 50);
+            posV = Math.max(30, scrollTop + 50);
+        }
+
+        // Avoid dropping exactly on top of an existing table
+        let attempts = 0;
+        while (
+            attempts < 30 &&
+            existingTable.some(
+                (t) =>
+                    Math.abs((t.position_h || 0) - posH) < 40 &&
+                    Math.abs((t.position_v || 0) - posV) < 40
+            )
+        ) {
+            posH += 50;
+            posV += 30;
+            attempts++;
         }
 
         const newTable = {
@@ -116,18 +142,21 @@ patch(FloorScreen.prototype, {
             show_seats: payload.show_seats !== false,
             floor_id: [this.activeFloor.id, ""],
             floor: this.activeFloor,
+            active: true,
         };
 
         await this._save(newTable);
         this.activeTables.push(newTable);
         this.activeFloor.table_ids.push(newTable.id);
+        this.pos.tables_by_id[newTable.id] = newTable;
         this.state.selectedTableIds = [newTable.id];
         return newTable;
     },
 
     async _save(table) {
+        table.active = true;
         const tableCopy = {
-            floor_id: table.floor.id,
+            floor_id: table.floor ? table.floor.id : (Array.isArray(table.floor_id) ? table.floor_id[0] : table.floor_id),
             color: table.color,
             height: table.height,
             name: table.name,
@@ -143,6 +172,7 @@ patch(FloorScreen.prototype, {
             custom_image: table.custom_image || false,
             show_label: table.show_label !== false,
             show_seats: table.show_seats !== false,
+            active: true,
         };
 
         if (table.id) {
@@ -150,7 +180,8 @@ patch(FloorScreen.prototype, {
         } else {
             const tableId = await this.orm.create("restaurant.table", [tableCopy]);
             table.id = tableId[0];
-            this.pos.tables_by_id[tableId] = table;
+            table.active = true;
+            this.pos.tables_by_id[table.id] = table;
         }
     },
 

@@ -388,5 +388,4 @@
 .floor-screen .floor-map > div {
     transform: scale(var(--scale, 1));
     transform-origin: 0 0;
-    transition: transform 0.08s ease-out;
 }

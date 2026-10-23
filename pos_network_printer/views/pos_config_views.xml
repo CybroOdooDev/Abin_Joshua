@@ -7,17 +7,25 @@
         <field name="arch" type="xml">
             <xpath expr="//sheet" position="inside">
                 <div class="network_printing_config" name="network_printing_config">
-                    <group string="Local Ticket Printing (QZ Tray - No IoT Box)">
+                    <group string="Local Ticket &amp; Kitchen Printing (QZ Tray - No IoT Box)">
                         <div class="text-muted mb-3" colspan="2">
-                            Direct local printing to thermal receipt printers via QZ Tray without IoT Box or cloud networking restrictions.
+                            Direct local printing to thermal receipt and kitchen preparation printers via QZ Tray without IoT Box or cloud networking restrictions.
                         </div>
-                        <group>
+                        <group string="Customer Receipt Printer">
                             <field name="enable_network_printing"/>
                             <field name="qz_printer_name"
                                    placeholder="e.g. Bitaspain, POS-80 (leave blank for system default)"
                                    invisible="not enable_network_printing"/>
                             <field name="auto_print_on_payment"
                                    invisible="not enable_network_printing"/>
+                            <field name="simulation_mode"
+                                   invisible="not enable_network_printing"/>
+                        </group>
+                        <group string="Kitchen Preparation Printer" invisible="not enable_network_printing">
+                            <field name="enable_kitchen_printing"/>
+                            <field name="qz_kitchen_printer_name"
+                                   placeholder="e.g. Kitchen, POS-80-Kitchen (leave blank for default)"
+                                   invisible="not enable_kitchen_printing"/>
                         </group>
                     </group>
                 </div>

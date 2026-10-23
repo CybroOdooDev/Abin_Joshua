@@ -128,14 +128,21 @@ patch(PrintBillButton.prototype, {
                 order.server_id ||
                 (typeof order.id === "number" ? order.id : 0);
 
-            // Dispatch print directly to local QZ Tray
+            // Dispatch print directly to local QZ Tray or skip in simulation mode
             const preferredPrinter = this.pos.config.qz_printer_name || this.pos.config.printer_name || "";
-            const printResult = await qzPrinterService.printReceiptImage(imageBase64, preferredPrinter);
-
-            this.notification.add(
-                _t("Pre-payment bill printed via QZ Tray (%s)", printResult.printer_name || ""),
-                { type: "success" }
-            );
+            if (this.pos.config.simulation_mode) {
+                console.log(`[Simulation Mode] Pre-payment bill for ${orderName} recorded without physical printing.`);
+                this.notification.add(
+                    _t("Pre-payment bill saved in history (Simulation Mode: physical print skipped)"),
+                    { type: "info" }
+                );
+            } else {
+                const printResult = await qzPrinterService.printReceiptImage(imageBase64, preferredPrinter);
+                this.notification.add(
+                    _t("Pre-payment bill printed via QZ Tray (%s)", printResult.printer_name || preferredPrinter),
+                    { type: "success" }
+                );
+            }
 
             // Archive visual snapshot in backend
             try {
