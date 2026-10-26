@@ -95,8 +95,15 @@ class QZPrinterService {
     async resolvePrinter(preferredName = null) {
         await this.connect();
 
-        if (preferredName && typeof preferredName === "string" && preferredName.trim().length > 0) {
-            const trimmed = preferredName.trim();
+        let printerTargetName = preferredName;
+        if (Array.isArray(printerTargetName) && printerTargetName.length > 1) {
+            printerTargetName = printerTargetName[1];
+        } else if (printerTargetName && typeof printerTargetName === "object" && printerTargetName.name) {
+            printerTargetName = printerTargetName.name;
+        }
+
+        if (printerTargetName && typeof printerTargetName === "string" && printerTargetName.trim().length > 0) {
+            const trimmed = printerTargetName.trim();
             try {
                 const found = await window.qz.printers.find(trimmed);
                 if (found) {
@@ -130,10 +137,10 @@ class QZPrinterService {
         const targetPrinter = await this.resolvePrinter(preferredPrinterName);
 
         const qzConfig = window.qz.configs.create(targetPrinter, {
-            size: { width: 80 },
+            size: { width: 80, height: 297 },
             units: "mm",
             margins: 0,
-            scaleContent: false,
+            scaleContent: true,
             colorType: "blackwhite",
             rasterize: true,
         });

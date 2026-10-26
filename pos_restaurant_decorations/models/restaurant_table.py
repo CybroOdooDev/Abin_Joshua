@@ -23,3 +23,5 @@ class RestaurantTable(models.Model):
     custom_image = fields.Binary(string='Custom Image', attachment=True)
     show_label = fields.Boolean(string='Show Table Name / Label', default=True)
     show_seats = fields.Boolean(string='Show Seats Count', default=True)
+    rotation = fields.Integer(string='Rotation (Degrees)', default=0)
+    z_index = fields.Integer(string='Layer (Z-Index)', default=10)

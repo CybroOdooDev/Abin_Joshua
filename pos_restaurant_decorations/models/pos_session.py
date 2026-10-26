@@ -15,5 +15,7 @@ class PosSession(models.Model):
             'custom_image',
             'show_label',
             'show_seats',
+            'rotation',
+            'z_index',
         ])
         return params

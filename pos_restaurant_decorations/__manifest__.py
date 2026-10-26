@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'POS Restaurant Customizable Decor & Surrounding Tables',
-    'version': '17.0.1.0.0',
+    'version': '17.0.1.1.0',
     'category': 'Point of Sale',
     'summary': 'Customizable surrounding tables, bar items, flowerpots, barrels, chairs and decorations for POS Restaurant',
     'description': """

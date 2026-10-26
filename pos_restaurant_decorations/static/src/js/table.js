@@ -61,6 +61,12 @@ patch(Table.prototype, {
                 style = style.replace(/background:\s*[^;]+;/, "background: rgba(53, 211, 116, 0.25);");
             }
         }
+        const rot = this.props.table.rotation || 0;
+        if (rot) {
+            style += ` transform: rotate(${rot}deg);`;
+        }
+        const zIndex = typeof this.props.table.z_index === "number" ? this.props.table.z_index : 10;
+        style += ` z-index: ${zIndex};`;
         return style;
     },
 });

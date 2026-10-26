@@ -46,7 +46,8 @@ patch(PosStore.prototype, {
             ? order.table.floor.name
             : (order.getTable && order.getTable()?.floor ? (order.getTable().floor.name || "") : "");
 
-        const orderName = typeof order.get_name === "function" ? order.get_name() : (order.tracking_number || order.name || "");
+        const rawOrderName = typeof order.get_name === "function" ? order.get_name() : (order.tracking_number || order.name || "");
+        const orderName = rawOrderName.replace(/^Order\s*/i, "");
         const cashierName = this.get_cashier ? this.get_cashier().name : (this.user ? this.user.name : "");
 
         // 3. Group new lines by Course / Plating Level
@@ -181,9 +182,11 @@ patch(PosStore.prototype, {
             return;
         }
 
-        const kitchenPrinterName = this.config.qz_kitchen_printer_name
-            ? this.config.qz_kitchen_printer_name.trim()
-            : (this.config.qz_printer_name ? this.config.qz_printer_name.trim() : null);
+        const config = this.config;
+        const kitchenPrinterName = (config.qz_kitchen_printer_id && config.qz_kitchen_printer_id[1])
+            || (config.qz_kitchen_printer_name ? config.qz_kitchen_printer_name.trim() : null)
+            || (config.qz_printer_id && config.qz_printer_id[1])
+            || (config.qz_printer_name ? config.qz_printer_name.trim() : null);
 
         // 5. Asynchronously log the kitchen ticket snapshot in pos.printed.ticket
         try {

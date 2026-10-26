@@ -2,11 +2,11 @@
 <templates id="template" xml:space="preserve">
     <t t-name="pos_network_printer.KitchenOrderReceipt">
         <t t-set="d" t-value="typeof props !== 'undefined' and props.data ? props.data : data"/>
-        <div class="pos-receipt pos-kitchen-receipt" style="width: 330px; font-family: monospace; font-size: 15px; color: #000; padding: 10px 15px; background: #fff; box-sizing: border-box; margin: 0 auto;">
+        <div class="pos-receipt pos-kitchen-receipt" style="width: 330px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 16px; color: #000; padding: 10px 14px; background: #fff; box-sizing: border-box; margin: 0 auto; line-height: 1.35;">
             <!-- HEADER -->
             <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 8px; margin-bottom: 8px;">
-                <div style="font-size: 22px; font-weight: bold; letter-spacing: 2px;">*** COCINA / KITCHEN ***</div>
-                <div style="font-size: 18px; font-weight: bold; margin-top: 4px;">
+                <div style="font-size: 20px; font-weight: 800; letter-spacing: 1px;">*** COCINA / KITCHEN ***</div>
+                <div style="font-size: 24px; font-weight: 900; margin-top: 4px; text-transform: uppercase;">
                     <t t-if="d.tableName">
                         MESA: <t t-esc="d.tableName"/>
                         <t t-if="d.floorName"> (<t t-esc="d.floorName"/>)</t>
@@ -15,30 +15,40 @@
                         <t t-esc="d.orderType || 'PARA LLEVAR / TAKEAWAY'"/>
                     </t>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 14px; margin-top: 6px;">
-                    <span>ORDEN: #<t t-esc="d.orderName"/></span>
-                    <span>HORA: <t t-esc="d.time"/></span>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-top: 2px; color: #222;">
-                    <span>CAMARERO: <t t-esc="d.cashierName"/></span>
-                    <t t-if="d.diners">
-                        <span>COMENSALES: <t t-esc="d.diners"/></span>
-                    </t>
-                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 6px; border-top: 1px dashed #444;">
+                    <tr>
+                        <td style="text-align: left; font-size: 15px; font-weight: 800; padding: 4px 0 2px 0; vertical-align: top;">
+                            ORDEN: #<t t-esc="d.orderName"/>
+                        </td>
+                        <td style="text-align: right; font-size: 14px; font-weight: 700; padding: 4px 0 2px 0; white-space: nowrap; vertical-align: top; color: #222;">
+                            <t t-esc="d.time"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="text-align: left; font-size: 14px; font-weight: 600; padding: 2px 0; vertical-align: top; color: #222;">
+                            CAMARERO: <strong><t t-esc="d.cashierName"/></strong>
+                        </td>
+                        <t t-if="d.diners">
+                            <td style="text-align: right; font-size: 14px; font-weight: 800; padding: 2px 0; white-space: nowrap; vertical-align: top;">
+                                PAX: <t t-esc="d.diners"/>
+                            </td>
+                        </t>
+                    </tr>
+                </table>
             </div>
 
             <!-- CANCELLED ITEMS (IF ANY) -->
             <t t-if="d.cancelledLines and d.cancelledLines.length > 0">
-                <div style="border: 2px solid #000; padding: 6px; margin-bottom: 10px; background-color: #f2f2f2;">
-                    <div style="font-size: 16px; font-weight: bold; text-align: center; text-decoration: underline;">
+                <div style="border: 2px solid #000; padding: 8px; margin-bottom: 10px; background-color: #f2f2f2;">
+                    <div style="font-size: 17px; font-weight: 900; text-align: center; text-decoration: underline; margin-bottom: 4px;">
                         *** ANULADO / CANCELLED ***
                     </div>
                     <t t-foreach="d.cancelledLines" t-as="item" t-key="item_index">
-                        <div style="display: flex; justify-content: space-between; font-size: 15px; font-weight: bold; margin-top: 4px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 17px; font-weight: 800; margin-top: 4px;">
                             <span>-<t t-esc="item.qty"/>x <t t-esc="item.name"/></span>
                         </div>
                         <t t-if="item.note">
-                            <div style="font-size: 13px; margin-left: 15px;">* <t t-esc="item.note"/></div>
+                            <div style="font-size: 14px; font-weight: 700; margin-left: 20px;">* <t t-esc="item.note"/></div>
                         </t>
                     </t>
                 </div>
@@ -48,25 +58,25 @@
             <t t-foreach="d.courses" t-as="course" t-key="course.id || course_index">
                 <div style="margin-bottom: 12px;">
                     <!-- Course Header -->
-                    <div style="background-color: #000; color: #fff; padding: 4px 8px; font-size: 16px; font-weight: bold; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 1px;">
+                    <div style="background-color: #000; color: #fff; padding: 6px 10px; font-size: 17px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: center;">
                         [ <t t-esc="course.name"/> ]
                     </div>
 
                     <!-- Items inside this course -->
                     <t t-foreach="course.lines" t-as="line" t-key="line_index">
-                        <div style="margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dotted #ccc;">
-                            <div style="display: flex; align-items: baseline; justify-content: space-between;">
-                                <span style="font-size: 18px; font-weight: 900; width: 45px;"><t t-esc="line.qty"/>x</span>
-                                <span style="font-size: 16px; font-weight: bold; flex: 1; text-align: left;"><t t-esc="line.name"/></span>
+                        <div style="margin-bottom: 6px; padding-bottom: 6px; border-bottom: 1px dashed #aaa;">
+                            <div style="display: flex; align-items: flex-start; justify-content: space-between;">
+                                <span style="font-size: 22px; font-weight: 900; min-width: 45px; line-height: 1.1;"><t t-esc="line.qty"/>x</span>
+                                <span style="font-size: 18px; font-weight: 800; flex: 1; text-align: left; line-height: 1.2;"><t t-esc="line.name"/></span>
                             </div>
 
                             <!-- Combo child lines -->
                             <t t-if="line.comboLines and line.comboLines.length > 0">
                                 <t t-foreach="line.comboLines" t-as="comboItem" t-key="comboItem_index">
-                                    <div style="margin-left: 25px; font-size: 14px; color: #222;">
+                                    <div style="margin-left: 45px; font-size: 15px; font-weight: 700; color: #222; margin-top: 2px;">
                                         + <t t-if="comboItem.qty and comboItem.qty > 1"><t t-esc="comboItem.qty"/>x </t><t t-esc="comboItem.name"/>
                                         <t t-if="comboItem.note">
-                                            <span style="font-weight: bold;"> (<t t-esc="comboItem.note"/>)</span>
+                                            <span style="font-weight: 800; color: #000;"> (<t t-esc="comboItem.note"/>)</span>
                                         </t>
                                     </div>
                                 </t>
@@ -74,7 +84,7 @@
 
                             <!-- Customer Notes / Instructions -->
                             <t t-if="line.note">
-                                <div style="margin-left: 20px; font-size: 14px; font-weight: bold; background: #eee; padding: 2px 4px; margin-top: 2px; border-left: 3px solid #000;">
+                                <div style="margin-left: 45px; font-size: 14px; font-weight: 800; background: #eee; padding: 3px 6px; margin-top: 3px; border-left: 3px solid #000;">
                                     * NOTA: <t t-esc="line.note"/>
                                 </div>
                             </t>
@@ -84,9 +94,9 @@
             </t>
 
             <!-- FOOTER -->
-            <div style="border-top: 2px dashed #000; padding-top: 6px; margin-top: 10px; text-align: center; font-size: 13px;">
-                <div>ENVIADO A COCINA: <t t-esc="d.date"/> <t t-esc="d.time"/></div>
-                <div style="letter-spacing: 3px; font-weight: bold; margin-top: 4px;">========================</div>
+            <div style="border-top: 2px dashed #000; padding-top: 8px; margin-top: 12px; text-align: center;">
+                <div style="font-size: 14px; font-weight: 700; letter-spacing: 0.5px;">ENVIADO A COCINA</div>
+                <div style="font-size: 13px; font-weight: 600; color: #333; margin-top: 2px;"><t t-esc="d.date"/> <t t-esc="d.time"/></div>
             </div>
         </div>
     </t>

@@ -39,6 +39,8 @@ export class TableCustomizationPopup extends AbstractAwaitablePopup {
             image_url: table.image_url || null,
             custom_image: table.custom_image || null,
             imagePreview: currentImagePreview,
+            rotation: typeof table.rotation === "number" ? table.rotation : 0,
+            z_index: typeof table.z_index === "number" ? table.z_index : 10,
         });
     }
 
@@ -106,6 +108,8 @@ export class TableCustomizationPopup extends AbstractAwaitablePopup {
             decor_preset_id: this.state.decor_preset_id,
             image_url: this.state.image_url,
             custom_image: this.state.custom_image,
+            rotation: this.state.rotation || 0,
+            z_index: this.state.z_index || 10,
         };
     }
 }

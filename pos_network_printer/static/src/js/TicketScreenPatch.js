@@ -27,7 +27,11 @@ patch(ReprintReceiptButton.prototype, {
 
         const order = this.props.order;
         const serverId = order.server_id || order.id || order.backendId;
-        const preferredPrinter = this.pos.config.qz_printer_name || this.pos.config.printer_name || "";
+        const config = this.pos.config;
+        const preferredPrinter = (config.qz_printer_id && config.qz_printer_id[1])
+            || config.qz_printer_name
+            || config.printer_name
+            || "";
 
         try {
             // First attempt: Reprint the exact preserved snapshot from pos.printed.ticket
@@ -84,6 +88,7 @@ patch(ReprintReceiptButton.prototype, {
             });
             const imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
 
+            let printerDisplayName = preferredPrinter || "Default";
             if (this.pos.config.simulation_mode) {
                 this.notification.add(
                     _t("Ticket reprint simulated (Simulation Mode: physical print skipped)"),
@@ -91,8 +96,9 @@ patch(ReprintReceiptButton.prototype, {
                 );
             } else {
                 const printResult = await qzPrinterService.printReceiptImage(imageBase64, preferredPrinter);
+                printerDisplayName = printResult.printer_name || preferredPrinter;
                 this.notification.add(
-                    _t("Ticket reprinted via QZ Tray (%s)", printResult.printer_name || preferredPrinter),
+                    _t("Ticket reprinted via QZ Tray (%s)", printerDisplayName),
                     { type: "success" }
                 );
             }
@@ -107,7 +113,7 @@ patch(ReprintReceiptButton.prototype, {
                             serverId,
                             imageBase64,
                             "reprint",
-                            printResult.printer_name || preferredPrinter,
+                            printerDisplayName,
                             "success",
                             false,
                         ]

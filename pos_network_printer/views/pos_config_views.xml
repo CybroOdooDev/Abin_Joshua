@@ -11,21 +11,34 @@
                         <div class="text-muted mb-3" colspan="2">
                             Direct local printing to thermal receipt and kitchen preparation printers via QZ Tray without IoT Box or cloud networking restrictions.
                         </div>
+                        <div class="d-flex align-items-center gap-2 mb-3" colspan="2" invisible="not enable_network_printing">
+                            <button name="action_find_system_printers"
+                                    string="Scan / Discover Available Printers"
+                                    type="object"
+                                    class="btn btn-secondary btn-sm"
+                                    icon="fa-refresh"/>
+                            <span class="text-muted small">
+                                Scans local OS printers and populates the Receipt and Kitchen printer dropdowns.
+                            </span>
+                        </div>
                         <group string="Customer Receipt Printer">
                             <field name="enable_network_printing"/>
-                            <field name="qz_printer_name"
-                                   placeholder="e.g. Bitaspain, POS-80 (leave blank for system default)"
+                            <field name="qz_printer_id"
+                                   placeholder="Select or enter receipt printer..."
+                                   options="{'no_open': False, 'no_create_edit': False}"
                                    invisible="not enable_network_printing"/>
+                            <field name="qz_printer_name" invisible="1"/>
                             <field name="auto_print_on_payment"
                                    invisible="not enable_network_printing"/>
-                            <field name="simulation_mode"
-                                   invisible="not enable_network_printing"/>
+                            <field name="simulation_mode" invisible="1"/>
                         </group>
                         <group string="Kitchen Preparation Printer" invisible="not enable_network_printing">
                             <field name="enable_kitchen_printing"/>
-                            <field name="qz_kitchen_printer_name"
-                                   placeholder="e.g. Kitchen, POS-80-Kitchen (leave blank for default)"
+                            <field name="qz_kitchen_printer_id"
+                                   placeholder="Select or enter kitchen printer..."
+                                   options="{'no_open': False, 'no_create_edit': False}"
                                    invisible="not enable_kitchen_printing"/>
+                            <field name="qz_kitchen_printer_name" invisible="1"/>
                         </group>
                     </group>
                 </div>

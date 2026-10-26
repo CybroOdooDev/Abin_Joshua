@@ -5,49 +5,22 @@
         <field name="name">pos.network.printer.form</field>
         <field name="model">pos.network.printer</field>
         <field name="arch" type="xml">
-            <form string="Network Thermal Printer">
-                <header>
-                    <button name="action_test_connection"
-                            string="Test Connection"
-                            type="object"
-                            class="btn-primary"
-                            icon="fa-plug"/>
-                    <button name="action_print_test_page"
-                            string="Print Test Ticket"
-                            type="object"
-                            class="btn-secondary"
-                            icon="fa-print"/>
-                    <field name="last_status" widget="statusbar" statusbar_visible="online,offline"/>
-                </header>
+            <form string="Network / QZ Tray Printer">
                 <sheet>
-                    <div class="oe_button_box" name="button_box"/>
                     <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
                     <div class="oe_title">
                         <label for="name" string="Printer Name"/>
                         <h1>
-                            <field name="name" placeholder="e.g. Counter Thermal Printer"/>
+                            <field name="name" placeholder="e.g. POS-80, Canon-G6000, Kitchen-Printer"/>
                         </h1>
                     </div>
                     <group>
-                        <group string="Network Connection (TCP/IP)">
-                            <field name="ip_address" placeholder="192.168.1.150"/>
-                            <field name="port"/>
-                            <field name="connection_timeout"/>
-                            <field name="active" invisible="1"/>
-                        </group>
                         <group string="Hardware Specifications">
                             <field name="paper_width"/>
                             <field name="printer_type"/>
+                            <field name="active" widget="boolean_toggle"/>
                         </group>
                     </group>
-                    <notebook>
-                        <page string="Diagnostic Status" name="diagnostics">
-                            <group>
-                                <field name="last_checked"/>
-                                <field name="last_status_message" readonly="1"/>
-                            </group>
-                        </page>
-                    </notebook>
                 </sheet>
             </form>
         </field>
@@ -58,18 +31,11 @@
         <field name="name">pos.network.printer.tree</field>
         <field name="model">pos.network.printer</field>
         <field name="arch" type="xml">
-            <tree string="Network Thermal Printers">
+            <tree string="Network / QZ Tray Printers" editable="bottom">
                 <field name="name"/>
-                <field name="ip_address"/>
-                <field name="port"/>
                 <field name="paper_width"/>
                 <field name="printer_type"/>
-                <field name="last_status"
-                       widget="badge"
-                       decoration-success="last_status == 'online'"
-                       decoration-danger="last_status == 'offline'"
-                       decoration-muted="last_status == 'unknown'"/>
-                <field name="last_checked"/>
+                <field name="active" widget="boolean_toggle"/>
             </tree>
         </field>
     </record>
@@ -84,8 +50,7 @@
                 Configure your first Local Network Thermal Printer!
             </p>
             <p>
-                Connect directly to receipt and kitchen thermal printers on your local network
-                (TCP Port 9100) without requiring an IoT Box or ePOS printer.
+                Printers detected automatically via QZ Tray or local spooler will be listed here.
             </p>
         </field>
     </record>

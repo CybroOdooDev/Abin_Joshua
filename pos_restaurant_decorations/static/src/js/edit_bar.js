@@ -8,6 +8,10 @@ patch(EditBar, {
         ...EditBar.props,
         addDecor: { type: Function, optional: true },
         customizeTable: { type: Function, optional: true },
+        rotateLeft: { type: Function, optional: true },
+        rotateRight: { type: Function, optional: true },
+        bringToFront: { type: Function, optional: true },
+        sendToBack: { type: Function, optional: true },
     },
 });
 

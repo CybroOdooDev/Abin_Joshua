@@ -47,7 +47,7 @@ class PosOrder(models.Model):
         return {'invoice_id': False, 'invoice_number': ''}
 
     @api.model
-    def log_printed_ticket(self, order_id, image_base64, print_type='first_print', printer_name='', status='success', error_message=False):
+    def log_printed_ticket(self, order_id, image_base64, print_type='first_print', printer_name='', status='success', error_message=False, custom_name=False, **kwargs):
         """
         Invoked from POS frontend upon ticket print via QZ Tray.
         Records an exact visual snapshot and audit record in pos.printed.ticket history.
@@ -56,7 +56,11 @@ class PosOrder(models.Model):
         if order and not order.exists():
             order = self.env['pos.order']
 
-        ticket_name = (order.tracking_number or order.pos_reference or order.name) if order else _("Pre-Payment Bill")
+        if custom_name:
+            ticket_name = str(custom_name)
+        else:
+            ticket_name = (order.tracking_number or order.pos_reference or order.name) if order else _("Ticket")
+
         if print_type == 'bill':
             ticket_name = f"{ticket_name} (Pro-Forma)"
         elif print_type == 'invoice':

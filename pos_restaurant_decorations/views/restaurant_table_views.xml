@@ -17,6 +17,8 @@
                     <group>
                         <field name="show_label"/>
                         <field name="show_seats"/>
+                        <field name="rotation"/>
+                        <field name="z_index"/>
                         <field name="custom_image" widget="image" class="oe_avatar"/>
                     </group>
                 </group>

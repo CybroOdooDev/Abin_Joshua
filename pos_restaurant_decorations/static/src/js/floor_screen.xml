@@ -4,6 +4,10 @@
         <xpath expr="//EditBar" position="attributes">
             <attribute name="addDecor.bind">addDecor</attribute>
             <attribute name="customizeTable.bind">customizeTable</attribute>
+            <attribute name="rotateLeft.bind">rotateLeft</attribute>
+            <attribute name="rotateRight.bind">rotateRight</attribute>
+            <attribute name="bringToFront.bind">bringToFront</attribute>
+            <attribute name="sendToBack.bind">sendToBack</attribute>
         </xpath>
     </t>
 </templates>

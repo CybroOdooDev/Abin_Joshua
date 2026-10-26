@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'POS Local Ticket Printing System (QZ Tray)',
-    'version': '17.0.1.0.1',
+    'version': '17.0.1.0.2',
     'category': 'Point Of Sale',
     'summary': 'Direct local thermal ticket printing for POS receipts, bills, and legal invoices via QZ Tray',
     'description': """
@@ -44,6 +44,7 @@
         'views/pos_printed_ticket_views.xml',
         'views/pos_config_views.xml',
         'views/pos_order_views.xml',
+        'views/pos_network_printer_views.xml',
     ],
     'assets': {
         'point_of_sale._assets_pos': [

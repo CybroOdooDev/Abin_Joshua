@@ -101,5 +101,12 @@ patch(EditableTable.prototype, {
             this.root.el.style.background = "rgba(59, 130, 246, 0.15)";
             this.root.el.style.border = "2px dashed #3b82f6";
         }
+        if (this.root && this.root.el) {
+            const rot = this.props.table.rotation || 0;
+            this.root.el.style.transform = rot ? `rotate(${rot}deg)` : "none";
+            const zIndex = typeof this.props.table.z_index === "number" ? this.props.table.z_index : 10;
+            this.root.el.style.zIndex = `${zIndex + 2}`;
+            this.root.el.style.setProperty("--table-z-index", `${zIndex + 2}`);
+        }
     },
 });

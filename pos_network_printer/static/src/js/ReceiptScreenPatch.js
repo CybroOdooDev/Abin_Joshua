@@ -180,8 +180,11 @@ patch(ReceiptScreen.prototype, {
                 throw new Error(_t("Failed to capture receipt image."));
             }
 
-            // Dispatch print directly to local QZ Tray or skip in simulation mode
-            const preferredPrinter = this.pos.config.qz_printer_name || this.pos.config.printer_name || "";
+            const config = this.pos.config;
+            const preferredPrinter = (config.qz_printer_id && config.qz_printer_id[1])
+                || config.qz_printer_name
+                || config.printer_name
+                || "";
             let printerDisplayName = preferredPrinter || "Default";
             if (this.pos.config.simulation_mode) {
                 console.log(`[Simulation Mode] Receipt for ${orderName} recorded without physical printing.`);
@@ -210,9 +213,10 @@ patch(ReceiptScreen.prototype, {
                         serverOrderId || 0,
                         imageBase64,
                         printType,
-                        printResult.printer_name || preferredPrinter,
+                        printerDisplayName,
                         "success",
                         false,
+                        orderName,
                     ]
                 );
             } catch (err) {

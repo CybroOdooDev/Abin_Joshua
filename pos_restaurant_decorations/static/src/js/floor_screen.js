@@ -140,6 +140,8 @@ patch(FloorScreen.prototype, {
             custom_image: payload.custom_image || false,
             show_label: payload.show_label !== false,
             show_seats: payload.show_seats !== false,
+            rotation: typeof payload.rotation === "number" ? payload.rotation : 0,
+            z_index: typeof payload.z_index === "number" ? payload.z_index : 10,
             floor_id: [this.activeFloor.id, ""],
             floor: this.activeFloor,
             active: true,
@@ -151,6 +153,68 @@ patch(FloorScreen.prototype, {
         this.pos.tables_by_id[newTable.id] = newTable;
         this.state.selectedTableIds = [newTable.id];
         return newTable;
+    },
+
+    async rotateLeft() {
+        if (!this.selectedTables || this.selectedTables.length === 0) return;
+        for (const table of this.selectedTables) {
+            const current = typeof table.rotation === "number" ? table.rotation : 0;
+            table.rotation = (current - 90 + 360) % 360;
+            await this._save(table);
+        }
+        this.render();
+    },
+
+    async rotateRight() {
+        if (!this.selectedTables || this.selectedTables.length === 0) return;
+        for (const table of this.selectedTables) {
+            const current = typeof table.rotation === "number" ? table.rotation : 0;
+            table.rotation = (current + 90) % 360;
+            await this._save(table);
+        }
+        this.render();
+    },
+
+    async bringToFront() {
+        if (!this.selectedTables || this.selectedTables.length === 0) return;
+        const allTables = this.activeTables || [];
+        let maxZ = 10;
+        for (const t of allTables) {
+            const z = typeof t.z_index === "number" ? t.z_index : 10;
+            if (z > maxZ) maxZ = z;
+        }
+        for (const table of this.selectedTables) {
+            maxZ += 1;
+            table.z_index = maxZ;
+            await this._save(table);
+        }
+        this.render();
+    },
+
+    async sendToBack() {
+        if (!this.selectedTables || this.selectedTables.length === 0) return;
+        const allTables = this.activeTables || [];
+        let minZ = 10;
+        for (const t of allTables) {
+            const z = typeof t.z_index === "number" ? t.z_index : 10;
+            if (z < minZ) minZ = z;
+        }
+        if (minZ <= 1) {
+            const shift = 2 - minZ;
+            for (const t of allTables) {
+                if (!this.selectedTables.includes(t)) {
+                    t.z_index = (typeof t.z_index === "number" ? t.z_index : 10) + shift;
+                    await this._save(t);
+                }
+            }
+            minZ = 2;
+        }
+        for (const table of this.selectedTables) {
+            minZ = Math.max(1, minZ - 1);
+            table.z_index = minZ;
+            await this._save(table);
+        }
+        this.render();
     },
 
     async _save(table) {
@@ -172,6 +236,8 @@ patch(FloorScreen.prototype, {
             custom_image: table.custom_image || false,
             show_label: table.show_label !== false,
             show_seats: table.show_seats !== false,
+            rotation: typeof table.rotation === "number" ? table.rotation : 0,
+            z_index: typeof table.z_index === "number" ? table.z_index : 10,
             active: true,
         };
 

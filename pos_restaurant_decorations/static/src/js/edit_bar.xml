@@ -18,6 +18,30 @@
                 <i class="fa fa-sliders icon-button" role="img" aria-label="Customize" title="Customize Decor"></i>
                 <span class="text-button d-block">Decorate</span>
             </span>
+            <span role="button" class="edit-button btn-decor-rotate-left text-center d-flex flex-column justify-content-center align-items-center btn btn-light"
+                  t-att-class="{ disabled: props.selectedTables.length == 0 }"
+                  t-on-click.stop="props.rotateLeft"
+                  title="Rotate Left (90°)">
+                <i class="fa fa-undo icon-button fs-4" role="img" aria-label="Rotate Left" title="Rotate Left (90°)"></i>
+            </span>
+            <span role="button" class="edit-button btn-decor-rotate-right text-center d-flex flex-column justify-content-center align-items-center btn btn-light"
+                  t-att-class="{ disabled: props.selectedTables.length == 0 }"
+                  t-on-click.stop="props.rotateRight"
+                  title="Rotate Right (90°)">
+                <i class="fa fa-repeat icon-button fs-4" role="img" aria-label="Rotate Right" title="Rotate Right (90°)"></i>
+            </span>
+            <span role="button" class="edit-button btn-decor-bring-front text-center d-flex flex-column justify-content-center align-items-center btn btn-light"
+                  t-att-class="{ disabled: props.selectedTables.length == 0 }"
+                  t-on-click.stop="props.bringToFront"
+                  title="Bring to Front">
+                <i class="fa fa-angle-double-up icon-button fs-4" role="img" aria-label="Bring to Front" title="Bring to Front"></i>
+            </span>
+            <span role="button" class="edit-button btn-decor-send-back text-center d-flex flex-column justify-content-center align-items-center btn btn-light"
+                  t-att-class="{ disabled: props.selectedTables.length == 0 }"
+                  t-on-click.stop="props.sendToBack"
+                  title="Send to Back">
+                <i class="fa fa-angle-double-down icon-button fs-4" role="img" aria-label="Send to Back" title="Send to Back"></i>
+            </span>
         </xpath>
 
         <!-- Disable shape change for decor and custom image items -->
