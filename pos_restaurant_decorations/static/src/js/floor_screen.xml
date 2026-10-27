@@ -9,5 +9,11 @@
             <attribute name="bringToFront.bind">bringToFront</attribute>
             <attribute name="sendToBack.bind">sendToBack</attribute>
         </xpath>
+        <xpath expr="//div[hasclass('floor-map')]" position="attributes">
+            <attribute name="t-att-data-floor-plan-style">pos.floorPlanStyle</attribute>
+        </xpath>
+        <xpath expr="//div[@t-ref='map']/t[@t-foreach='activeTables']" position="attributes">
+            <attribute name="t-key">(pos.floorPlanStyle || 'default') + '_' + table.id</attribute>
+        </xpath>
     </t>
 </templates>

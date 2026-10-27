@@ -30,7 +30,7 @@
                             <field name="qz_printer_name" invisible="1"/>
                             <field name="auto_print_on_payment"
                                    invisible="not enable_network_printing"/>
-                            <field name="simulation_mode" invisible="1"/>
+                            <field name="simulation_mode" invisible="0"/>
                         </group>
                         <group string="Kitchen Preparation Printer" invisible="not enable_network_printing">
                             <field name="enable_kitchen_printing"/>

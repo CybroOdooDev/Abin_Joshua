@@ -2,16 +2,22 @@
 
 import { patch } from "@web/core/utils/patch";
 import { FloorScreen } from "@pos_restaurant/app/floor_screen/floor_screen";
+import { Navbar } from "@point_of_sale/app/navbar/navbar";
 import { DecorPresetPopup } from "@pos_restaurant_decorations/js/decor_preset_popup";
 import { TableCustomizationPopup } from "@pos_restaurant_decorations/js/table_customization_popup";
+
+patch(Navbar.prototype, {
+    onSwitchButtonClick() {
+        super.onSwitchButtonClick(...arguments);
+        if (this.pos.mainScreen?.component?.name === "FloorScreen") {
+            this.pos.showScreen("FloorScreen", { floor: this.pos.currentFloor });
+        }
+    },
+});
 
 patch(FloorScreen.prototype, {
     setup() {
         super.setup();
-        this.pos.floorPlanStyle = "default";
-        try {
-            localStorage.setItem("floorPlanStyle", "default");
-        } catch (_) {}
         this._onWindowResize = () => {
             this.autoFitFloorMap();
         };
@@ -20,6 +26,11 @@ patch(FloorScreen.prototype, {
 
     onMounted() {
         super.onMounted();
+        this.autoFitFloorMap();
+    },
+
+    onPatched() {
+        super.onPatched?.();
         this.autoFitFloorMap();
     },
 
@@ -35,6 +46,10 @@ patch(FloorScreen.prototype, {
 
     autoFitFloorMap() {
         if (!this.map || !this.map.el || !this.floorMapRef || !this.floorMapRef.el) return;
+        if (this.pos.floorPlanStyle === "kanban") {
+            this.setScale(1);
+            return;
+        }
         const container = this.floorMapRef.el;
         const cWidth = container.clientWidth;
         const cHeight = container.clientHeight;
