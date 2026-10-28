@@ -112,9 +112,27 @@ class PosOrder(models.Model):
             }
         return False
 
-    def action_reprint_ticket(self):
-        """Notifies user that reprinting is executed directly in the POS screen via QZ Tray."""
+    def action_print_invoice_ticket_80mm(self):
+        """Prints or downloads the 80mm ticket format for the linked invoice."""
         self.ensure_one()
+        if self.account_move:
+            return self.env.ref('pos_network_printer.report_invoice_ticket_80mm').report_action(self.account_move)
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('No Invoice Found'),
+                'message': _('This POS order does not have an invoice generated yet.'),
+                'type': 'warning',
+                'sticky': False,
+            },
+        }
+
+    def action_reprint_ticket(self):
+        """Prints the 80mm ticket report if invoiced, or notifies user to reprint in POS screen."""
+        self.ensure_one()
+        if self.account_move:
+            return self.action_print_invoice_ticket_80mm()
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',

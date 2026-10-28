@@ -14,6 +14,7 @@ patch(ReceiptScreen.prototype, {
     setup() {
         super.setup();
         this.notification = useService("notification");
+        this.report = useService("report");
 
         onMounted(() => {
             // Auto-print receipt upon reaching the ReceiptScreen if enabled in POS settings
@@ -232,6 +233,31 @@ patch(ReceiptScreen.prototype, {
             if (this.buttonPrintReceipt && this.buttonPrintReceipt.el) {
                 this.buttonPrintReceipt.el.className = "fa fa-print";
             }
+        }
+    },
+
+    async downloadInvoicePdf() {
+        const order = this.currentOrder;
+        if (!order) return;
+        const orderName = typeof order.get_name === "function" ? order.get_name() : order.name;
+        let serverOrderId =
+            (this.pos.validated_orders_name_server_id_map && this.pos.validated_orders_name_server_id_map[orderName]) ||
+            order.server_id ||
+            (typeof order.id === "number" ? order.id : false);
+        if (!serverOrderId) {
+            this.notification.add(_t("Order not yet synced to server."), { type: "warning" });
+            return;
+        }
+        try {
+            const invInfo = await this.orm.call("pos.order", "get_order_invoice_info", [serverOrderId]);
+            if (invInfo && invInfo.invoice_id) {
+                return await this.report.doAction("pos_network_printer.report_invoice_ticket_80mm", [invInfo.invoice_id]);
+            } else {
+                this.notification.add(_t("No invoice found for this order."), { type: "warning" });
+            }
+        } catch (err) {
+            console.error("Could not download invoice PDF:", err);
+            this.notification.add(_t("Error downloading invoice PDF: %s", err.message || err), { type: "danger" });
         }
     },
 });

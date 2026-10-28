@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="pos_network_printer.ReceiptScreenDownloadInvoice" t-inherit="point_of_sale.ReceiptScreen" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('buttons')]//button[contains(@class, 'button') and contains(@class, 'print')]" position="after">
+            <button t-if="currentOrder.is_to_invoice and currentOrder.is_to_invoice()"
+                    class="button btn btn-lg btn-outline-secondary w-100 py-3 mt-2"
+                    t-on-click="downloadInvoicePdf">
+                <i class="fa fa-download ms-2"/> Download Invoice (80mm PDF)
+            </button>
+        </xpath>
+    </t>
+</templates>

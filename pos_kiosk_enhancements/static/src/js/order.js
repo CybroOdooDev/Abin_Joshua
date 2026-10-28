@@ -277,7 +277,7 @@ patch(Order.prototype, {
                 line.price_type === "original" && !(line.comboLines?.length || line.comboParent)
         );
         lines_to_recompute.forEach((line) => {
-            if (line.is_lot_tracked()) {
+            if (typeof line.is_lot_tracked === "function" && line.is_lot_tracked()) {
                 let related_lines = [];
                 const price = line.product.get_price(
                     self.pricelist,

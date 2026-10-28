@@ -3,6 +3,15 @@
 import { Orderline } from "@point_of_sale/app/store/models";
 import { patch } from "@web/core/utils/patch";
 
+if (!Orderline.prototype.is_lot_tracked) {
+    Orderline.prototype.is_lot_tracked = function () {
+        return Boolean(
+            this.product?.tracking === "lot" &&
+            (this.pos?.picking_type?.use_create_lots || this.pos?.picking_type?.use_existing_lots)
+        );
+    };
+}
+
 patch(Orderline.prototype, {
      export_as_JSON() {
         if (Array.isArray(this.comboLines) && this.comboLines.some((l) => !l)) {

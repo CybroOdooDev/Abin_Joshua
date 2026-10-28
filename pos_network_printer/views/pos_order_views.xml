@@ -7,12 +7,19 @@
         <field name="arch" type="xml">
             <!-- Add Reprint Ticket button in header -->
             <xpath expr="//header" position="inside">
+                <field name="account_move" invisible="1"/>
                 <button name="action_reprint_ticket"
                         string="Reprint Network Ticket"
                         type="object"
                         class="btn-secondary"
                         icon="fa-print"
                         invisible="state not in ['paid', 'done', 'invoiced']"/>
+                <button name="action_print_invoice_ticket_80mm"
+                        string="Print Invoice Ticket (80mm)"
+                        type="object"
+                        class="btn-secondary"
+                        icon="fa-file-text-o"
+                        invisible="not account_move"/>
             </xpath>
 
             <!-- Add notebook tab for Printed Tickets History -->
