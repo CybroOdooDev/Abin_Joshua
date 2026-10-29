@@ -1,14 +1,33 @@
 /** @odoo-module **/
 
 import { patch } from "@web/core/utils/patch";
-import { Order } from "@point_of_sale/app/store/models";
+import { Order, Orderline } from "@point_of_sale/app/store/models";
 import { _t } from "@web/core/l10n/translation";
+
+patch(Orderline.prototype, {
+    getPriceString() {
+        if (this.get_discount_str() === "100") {
+            return _t("Free");
+        }
+        const displayPrice = this.get_display_price();
+        // If combo parent has 0 display price, omit it; otherwise always display the combo base price
+        if (this.comboLines && this.comboLines.length > 0 && displayPrice === 0) {
+            return "";
+        }
+        return this.env.utils.formatCurrency(displayPrice, this.currency);
+    },
+});
 
 patch(Order.prototype, {
     export_for_printing() {
         const res = super.export_for_printing(...arguments);
         const partner = this.get_partner();
-        res.is_to_invoice = Boolean(this.is_to_invoice());
+        res.is_to_invoice = Boolean(
+            (typeof this.is_to_invoice === "function" ? this.is_to_invoice() : this.to_invoice) ||
+            this.account_move ||
+            this.account_move_name ||
+            this.state === "invoiced"
+        );
 
         if (partner) {
             const addrParts = [partner.street, partner.street2, partner.zip, partner.city].filter(Boolean);

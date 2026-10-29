@@ -1,0 +1,138 @@
+/* Thermal Printing Optimization for 80mm POS Thermal Printers */
+.pos-thermal-receipt {
+    width: 330px !important;
+    max-width: 330px !important;
+    min-width: 330px !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+    padding: 10px 14px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box !important;
+    -webkit-font-smoothing: antialiased !important;
+    text-rendering: geometricPrecision !important;
+}
+
+/* Force pure black color and solid contrast on all child elements */
+.pos-thermal-receipt,
+.pos-thermal-receipt * {
+    color: #000000 !important;
+    border-color: #000000 !important;
+}
+
+/* Headings and Titles */
+.pos-thermal-receipt h1,
+.pos-thermal-receipt h2,
+.pos-thermal-receipt h3,
+.pos-thermal-receipt .tracking-number,
+.pos-thermal-receipt .pos-receipt-title,
+.pos-thermal-receipt .pos-receipt-header {
+    color: #000000 !important;
+    font-weight: 900 !important;
+}
+
+/* Company and Contact Info */
+.pos-thermal-receipt .pos-receipt-contact {
+    text-align: center !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+}
+
+/* Orderline items */
+.pos-thermal-receipt .orderline {
+    padding: 4px 0 !important;
+    border-bottom: 1px dashed #000000 !important;
+}
+
+.pos-thermal-receipt .orderline .product-name {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #000000 !important;
+    line-height: 1.2 !important;
+}
+
+.pos-thermal-receipt .orderline .product-price,
+.pos-thermal-receipt .orderline .price {
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #000000 !important;
+}
+
+.pos-thermal-receipt .orderline .info-list {
+    margin-left: 8px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+}
+
+.pos-thermal-receipt .orderline .price-per-unit {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+}
+
+.pos-thermal-receipt .orderline .price-per-unit em,
+.pos-thermal-receipt .orderline .price-per-unit .qty {
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    font-style: normal !important;
+    color: #000000 !important;
+}
+
+/* Total Section */
+.pos-thermal-receipt .pos-receipt-amount {
+    font-size: 19px !important;
+    font-weight: 900 !important;
+    color: #000000 !important;
+    padding: 4px 0 !important;
+}
+
+/* Payments & Change */
+.pos-thermal-receipt .paymentlines,
+.pos-thermal-receipt .payment-info {
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    padding: 2px 0 !important;
+}
+
+/* Taxes */
+.pos-thermal-receipt .pos-receipt-taxes {
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+}
+
+.pos-thermal-receipt .pos-receipt-taxes span {
+    font-weight: 700 !important;
+    color: #000000 !important;
+}
+
+/* Customer details box */
+.pos-thermal-receipt .pos-receipt-customer,
+.pos-thermal-receipt .pos-receipt-invoice-box {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    color: #000000 !important;
+    border-color: #000000 !important;
+}
+
+/* Notes */
+.pos-thermal-receipt .customer-note,
+.pos-thermal-receipt .internal-note {
+    font-size: 13px !important;
+    font-weight: 800 !important;
+    color: #000000 !important;
+    background-color: #f0f0f0 !important;
+    border-left: 3px solid #000000 !important;
+    padding: 4px 8px !important;
+}
+
+/* Dividers */
+.pos-thermal-receipt hr {
+    border-top: 2px dashed #000000 !important;
+    opacity: 1 !important;
+}

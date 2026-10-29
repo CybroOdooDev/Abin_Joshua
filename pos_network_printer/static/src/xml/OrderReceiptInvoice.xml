@@ -5,15 +5,17 @@
         <xpath expr="//ReceiptHeader" position="after">
             <!-- Formal Legal Invoice Header (Factura Completa) -->
             <t t-if="props.data.is_to_invoice and props.data.partner">
-                <div class="pos-receipt-invoice-box my-2 p-2 border-top border-bottom text-start" style="border-width: 2px !important; border-color: #000 !important; font-size: 13px;">
+                <div class="pos-receipt-invoice-box my-2 text-start" style="font-size: 13px;">
+                    <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
                     <div class="fw-bold mb-1" style="text-decoration: underline;">
-                        <t t-esc="props.data.partner.labels ? props.data.partner.labels.header : 'DATOS DEL CLIENTE:'"/>
+                        <t t-esc="props.data.partner.labels ? props.data.partner.labels.header : 'Customer Details:'"/>
                     </div>
-                    <div><strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.customer : 'Nombre:'"/> </strong><t t-esc="props.data.partner.name"/></div>
-                    <div t-if="props.data.partner.vat"><strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.vat : 'NIF/CIF:'"/> </strong><t t-esc="props.data.partner.vat"/></div>
-                    <div t-if="props.data.partner.phone"><strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.phone : 'Teléfono:'"/> </strong><t t-esc="props.data.partner.phone"/></div>
+                    <div><strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.customer : 'Customer:'"/> </strong><t t-esc="props.data.partner.name"/></div>
+                    <div t-if="props.data.partner.vat"><strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.vat : 'VAT:'"/> </strong><t t-esc="props.data.partner.vat"/></div>
+                    <div t-if="props.data.partner.phone"><strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.phone : 'Phone:'"/> </strong><t t-esc="props.data.partner.phone"/></div>
                     <div t-if="props.data.partner.email"><strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.email : 'Email:'"/> </strong><t t-esc="props.data.partner.email"/></div>
-                    <div t-if="props.data.partner.address"><strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.address : 'Dirección:'"/> </strong><t t-esc="props.data.partner.address"/></div>
+                    <div t-if="props.data.partner.address"><strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.address : 'Address:'"/> </strong><t t-esc="props.data.partner.address"/></div>
+                    <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
                 </div>
             </t>
         </xpath>

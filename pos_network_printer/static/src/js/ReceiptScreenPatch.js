@@ -3,12 +3,11 @@
 import { patch } from "@web/core/utils/patch";
 import { ReceiptScreen } from "@point_of_sale/app/screens/receipt_screen/receipt_screen";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
-import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
-import { loadAllImages } from "@point_of_sale/utils";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { onMounted } from "@odoo/owl";
 import { qzPrinterService } from "./QZPrinterService";
+import { captureThermalReceipt } from "./ThermalReceiptHelper";
 
 patch(ReceiptScreen.prototype, {
     setup() {
@@ -44,16 +43,6 @@ patch(ReceiptScreen.prototype, {
             this.buttonPrintReceipt.el.className = "fa fa-fw fa-spin fa-circle-o-notch";
         }
 
-        const applyStandardReceiptStyles = (el) => {
-            el.style.width = "330px";
-            el.style.maxWidth = "330px";
-            el.style.minWidth = "330px";
-            el.style.boxSizing = "border-box";
-            el.style.margin = "0 auto";
-            el.style.padding = "10px 15px";
-            el.style.backgroundColor = "#ffffff";
-            el.style.fontSize = "16px";
-        };
 
         try {
             // Fetch server order ID
@@ -94,7 +83,7 @@ patch(ReceiptScreen.prototype, {
             }
 
             let imageBase64 = null;
-            let receiptEl = document.querySelector(".pos-receipt");
+            const receiptEl = document.querySelector(".pos-receipt");
 
             // If isInvoice, only reuse DOM element if it already includes the invoice sequence number
             const domHasInvoiceNumber = Boolean(
@@ -103,21 +92,10 @@ patch(ReceiptScreen.prototype, {
                 (!isInvoice || (order.account_move_name && receiptEl.textContent.includes(order.account_move_name)))
             );
 
-            // 1. If .pos-receipt is already rendered and up-to-date in the screen DOM, capture directly
+            // 1. If .pos-receipt is already rendered and up-to-date in the screen DOM, clone and capture in offscreen thermal wrapper
             if (domHasInvoiceNumber) {
-                applyStandardReceiptStyles(receiptEl);
-                try {
-                    await loadAllImages(receiptEl);
-                } catch (_) {}
-                const dataUrl = await toJpeg(receiptEl, {
-                    skipFonts: true,
-                    backgroundColor: "#ffffff",
-                    pixelRatio: 2,
-                    quality: 0.95,
-                });
-                if (dataUrl && dataUrl !== "data:," && dataUrl.length >= 100) {
-                    imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
-                }
+                const cloneEl = receiptEl.cloneNode(true);
+                imageBase64 = await captureThermalReceipt(cloneEl);
             }
 
             // 2. If not already mounted, outdated, or capture failed, render cleanly via renderer
@@ -131,49 +109,7 @@ patch(ReceiptScreen.prototype, {
                 });
 
                 if (generatedEl) {
-                    if (this.renderer.whenMounted) {
-                        imageBase64 = await this.renderer.whenMounted({
-                            el: generatedEl,
-                            callback: async (mountedEl) => {
-                                applyStandardReceiptStyles(mountedEl);
-                                try {
-                                    await loadAllImages(mountedEl);
-                                } catch (_) {}
-                                const dataUrl = await toJpeg(mountedEl, {
-                                    skipFonts: true,
-                                    backgroundColor: "#ffffff",
-                                    pixelRatio: 2,
-                                    quality: 0.95,
-                                });
-                                return dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
-                            },
-                        });
-                    } else {
-                        const wrapper = document.createElement("div");
-                        wrapper.style.position = "fixed";
-                        wrapper.style.left = "-1000px";
-                        wrapper.style.top = "0";
-                        wrapper.style.width = "330px";
-                        wrapper.style.opacity = "0";
-                        wrapper.style.pointerEvents = "none";
-                        applyStandardReceiptStyles(generatedEl);
-                        wrapper.appendChild(generatedEl);
-                        (document.querySelector(".pos") || document.body).appendChild(wrapper);
-                        try {
-                            try {
-                                await loadAllImages(generatedEl);
-                            } catch (_) {}
-                            const dataUrl = await toJpeg(generatedEl, {
-                                skipFonts: true,
-                                backgroundColor: "#ffffff",
-                                pixelRatio: 2,
-                                quality: 0.95,
-                            });
-                            imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
-                        } finally {
-                            wrapper.remove();
-                        }
-                    }
+                    imageBase64 = await captureThermalReceipt(generatedEl);
                 }
             }
 

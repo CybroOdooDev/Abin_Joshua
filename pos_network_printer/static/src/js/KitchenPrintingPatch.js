@@ -3,10 +3,9 @@
 import { patch } from "@web/core/utils/patch";
 import { PosStore } from "@point_of_sale/app/store/pos_store";
 import { qzPrinterService } from "./QZPrinterService";
-import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
 import { renderToElement } from "@web/core/utils/render";
-import { loadAllImages } from "@point_of_sale/utils";
 import { _t } from "@web/core/l10n/translation";
+import { captureThermalReceipt } from "./ThermalReceiptHelper";
 
 patch(PosStore.prototype, {
     async sendOrderInPreparationUpdateLastChange(order, cancelled = false) {
@@ -148,33 +147,7 @@ patch(PosStore.prototype, {
         }
 
         if (receiptEl) {
-            const wrapper = document.createElement("div");
-            wrapper.style.position = "fixed";
-            wrapper.style.left = "-2000px";
-            wrapper.style.top = "0";
-            wrapper.style.width = "330px";
-            wrapper.style.backgroundColor = "#ffffff";
-            wrapper.style.pointerEvents = "none";
-            wrapper.appendChild(receiptEl);
-            document.body.appendChild(wrapper);
-
-            try {
-                try {
-                    await loadAllImages(receiptEl);
-                } catch (_) {}
-
-                const dataUrl = await toJpeg(receiptEl, {
-                    skipFonts: true,
-                    backgroundColor: "#ffffff",
-                    pixelRatio: 2,
-                    quality: 0.95,
-                });
-                if (dataUrl && dataUrl !== "data:," && dataUrl.length >= 100) {
-                    imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
-                }
-            } finally {
-                wrapper.remove();
-            }
+            imageBase64 = await captureThermalReceipt(receiptEl);
         }
 
         if (!imageBase64) {

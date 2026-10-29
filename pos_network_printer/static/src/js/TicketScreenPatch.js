@@ -3,10 +3,10 @@
 import { patch } from "@web/core/utils/patch";
 import { ReprintReceiptButton } from "@point_of_sale/app/screens/ticket_screen/reprint_receipt_button/reprint_receipt_button";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
-import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { qzPrinterService } from "./QZPrinterService";
+import { captureThermalReceipt } from "./ThermalReceiptHelper";
 
 patch(ReprintReceiptButton.prototype, {
     setup() {
@@ -68,25 +68,22 @@ patch(ReprintReceiptButton.prototype, {
                 } catch (_) {}
             }
 
-            let receiptEl = document.querySelector(".pos-receipt");
-            if (!receiptEl && this.renderer) {
-                receiptEl = await this.renderer.toHtml(OrderReceipt, {
+            let targetNode = null;
+            const liveReceiptEl = document.querySelector(".pos-receipt");
+            if (liveReceiptEl) {
+                targetNode = liveReceiptEl.cloneNode(true);
+            } else if (this.renderer) {
+                targetNode = await this.renderer.toHtml(OrderReceipt, {
                     data: order.export_for_printing(),
                     formatCurrency: this.env.utils.formatCurrency,
                 });
             }
 
-            if (!receiptEl) {
+            if (!targetNode) {
                 throw new Error(_t("Receipt element could not be found or rendered."));
             }
 
-            const dataUrl = await toJpeg(receiptEl, {
-                skipFonts: true,
-                backgroundColor: "#ffffff",
-                pixelRatio: 2,
-                quality: 0.95,
-            });
-            const imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
+            const imageBase64 = await captureThermalReceipt(targetNode);
 
             let printerDisplayName = preferredPrinter || "Default";
             if (this.pos.config.simulation_mode) {

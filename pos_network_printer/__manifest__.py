@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'POS Local Ticket Printing System (QZ Tray)',
-    'version': '17.0.1.0.2',
+    'version': '17.0.1.0.3',
     'category': 'Point Of Sale',
     'summary': 'Direct local thermal ticket printing for POS receipts, bills, and legal invoices via QZ Tray',
     'description': """
@@ -53,7 +53,9 @@
     'assets': {
         'point_of_sale._assets_pos': [
             'web_editor/static/lib/html2canvas.js',
+            'pos_network_printer/static/src/css/thermal_receipt.css',
             'pos_network_printer/static/src/js/QZPrinterService.js',
+            'pos_network_printer/static/src/js/ThermalReceiptHelper.js',
             'pos_network_printer/static/src/js/ReceiptScreenPatch.js',
             'pos_network_printer/static/src/js/TicketScreenPatch.js',
             'pos_network_printer/static/src/js/PrintBillPatch.js',
@@ -67,6 +69,8 @@
             'pos_network_printer/static/src/js/KitchenPrintingPatch.js',
         ],
         'pos_self_order.assets': [
+            'pos_network_printer/static/src/css/thermal_receipt.css',
+            'pos_network_printer/static/src/js/ThermalReceiptHelper.js',
             'pos_network_printer/static/src/js/KioskConfirmationPatch.js',
         ],
     },

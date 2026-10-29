@@ -3,11 +3,10 @@
 import { patch } from "@web/core/utils/patch";
 import { PrintBillButton } from "@pos_restaurant/app/control_buttons/print_bill_button/print_bill_button";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
-import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
-import { loadAllImages } from "@point_of_sale/utils";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { qzPrinterService } from "./QZPrinterService";
+import { captureThermalReceipt } from "./ThermalReceiptHelper";
 
 patch(PrintBillButton.prototype, {
     setup() {
@@ -59,63 +58,7 @@ patch(PrintBillButton.prototype, {
                 return await super.click(...arguments);
             }
 
-            // Apply exact 330px width and 16px font matching on-screen ReceiptScreen
-            const applyStandardReceiptStyles = (el) => {
-                el.style.width = "330px";
-                el.style.maxWidth = "330px";
-                el.style.minWidth = "330px";
-                el.style.boxSizing = "border-box";
-                el.style.margin = "0 auto";
-                el.style.padding = "10px 15px";
-                el.style.backgroundColor = "#ffffff";
-                el.style.fontSize = "16px";
-            };
-
-            let imageBase64 = null;
-            if (this.renderer && this.renderer.whenMounted) {
-                imageBase64 = await this.renderer.whenMounted({
-                    el: receiptEl,
-                    callback: async (mountedEl) => {
-                        applyStandardReceiptStyles(mountedEl);
-                        try {
-                            await loadAllImages(mountedEl);
-                        } catch (_) {}
-                        const dataUrl = await toJpeg(mountedEl, {
-                            skipFonts: true,
-                            backgroundColor: "#ffffff",
-                            pixelRatio: 2,
-                            quality: 0.95,
-                        });
-                        return dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
-                    },
-                });
-            } else {
-                // Safe offscreen wrapper inside .pos
-                const wrapper = document.createElement("div");
-                wrapper.style.position = "fixed";
-                wrapper.style.left = "-1000px";
-                wrapper.style.top = "0";
-                wrapper.style.width = "330px";
-                wrapper.style.opacity = "0";
-                wrapper.style.pointerEvents = "none";
-                applyStandardReceiptStyles(receiptEl);
-                wrapper.appendChild(receiptEl);
-                (document.querySelector(".pos") || document.body).appendChild(wrapper);
-                try {
-                    try {
-                        await loadAllImages(receiptEl);
-                    } catch (_) {}
-                    const dataUrl = await toJpeg(receiptEl, {
-                        skipFonts: true,
-                        backgroundColor: "#ffffff",
-                        pixelRatio: 2,
-                        quality: 0.95,
-                    });
-                    imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
-                } finally {
-                    wrapper.remove();
-                }
-            }
+            const imageBase64 = await captureThermalReceipt(receiptEl);
 
             if (!imageBase64 || imageBase64.length < 100) {
                 throw new Error(_t("Failed to capture bill receipt image."));

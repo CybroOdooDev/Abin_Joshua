@@ -142,6 +142,7 @@ class QZPrinterService {
             margins: 0,
             scaleContent: true,
             colorType: "blackwhite",
+            interpolation: "nearest-neighbor",
             rasterize: true,
         });
 

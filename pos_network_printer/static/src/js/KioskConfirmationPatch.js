@@ -3,10 +3,9 @@
 import { patch } from "@web/core/utils/patch";
 import { ConfirmationPage } from "@pos_self_order/app/pages/confirmation_page/confirmation_page";
 import { OrderReceipt } from "@point_of_sale/app/screens/receipt_screen/receipt/order_receipt";
-import { toJpeg } from "@point_of_sale/app/utils/html-to-image";
-import { loadAllImages } from "@point_of_sale/utils";
 import { useService } from "@web/core/utils/hooks";
 import { onMounted } from "@odoo/owl";
+import { captureThermalReceipt } from "./ThermalReceiptHelper";
 
 patch(ConfirmationPage.prototype, {
     setup() {
@@ -42,50 +41,7 @@ patch(ConfirmationPage.prototype, {
                 return;
             }
 
-            let imageBase64 = null;
-            if (this.renderer && this.renderer.whenMounted) {
-                imageBase64 = await this.renderer.whenMounted({
-                    el: receiptEl,
-                    callback: async (mountedEl) => {
-                        mountedEl.classList.add("pos-receipt-print");
-                        try {
-                            await loadAllImages(mountedEl);
-                        } catch (_) {}
-                        const dataUrl = await toJpeg(mountedEl, {
-                            skipFonts: true,
-                            backgroundColor: "#ffffff",
-                            pixelRatio: 2,
-                            quality: 0.95,
-                        });
-                        return dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
-                    },
-                });
-            } else {
-                const wrapper = document.createElement("div");
-                wrapper.style.position = "fixed";
-                wrapper.style.left = "-1000px";
-                wrapper.style.top = "0";
-                wrapper.style.width = "380px";
-                wrapper.style.opacity = "0";
-                wrapper.style.pointerEvents = "none";
-                receiptEl.classList.add("pos-receipt-print");
-                wrapper.appendChild(receiptEl);
-                (document.querySelector(".pos-receipt-container") || document.body).appendChild(wrapper);
-                try {
-                    try {
-                        await loadAllImages(receiptEl);
-                    } catch (_) {}
-                    const dataUrl = await toJpeg(receiptEl, {
-                        skipFonts: true,
-                        backgroundColor: "#ffffff",
-                        pixelRatio: 2,
-                        quality: 0.95,
-                    });
-                    imageBase64 = dataUrl.replace(/^data:image\/[a-z]+;base64,/, "");
-                } finally {
-                    wrapper.remove();
-                }
-            }
+            const imageBase64 = await captureThermalReceipt(receiptEl);
 
             if (!imageBase64 || imageBase64.length < 100) {
                 throw new Error("Failed to capture kiosk receipt image.");
