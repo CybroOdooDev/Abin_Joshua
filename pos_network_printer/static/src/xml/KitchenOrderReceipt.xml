@@ -39,16 +39,17 @@
 
             <!-- CANCELLED ITEMS (IF ANY) -->
             <t t-if="d.cancelledLines and d.cancelledLines.length > 0">
-                <div style="border: 2px solid #000; padding: 8px; margin-bottom: 10px; background-color: #f2f2f2;">
-                    <div style="font-size: 17px; font-weight: 900; text-align: center; text-decoration: underline; margin-bottom: 4px;">
+                <div style="border: 2px solid #000; padding: 8px 10px; margin-bottom: 12px; background-color: #f2f2f2; box-sizing: border-box;">
+                    <div style="font-size: 17px; font-weight: 900; text-align: center; text-decoration: underline; margin-bottom: 8px;">
                         *** ANULADO / CANCELLED ***
                     </div>
                     <t t-foreach="d.cancelledLines" t-as="item" t-key="item_index">
-                        <div style="display: flex; justify-content: space-between; font-size: 17px; font-weight: 800; margin-top: 4px;">
-                            <span>-<t t-esc="item.qty"/>x <t t-esc="item.name"/></span>
+                        <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px dashed #bbb;">
+                            <span style="font-size: 20px; font-weight: 900; min-width: 55px; line-height: 1.1;">-<t t-esc="item.qty"/>x</span>
+                            <span style="font-size: 17px; font-weight: 800; flex: 1; text-align: left; line-height: 1.2;"><t t-esc="item.name"/></span>
                         </div>
                         <t t-if="item.note">
-                            <div style="font-size: 14px; font-weight: 700; margin-left: 20px;">* <t t-esc="item.note"/></div>
+                            <div style="margin-left: 55px; font-size: 14px; font-weight: 700; color: #333; margin-top: 2px;">* <t t-esc="item.note"/></div>
                         </t>
                     </t>
                 </div>
@@ -58,7 +59,7 @@
             <t t-foreach="d.courses" t-as="course" t-key="course.id || course_index">
                 <div style="margin-bottom: 12px;">
                     <!-- Course Header -->
-                    <div style="background-color: #000; color: #fff; padding: 6px 10px; font-size: 17px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: center;">
+                    <div class="kitchen-course-header" style="background-color: #000; color: #fff; padding: 6px 10px; font-size: 17px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; text-align: center;">
                         [ <t t-esc="course.name"/> ]
                     </div>
 
@@ -70,7 +71,14 @@
                                 <span style="font-size: 18px; font-weight: 800; flex: 1; text-align: left; line-height: 1.2;"><t t-esc="line.name"/></span>
                             </div>
 
-                            <!-- Combo child lines -->
+                            <!-- Combo parent reference if child item -->
+                            <t t-if="line.comboParentName">
+                                <div style="margin-left: 45px; font-size: 14px; font-weight: 700; color: #333; margin-top: 2px;">
+                                    (<t t-esc="line.comboParentName"/>)
+                                </div>
+                            </t>
+
+                            <!-- Combo child lines (if nested) -->
                             <t t-if="line.comboLines and line.comboLines.length > 0">
                                 <t t-foreach="line.comboLines" t-as="comboItem" t-key="comboItem_index">
                                     <div style="margin-left: 45px; font-size: 15px; font-weight: 700; color: #222; margin-top: 2px;">

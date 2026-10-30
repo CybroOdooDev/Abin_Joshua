@@ -34,6 +34,12 @@ export function applyThermalReceiptStyles(el) {
                 color: #000000 !important;
                 border-color: #000000 !important;
             }
+            .pos-thermal-receipt .kitchen-course-header,
+            .pos-thermal-receipt .kitchen-course-header * {
+                color: #ffffff !important;
+                background-color: #000000 !important;
+                border-color: #000000 !important;
+            }
             .pos-thermal-receipt .pos-receipt-contact {
                 font-size: 13px !important;
                 font-weight: 700 !important;

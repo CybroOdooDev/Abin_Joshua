@@ -55,11 +55,6 @@ patch(PosStore.prototype, {
         const defaultCourseName = this.config.module_pos_restaurant ? _t("Platos / Dishes") : _t("Comanda / Order");
 
         for (const change of (changes.new || [])) {
-            // If this item is part of a combo, it will be rendered under its combo parent
-            if (change.isPartOfCombo) {
-                continue;
-            }
-
             // Find full orderline for additional details (notes, combo, plating level)
             const line = (change.line_uuid && order.orderlines.find((l) => l.uuid === change.line_uuid)) ||
                 order.orderlines.find((l) => l.product.id === change.product_id && (l.getNote ? l.getNote() : (l.note || "")) === (change.note || "")) ||
@@ -80,31 +75,22 @@ patch(PosStore.prototype, {
                 });
             }
 
-            // Extract combo details if combo line
-            const comboLines = [];
-            const childLines = (line && line.comboLines) || (line && line.combo_line_ids) || [];
-            if (childLines.length > 0) {
-                for (const child of childLines) {
-                    const childName = typeof child._get_kitchen_product_name === "function"
-                        ? child._get_kitchen_product_name()
-                        : (child.get_product ? child.get_product().display_name : (child.name || ""));
-                    comboLines.push({
-                        name: childName,
-                        qty: child.qty || 1,
-                        note: child.note || "",
-                    });
-                }
-            }
-
             const productName = line && typeof line._get_kitchen_product_name === "function"
                 ? line._get_kitchen_product_name()
                 : change.name;
+
+            const comboParentName = line && line.comboParent
+                ? (typeof line.comboParent._get_kitchen_product_name === "function"
+                    ? line.comboParent._get_kitchen_product_name()
+                    : (line.comboParent.product?.display_name || line.comboParent.get_product?.()?.display_name || ""))
+                : "";
 
             courseMap.get(courseKey).lines.push({
                 name: productName,
                 qty: change.quantity,
                 note: change.note || (line ? line.note : "") || "",
-                comboLines: comboLines,
+                comboParentName: comboParentName,
+                isPartOfCombo: Boolean(change.isPartOfCombo),
             });
         }
 

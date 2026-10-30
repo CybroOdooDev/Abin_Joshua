@@ -47,6 +47,21 @@ class PosConfig(models.Model):
         default=False,
         help='When enabled, saves ticket snapshots to backend history without sending to physical printer.',
     )
+    cash_closing_printer_type = fields.Selection(
+        selection=[
+            ('receipt', 'Receipt Printer (Thermal 80mm - Default)'),
+            ('a4', 'A4 Printer (PDF)'),
+        ],
+        string='Cash Closing Printer Type',
+        default='receipt',
+        required=True,
+        help='Printer destination for the POS cash closing report (receipt thermal printer or A4 PDF report).',
+    )
+    auto_print_cash_closing = fields.Boolean(
+        string='Auto-Print Closing Report on Session Close',
+        default=True,
+        help='Automatically print the cash closing report when the POS session is closed.',
+    )
 
     @api.onchange('qz_printer_id')
     def _onchange_qz_printer_id(self):

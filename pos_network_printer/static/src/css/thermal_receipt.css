@@ -22,6 +22,13 @@
     border-color: #000000 !important;
 }
 
+.pos-thermal-receipt .kitchen-course-header,
+.pos-thermal-receipt .kitchen-course-header * {
+    color: #ffffff !important;
+    background-color: #000000 !important;
+    border-color: #000000 !important;
+}
+
 /* Headings and Titles */
 .pos-thermal-receipt h1,
 .pos-thermal-receipt h2,

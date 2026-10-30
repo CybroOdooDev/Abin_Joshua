@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <t t-inherit="point_of_sale.ClosePosPopup" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('modal-footer-right')]" position="inside">
+            <button class="button icon btn btn-lg btn-secondary"
+                    t-on-click="printCashClosingReport"
+                    title="Print Cash Closing Report (Thermal Receipt / A4)">
+                Closing Report
+                <i class="fa fa-print ms-1" role="img"/>
+            </button>
+        </xpath>
+    </t>
+
+</templates>

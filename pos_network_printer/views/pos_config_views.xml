@@ -40,6 +40,10 @@
                                    invisible="not enable_kitchen_printing"/>
                             <field name="qz_kitchen_printer_name" invisible="1"/>
                         </group>
+                        <group string="POS Cash Closing Report">
+                            <field name="cash_closing_printer_type" widget="radio"/>
+                            <field name="auto_print_cash_closing"/>
+                        </group>
                     </group>
                 </div>
             </xpath>

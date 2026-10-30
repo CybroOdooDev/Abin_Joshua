@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_pos_cash_closing" model="ir.actions.report">
+        <field name="name">POS Cash Closing Report</field>
+        <field name="model">pos.session</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">pos_network_printer.report_cash_closing_pdf</field>
+        <field name="report_file">pos_network_printer.report_cash_closing_pdf</field>
+        <field name="print_report_name">'Cash_Closing_' + (object.name or '').replace('/', '_')</field>
+        <field name="binding_model_id" ref="point_of_sale.model_pos_session"/>
+        <field name="binding_type">report</field>
+    </record>
+</odoo>
