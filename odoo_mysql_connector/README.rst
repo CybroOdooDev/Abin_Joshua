@@ -1,6 +1,6 @@
-.. |license| image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
 
 .. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
     :target: https://www.odoo.com
@@ -18,7 +18,7 @@
 Odoo MySQL Connector
 ====================
 
-This module allows you to connect an external MySQL database to Odoo and import data and tables directly into Odoo records.
+This module allows users to connect an external MySQL database to Odoo and import data and tables directly into Odoo records.
 
 Key Features
 ------------
@@ -34,16 +34,16 @@ Requires python package mysql-connector-python (pip install mysql-connector-pyth
 
 Configuration
 -------------
-Configure MySQL connection credentials under Settings / MySQL Connector.
+Configure MySQL connection credentials under MySQL Connector > Configuration > Credentials.
 
-Company
+Credits
 -------
-* `Cybrosys Techno Solutions <https://cybrosys.com/>`__
+* Cybrosys Techno Solutions <https://www.cybrosys.com>
 
 License
 -------
-Affero General Public License, Version 3 (AGPL v3).
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+GNU Lesser General Public License, Version 3 (LGPL v3).
+(https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 Contacts
 --------
@@ -51,10 +51,9 @@ Contacts
 * Website : https://cybrosys.com
 
 Maintainer
-==========
+----------
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
-
 
 This module is maintained by Cybrosys Technologies.
 

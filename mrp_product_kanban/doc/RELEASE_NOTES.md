@@ -1,6 +1,7 @@
-## Module <mrp_product_kanban>
+## Module mrp_product_kanban
 
-#### 04.09.2026
+#### 2026-09-04
 #### Version 20.0.1.0.0
-##### ADD
-- Initial commit for Manufacturing Product Kanban
+#### ADD
+
+- Initial release for Odoo 20: Manufacturing Product Kanban.

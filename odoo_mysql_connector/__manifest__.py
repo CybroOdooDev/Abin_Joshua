@@ -9,19 +9,22 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
 #############################################################################
 {
-    'name': "Odoo Mysql Connector",
+    'name': "Odoo MySQL Connector",
     'version': '20.0.1.0.0',
     'category': 'Extra Tools',
-    'summary': """This module will help you to import the data from Mysql 
-     database.""",
-    'description': """This module will assist you in importing data from 
+    'summary': "Import tables and records from external MySQL databases into Odoo.",
+    'description': """This module assists you in importing data from 
      a MySQL database, providing a seamless and efficient solution for 
      integrating your existing data into the Odoo system.""",
     'author': 'Cybrosys Techno Solutions',
@@ -33,12 +36,13 @@
         'security/ir.access.csv',
         'views/mysql_credential_views.xml',
         'views/mysql_connector_views.xml',
+        'views/imported_data_views.xml',
     ],
     'external_dependencies': {
         'python': ['mysql-connector-python']
-        },
+    },
     'images': ['static/description/banner.jpg'],
-    'license': 'AGPL-3',
+    'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
     'application': True,

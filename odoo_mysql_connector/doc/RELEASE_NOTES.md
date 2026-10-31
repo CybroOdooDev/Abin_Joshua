@@ -1,6 +1,7 @@
-## Module <odoo_mysql_connector>
+## Module odoo_mysql_connector
 
-#### 07.09.2026
+#### 2026-10-26
 #### Version 20.0.1.0.0
-##### ADD
-- Initial commit for Odoo Mysql Connector
+#### ADD
+
+- Initial release for Odoo 20: Import database tables and records from external MySQL databases into Odoo with foreign key resolution and field mapping.

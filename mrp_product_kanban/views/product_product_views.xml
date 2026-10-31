@@ -26,9 +26,7 @@
                         </button>
                         <button name="action_bom" type="object"
                                 class="dropdown-item">
-                            <b>Bill Of
-                                Material
-                            </b>
+                            <b>Bill of Materials</b>
                         </button>
                         <button name="action_scrap_orders"
                                 type="object"
@@ -103,7 +101,7 @@
         <field name="name">Products Kanban</field>
         <field name="res_model">product.product</field>
         <field name="type">ir.actions.act_window</field>
-        <field name="view_mode">form,kanban</field>
+        <field name="view_mode">kanban,form</field>
         <field name="view_ids" eval="[(5, 0, 0),
        (0, 0, {'view_mode': 'kanban', 'view_id': ref('mrp_product_kanban.product_product_view_kanban_mrp')})]"/>
     </record>
