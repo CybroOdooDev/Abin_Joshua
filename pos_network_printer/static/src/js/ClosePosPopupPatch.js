@@ -36,17 +36,7 @@ patch(ClosePosPopup.prototype, {
                 }
             }
 
-            // 1. A4 Printer Output
-            if (printerType === "a4") {
-                await this.report.doAction(
-                    "pos_network_printer.action_report_pos_cash_closing",
-                    [this.pos.pos_session.id]
-                );
-                this.notification?.add(_t("Generating A4 Cash Closing Report..."), { type: "info" });
-                return true;
-            }
-
-            // 2. Receipt Printer Output (Default)
+            // Fetch session closing report data
             const reportData = await this.orm.call(
                 "pos.session",
                 "get_cash_closing_report_data",
@@ -57,6 +47,7 @@ patch(ClosePosPopup.prototype, {
                 throw new Error(_t("Could not retrieve session closing report data."));
             }
 
+            // Generate receipt HTML element
             const receiptEl = await this.renderer.toHtml(CashClosingReceipt, {
                 data: reportData,
                 formatCurrency: this.env.utils.formatCurrency,
@@ -67,29 +58,64 @@ patch(ClosePosPopup.prototype, {
                 throw new Error(_t("Failed to generate thermal receipt element."));
             }
 
-            // Route to QZ Tray if enabled
+            // Capture thermal receipt raster image for QZ Tray and Ticket History
+            let imageBase64 = null;
+            try {
+                imageBase64 = await captureThermalReceipt(receiptEl);
+            } catch (snapErr) {
+                console.warn("Error capturing thermal receipt snapshot:", snapErr);
+            }
+
+            const printerDisplayName = printerType === "a4" ? "A4 Printer (PDF)" : (
+                (config.qz_printer_id && config.qz_printer_id[1]) ||
+                config.qz_printer_name ||
+                config.printer_name ||
+                "Receipt Printer"
+            );
+
+            // Always archive visual snapshot to pos.printed.ticket so it appears in Ticket History
+            if (imageBase64 && imageBase64.length > 50) {
+                try {
+                    await this.orm.call("pos.session", "log_closing_printed_ticket", [
+                        this.pos.pos_session.id,
+                        imageBase64,
+                        printerDisplayName,
+                        "success",
+                    ]);
+                } catch (archiveErr) {
+                    console.warn("Could not archive closing ticket snapshot:", archiveErr);
+                }
+            }
+
+            // 1. A4 Printer Output
+            if (printerType === "a4") {
+                await this.report.doAction(
+                    "pos_network_printer.action_report_pos_cash_closing",
+                    [this.pos.pos_session.id]
+                );
+                this.notification?.add(
+                    _t("A4 Cash Closing Report generated and archived to Ticket History"),
+                    { type: "success" }
+                );
+                return true;
+            }
+
+            // 2. Receipt Printer Output (QZ Tray / POS Printer)
             if (config.enable_network_printing) {
-                const imageBase64 = await captureThermalReceipt(receiptEl);
                 if (!imageBase64 || imageBase64.length < 50) {
                     throw new Error(_t("Failed to render thermal receipt image snapshot."));
                 }
 
-                const preferredPrinter =
-                    (config.qz_printer_id && config.qz_printer_id[1]) ||
-                    config.qz_printer_name ||
-                    config.printer_name ||
-                    "";
-
                 if (config.simulation_mode) {
-                    console.log("[Simulation Mode] Cash closing report printed virtually.");
+                    console.log("[Simulation Mode] Cash closing report saved to Ticket History (physical print skipped).");
                     this.notification?.add(
-                        _t("Cash Closing Report saved (Simulation Mode: physical print skipped)"),
+                        _t("Cash Closing Report saved to Ticket History (Simulation Mode: physical print skipped)"),
                         { type: "info" }
                     );
                 } else {
                     const printResult = await qzPrinterService.printReceiptImage(
                         imageBase64,
-                        preferredPrinter
+                        printerDisplayName
                     );
                     this.notification?.add(
                         _t("Cash Closing Report printed via QZ Tray (%s)", printResult.printer_name || "Receipt Printer"),

@@ -27,8 +27,10 @@ class PosPrintedTicket(models.Model):
     session_id = fields.Many2one(
         'pos.session',
         string='POS Session',
-        related='order_id.session_id',
+        compute='_compute_session_id',
         store=True,
+        readonly=False,
+        index=True,
     )
     pos_reference = fields.Char(
         string='POS Receipt Ref',
@@ -56,11 +58,20 @@ class PosPrintedTicket(models.Model):
             ('bill', 'Pre-Payment Bill'),
             ('invoice', 'Formal Legal Invoice'),
             ('kitchen', 'Kitchen Preparation'),
+            ('closing', 'Cash Closing (Z-Report)'),
         ],
         string='Print Purpose',
         default='first_print',
         required=True,
     )
+
+    @api.depends('order_id', 'order_id.session_id')
+    def _compute_session_id(self):
+        for record in self:
+            if record.order_id and record.order_id.session_id:
+                record.session_id = record.order_id.session_id
+            elif not record.session_id:
+                record.session_id = False
     receipt_snapshot = fields.Text(
         string='Ticket Snapshot (Base64)',
         help='High-resolution visual snapshot of the printed ticket preserving exact layout and Veri*Factu QR',
@@ -93,3 +104,10 @@ class PosPrintedTicket(models.Model):
                 'sticky': True,
             },
         }
+
+    def action_print_closing_pdf(self):
+        """Downloads the A4 PDF closing report for this ticket's session."""
+        self.ensure_one()
+        if not self.session_id:
+            raise UserError(_("No session is associated with this closing report."))
+        return self.env.ref('pos_network_printer.action_report_pos_cash_closing').report_action(self.session_id)

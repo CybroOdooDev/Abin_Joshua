@@ -71,7 +71,12 @@ class PosSession(models.Model):
 
         # Company details
         company = self.company_id
+        street_parts = [p for p in [company.street, company.street2] if p]
+        city_parts = [p for p in [company.city, company.zip] if p]
         company_address_parts = [p for p in [company.street, company.street2, company.city, company.zip] if p]
+
+        start_at_str = fields.Datetime.context_timestamp(self, self.start_at).strftime('%d/%m/%Y %H:%M') if self.start_at else '-'
+        stop_at_str = fields.Datetime.context_timestamp(self, self.stop_at or fields.Datetime.now()).strftime('%d/%m/%Y %H:%M')
 
         return {
             'session': {
@@ -79,14 +84,16 @@ class PosSession(models.Model):
                 'name': self.name,
                 'pos_name': self.config_id.name,
                 'cashier': self.user_id.name,
-                'start_at': fields.Datetime.to_string(self.start_at) if self.start_at else False,
-                'stop_at': fields.Datetime.to_string(self.stop_at or fields.Datetime.now()),
+                'start_at': start_at_str,
+                'stop_at': stop_at_str,
                 'state': self.state,
                 'printer_type': self.config_id.cash_closing_printer_type,
             },
             'company': {
                 'name': company.name,
                 'vat': company.vat or '',
+                'street': ', '.join(street_parts),
+                'city_zip': ', '.join(city_parts),
                 'address': ', '.join(company_address_parts),
                 'phone': company.phone or '',
                 'email': company.email or '',
@@ -114,4 +121,51 @@ class PosSession(models.Model):
                 'difference': difference,
                 'moves': moves_list,
             },
+        }
+
+    closing_ticket_ids = fields.One2many(
+        'pos.printed.ticket',
+        'session_id',
+        string='Printed Ticket History',
+    )
+    closing_ticket_count = fields.Integer(
+        string='Tickets Count',
+        compute='_compute_closing_ticket_count',
+    )
+
+    @api.depends('closing_ticket_ids')
+    def _compute_closing_ticket_count(self):
+        for session in self:
+            session.closing_ticket_count = len(session.closing_ticket_ids)
+
+    @api.model
+    def log_closing_printed_ticket(self, session_id, image_base64, printer_name='', status='success'):
+        """Archives the visual snapshot of the Cash Closing thermal report."""
+        session = self.browse(session_id)
+        if not session.exists():
+            return False
+        ticket_name = f"{session.name} - Cash Closing (Z-Report)"
+        ticket = self.env['pos.printed.ticket'].create({
+            'name': ticket_name,
+            'session_id': session.id,
+            'order_id': False,
+            'printer_name': printer_name or 'QZ Tray',
+            'print_type': 'closing',
+            'receipt_snapshot': image_base64,
+            'status': status or 'success',
+        })
+        return {
+            'success': True,
+            'ticket_id': ticket.id,
+        }
+
+    def action_view_printed_tickets(self):
+        self.ensure_one()
+        return {
+            'name': _('Printed Tickets & Closing Reports'),
+            'res_model': 'pos.printed.ticket',
+            'view_mode': 'tree,form',
+            'domain': [('session_id', '=', self.id)],
+            'context': {'default_session_id': self.id},
+            'type': 'ir.actions.act_window',
         }

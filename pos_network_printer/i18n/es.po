@@ -1,0 +1,155 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* pos_network_printer
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-02 11:00+0000\n"
+"PO-Revision-Date: 2026-11-02 11:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "*** CASH CLOSING (Z) ***"
+msgstr "*** CIERRE DE CAJA (Z) ***"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "SESSION CLOSING REPORT"
+msgstr "INFORME DE CIERRE DE SESIÓN"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Terminal:"
+msgstr "Terminal:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Session:"
+msgstr "Sesión:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Cashier:"
+msgstr "Cajero:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Opening:"
+msgstr "Apertura:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Closing:"
+msgstr "Cierre:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "=== CASH DRAWER BALANCE ==="
+msgstr "=== CUADRE DE CAJÓN ==="
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Starting Float:"
+msgstr "Fondo Inicial:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "(+) Cash Sales:"
+msgstr "(+) Ventas Efectivo:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "(+) Cash In:"
+msgstr "(+) Entradas Efectivo:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "(-) Cash Out:"
+msgstr "(-) Salidas Efectivo:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Expected Cash:"
+msgstr "Total Efectivo Teórico:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Counted Cash (Drawer):"
+msgstr "Efectivo Real (Cajón):"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Difference:"
+msgstr "Descuadre / Diferencia:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "=== SALES BY PAYMENT METHOD ==="
+msgstr "=== VENTAS POR MÉTODO DE PAGO ==="
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "transactions"
+msgstr "transacciones"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Total Orders / Tickets:"
+msgstr "Total Pedidos / Tickets:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Net Sales (Untaxed):"
+msgstr "Base Imponible (Neto):"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Taxes:"
+msgstr "Impuestos (IVA):"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "TOTAL SALES:"
+msgstr "TOTAL VENTAS:"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Cashier Signature"
+msgstr "Firma Cajero"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Manager Signature"
+msgstr "Firma Responsable"
+
+#. module: pos_network_printer
+#: model_terms:ir.ui.view,arch_db:pos_network_printer.CashClosingReceipt
+msgid "Printed on"
+msgstr "Impreso el"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/xml/ClosePosPopupPatch.xml:0
+msgid "Closing Report"
+msgstr "Informe Cierre"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ClosePosPopupPatch.js:0
+msgid "A4 Cash Closing Report generated and archived to Ticket History"
+msgstr "Informe de cierre en A4 generado y archivado en Historial de Tickets"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ClosePosPopupPatch.js:0
+msgid "Cash Closing Report saved to Ticket History (Simulation Mode: physical print skipped)"
+msgstr "Informe de cierre guardado en Historial de Tickets (Modo Simulación: impresión física omitida)"

@@ -11,7 +11,14 @@
                             string="Reprint Original Ticket"
                             type="object"
                             class="btn-primary"
-                            icon="fa-print"/>
+                            icon="fa-print"
+                            invisible="print_type == 'closing'"/>
+                    <button name="action_print_closing_pdf"
+                            string="Download A4 PDF Report"
+                            type="object"
+                            class="btn-secondary"
+                            icon="fa-file-pdf-o"
+                            invisible="print_type != 'closing'"/>
                     <field name="status" widget="statusbar" statusbar_visible="success,failed"/>
                 </header>
                 <sheet>
@@ -64,12 +71,14 @@
             <tree string="Printed Tickets History" create="false" edit="false">
                 <field name="print_date"/>
                 <field name="name"/>
-                <field name="order_id"/>
+                <field name="order_id" optional="show"/>
+                <field name="session_id" optional="show"/>
                 <field name="printer_name"/>
                 <field name="user_id"/>
                 <field name="print_type"
                        widget="badge"
                        decoration-info="print_type == 'first_print'"
+                       decoration-primary="print_type == 'closing'"
                        decoration-warning="print_type == 'reprint'"/>
                 <field name="status"
                        widget="badge"
@@ -81,6 +90,29 @@
                         icon="fa-print"
                         title="Reprint ticket"/>
             </tree>
+        </field>
+    </record>
+
+    <!-- POS Printed Ticket Search View -->
+    <record id="view_pos_printed_ticket_search" model="ir.ui.view">
+        <field name="name">pos.printed.ticket.search</field>
+        <field name="model">pos.printed.ticket</field>
+        <field name="arch" type="xml">
+            <search string="Search Printed Tickets">
+                <field name="name"/>
+                <field name="session_id"/>
+                <field name="order_id"/>
+                <field name="printer_name"/>
+                <field name="user_id"/>
+                <filter string="Cash Closing (Z-Reports)" name="closing_reports" domain="[('print_type', '=', 'closing')]"/>
+                <filter string="Customer Receipts" name="receipts" domain="[('print_type', 'in', ['first_print', 'reprint'])]"/>
+                <filter string="Invoices" name="invoices" domain="[('print_type', '=', 'invoice')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Print Purpose" name="group_by_print_type" context="{'group_by': 'print_type'}"/>
+                    <filter string="Session" name="group_by_session" context="{'group_by': 'session_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'print_date:day'}"/>
+                </group>
+            </search>
         </field>
     </record>
 
