@@ -2,6 +2,7 @@
 
 import { patch } from "@web/core/utils/patch";
 import { ClosePosPopup } from "@point_of_sale/app/navbar/closing_popup/closing_popup";
+import { PosStore } from "@point_of_sale/app/store/pos_store";
 import { useService } from "@web/core/utils/hooks";
 import { _t } from "@web/core/l10n/translation";
 import { parseFloat } from "@web/views/fields/parsers";
@@ -14,6 +15,21 @@ patch(ClosePosPopup.prototype, {
         super.setup(...arguments);
         this.renderer = useService("renderer");
         this.notification = useService("notification");
+        this.pos.cashClosingPrintHandler = () => this.printCashClosingReport();
+        this.pos.isClosingSession = false;
+
+        const originalOrmCall = this.orm.call.bind(this.orm);
+        this.orm.call = async (model, method, args, kwargs) => {
+            const result = await originalOrmCall(model, method, args, kwargs);
+            if (model === "pos.session" && method === "close_session_from_ui") {
+                if (result && result.successful) {
+                    this.pos.isClosingSession = true;
+                } else {
+                    this.pos.isClosingSession = false;
+                }
+            }
+            return result;
+        };
     },
 
     /**
@@ -153,18 +169,23 @@ patch(ClosePosPopup.prototype, {
             return false;
         }
     },
+});
 
-    /**
-     * Override closeSession to auto-print report if enabled.
-     */
-    async closeSession() {
-        if (this.pos.config.auto_print_cash_closing) {
-            try {
-                await this.printCashClosingReport();
-            } catch (printErr) {
-                console.warn("Auto-print on close warning:", printErr);
-            }
+patch(PosStore.prototype, {
+    redirectToBackend() {
+        if (this.isClosingSession && this.config && this.config.auto_print_cash_closing && this.cashClosingPrintHandler) {
+            this.isClosingSession = false;
+            const printPromise = Promise.resolve(this.cashClosingPrintHandler());
+            const timeoutPromise = new Promise((resolve) => setTimeout(resolve, 5000));
+            Promise.race([printPromise, timeoutPromise])
+                .catch((err) => {
+                    console.error("Auto-print error before redirect:", err);
+                })
+                .finally(() => {
+                    super.redirectToBackend();
+                });
+            return;
         }
-        return await super.closeSession(...arguments);
+        super.redirectToBackend();
     },
 });

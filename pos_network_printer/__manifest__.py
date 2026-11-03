@@ -72,7 +72,6 @@
             'pos_network_printer/static/src/js/KitchenPrintingPatch.js',
             'pos_network_printer/static/src/xml/CashClosingReceipt.xml',
             'pos_network_printer/static/src/js/CashClosingReceipt.js',
-            'pos_network_printer/static/src/xml/ClosePosPopupPatch.xml',
             'pos_network_printer/static/src/js/ClosePosPopupPatch.js',
         ],
         'pos_self_order.assets': [

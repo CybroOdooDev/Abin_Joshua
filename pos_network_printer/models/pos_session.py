@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
+import logging
 from odoo import api, fields, models, _
+
+_logger = logging.getLogger(__name__)
 
 
 class PosSession(models.Model):
@@ -47,11 +50,16 @@ class PosSession(models.Model):
         cash_payments = all_payments.filtered(lambda p: p.payment_method_id.id in cash_pm_ids)
         cash_sales = sum(cash_payments.mapped('amount'))
 
-        # Cash In / Cash Out movements
+        # Cash In / Cash Out movements (manual cash in/out moves)
         cash_in = 0.0
         cash_out = 0.0
         moves_list = []
-        for move in self.sudo().statement_line_ids.sorted('create_date'):
+        prefix = f"{self.name}-"
+        manual_moves = self.sudo().statement_line_ids.filtered(
+            lambda l: bool(l.payment_ref and l.payment_ref.startswith(prefix))
+        ).sorted('create_date')
+
+        for move in manual_moves:
             move_amount = move.amount
             if move_amount >= 0:
                 cash_in += move_amount
@@ -59,12 +67,19 @@ class PosSession(models.Model):
                 cash_out += abs(move_amount)
 
             moves_list.append({
-                'name': move.payment_ref or ('Cash In' if move_amount >= 0 else 'Cash Out'),
+                'id': move.id,
+                'name': move.payment_ref or (_('Cash In') if move_amount >= 0 else _('Cash Out')),
                 'amount': move_amount,
                 'date': fields.Datetime.to_string(move.create_date) if move.create_date else False,
             })
 
         net_cash_moves = cash_in - cash_out
+        if self.state == 'closed':
+            if abs(net_cash_moves - (self.cash_real_transaction or 0.0)) > 0.001:
+                _logger.warning(
+                    "Session %s: Net manual cash movements (%s) differ from cash_real_transaction (%s)",
+                    self.name, net_cash_moves, self.cash_real_transaction
+                )
         expected_cash = opening_cash + cash_sales + net_cash_moves
         counted_cash = self.cash_register_balance_end_real or 0.0
         difference = counted_cash - expected_cash
