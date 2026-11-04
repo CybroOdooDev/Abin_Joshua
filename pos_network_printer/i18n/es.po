@@ -266,3 +266,13 @@ msgstr "Firmas y verificación"
 #, python-format
 msgid "Cash Closing Report saved to Ticket History (Simulation Mode: physical print skipped)"
 msgstr "Informe de cierre guardado en Historial de Tickets (Modo Simulación: impresión física omitida)"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/OrderPatch.js:0
+#: code:addons/pos_network_printer/static/src/js/PrintBillPatch.js:0
+#: code:addons/pos_network_printer/static/src/xml/OrderReceiptInvoice.xml:0
+#, python-format
+msgid "PENDING PAYMENT"
+msgstr "PENDIENTE DE PAGO"
+

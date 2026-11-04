@@ -27,10 +27,11 @@ patch(PrintBillButton.prototype, {
         }
 
         try {
-            // Render receipt matching payment receipt format exactly
+            // Render pre-payment bill receipt with isBill flag set
             const receiptData = {
                 ...order.export_for_printing(),
-                isBill: false,
+                isBill: true,
+                pending_payment_label: _t("PENDING PAYMENT"),
             };
 
             // Ensure Veri*Factu QR code is present just like on payment receipt

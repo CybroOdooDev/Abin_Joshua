@@ -24,6 +24,15 @@
         <xpath expr="//div[hasclass('receipt-change')]" position="attributes">
             <attribute name="t-if">props.data.paymentlines and props.data.paymentlines.length > 0</attribute>
         </xpath>
+
+        <!-- Mark advance / premature receipts as Pending Payment at the very bottom -->
+        <xpath expr="//div[hasclass('pos-receipt')]" position="inside">
+            <t t-if="props.data.isBill or (props.data.is_paid === false and (!props.data.paymentlines or props.data.paymentlines.length === 0))">
+                <div class="pos-receipt-order-data text-center fw-bolder my-2 py-1 pending-payment-indicator" style="font-size: 15px; border-top: 2px dashed #000; border-bottom: 2px dashed #000; text-transform: uppercase; letter-spacing: 1px; font-weight: 800; text-align: center;">
+                    *** <t t-if="props.data.pending_payment_label" t-esc="props.data.pending_payment_label"/><t t-else="">PENDING PAYMENT</t> ***
+                </div>
+            </t>
+        </xpath>
     </t>
 
 </templates>

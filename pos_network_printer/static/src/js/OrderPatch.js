@@ -56,6 +56,10 @@ patch(Order.prototype, {
         // Invoice reference if available
         res.invoice_number = this.account_move_name || (this.account_move && this.account_move.name) || (typeof this.account_move === "string" ? this.account_move : null);
 
+        // Payment status & pending payment label
+        res.is_paid = typeof this.is_paid === "function" ? this.is_paid() : (this.get_due ? this.get_due() <= 0 : false);
+        res.pending_payment_label = _t("PENDING PAYMENT");
+
         return res;
     },
 });
