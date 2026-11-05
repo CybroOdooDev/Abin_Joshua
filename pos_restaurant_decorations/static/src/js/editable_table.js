@@ -43,7 +43,9 @@ patch(EditableTable.prototype, {
             document.removeEventListener("touchend", onMouseUp, true);
             if (this.props.onSaveTable && this.props.selectedTables) {
                 for (const t of this.props.selectedTables) {
-                    this.props.onSaveTable(t);
+                    if (t && t.active !== false && this.pos.tables_by_id[t.id] && this.pos.tables_by_id[t.id].active) {
+                        this.props.onSaveTable(t);
+                    }
                 }
             }
         };

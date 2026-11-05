@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_restaurant_decor_image_tree" model="ir.ui.view">
+        <field name="name">restaurant.decor.image.tree</field>
+        <field name="model">restaurant.decor.image</field>
+        <field name="arch" type="xml">
+            <tree string="Saved Floor Decor Images">
+                <field name="name"/>
+                <field name="image" widget="image" options="{'size': [50, 50]}"/>
+                <field name="table_type"/>
+                <field name="is_decoration"/>
+                <field name="seats"/>
+                <field name="active" widget="boolean_toggle"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_restaurant_decor_image_form" model="ir.ui.view">
+        <field name="name">restaurant.decor.image.form</field>
+        <field name="model">restaurant.decor.image</field>
+        <field name="arch" type="xml">
+            <form string="Saved Floor Decor Image">
+                <sheet>
+                    <field name="image" widget="image" class="oe_avatar"/>
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1><field name="name" placeholder="e.g. Vintage Tapestry, Flowerpot..."/></h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="table_type"/>
+                            <field name="is_decoration"/>
+                            <field name="seats" invisible="is_decoration"/>
+                        </group>
+                        <group string="Status">
+                            <field name="active" widget="boolean_toggle"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action Window -->
+    <record id="action_restaurant_decor_image" model="ir.actions.act_window">
+        <field name="name">Saved Floor Decor Images</field>
+        <field name="res_model">restaurant.decor.image</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Upload and manage saved custom graphics and decor images for restaurant floors.
+            </p>
+        </field>
+    </record>
+
+    <!-- Menuitem -->
+    <menuitem id="menu_restaurant_decor_image"
+              name="Floor Decor Images"
+              parent="point_of_sale.menu_point_config_product"
+              action="action_restaurant_decor_image"
+              sequence="25"/>
+</odoo>
+

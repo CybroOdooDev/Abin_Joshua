@@ -19,6 +19,19 @@ patch(Orderline.prototype, {
 });
 
 patch(Order.prototype, {
+    init_from_JSON(json) {
+        super.init_from_JSON(...arguments);
+        this.kitchen_print_count = json.kitchen_print_count || (
+            (json.last_order_preparation_change && json.last_order_preparation_change !== "{}") ? 1 : 0
+        );
+    },
+
+    export_as_JSON() {
+        const json = super.export_as_JSON(...arguments);
+        json.kitchen_print_count = this.kitchen_print_count || 0;
+        return json;
+    },
+
     export_for_printing() {
         const res = super.export_for_printing(...arguments);
         const partner = this.get_partner();

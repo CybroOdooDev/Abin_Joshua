@@ -52,7 +52,7 @@ patch(PosStore.prototype, {
         // 3. Group new lines by Course / Plating Level
         const courseMap = new Map();
         const defaultCourseKey = "general";
-        const defaultCourseName = this.config.module_pos_restaurant ? _t("Platos / Dishes") : _t("Comanda / Order");
+        const defaultCourseName = this.config.module_pos_restaurant ? _t("Dishes") : _t("Order");
 
         for (const change of (changes.new || [])) {
             // Find full orderline for additional details (notes, combo, plating level)
@@ -97,28 +97,59 @@ patch(PosStore.prototype, {
         // Sort courses by sequence
         const sortedCourses = Array.from(courseMap.values()).sort((a, b) => a.sequence - b.sequence);
 
-        const cancelledLines = (changes.cancelled || []).map((c) => ({
-            name: c.name,
-            qty: c.quantity,
-            note: c.note || "",
-        }));
+        const cancelledLines = (changes.cancelled || []).map((c) => {
+            let comboParentName = "";
+            if (c.line_uuid) {
+                const prevLine = order.orderlines.find((l) => l.uuid === c.line_uuid);
+                if (prevLine?.comboParent) {
+                    comboParentName = typeof prevLine.comboParent._get_kitchen_product_name === "function"
+                        ? prevLine.comboParent._get_kitchen_product_name()
+                        : (prevLine.comboParent.product?.display_name || prevLine.comboParent.get_product?.()?.display_name || "");
+                }
+            }
+            return {
+                name: c.name,
+                qty: c.quantity,
+                note: c.note || "",
+                comboParentName: comboParentName,
+            };
+        });
 
         if (sortedCourses.length === 0 && cancelledLines.length === 0) {
             console.log("[Kitchen Printing] No food items to print in kitchen ticket.");
             return;
         }
 
+        const hasSentBefore = Boolean(
+            (order.kitchen_print_count && order.kitchen_print_count > 0) ||
+            (order.last_order_preparation_change && order.last_order_preparation_change !== "{}" && order.server_id)
+        );
+
+        const isUpdate = Boolean(hasCancelled || hasSentBefore);
+
         const kitchenData = {
+            headerTitle: _t("*** KITCHEN ***"),
             orderName: orderName,
             tableName: tableName,
             floorName: floorName,
-            orderType: order.take_away ? _t("PARA LLEVAR / TAKEAWAY") : _t("COMEDOR / DINE IN"),
+            orderType: order.take_away ? _t("TAKEAWAY") : _t("DINE IN"),
             cashierName: cashierName,
             diners: order.customer_count || null,
             time: timeStr,
             date: dateStr,
             courses: sortedCourses,
             cancelledLines: cancelledLines,
+            hasCancelled: hasCancelled,
+            hasNew: hasNew,
+            isUpdate: isUpdate,
+            newSectionTitle: _t("*** NEW ***"),
+            cancelledSectionTitle: _t("*** CANCELLED ***"),
+            sentToKitchenLabel: _t("SENT TO KITCHEN"),
+            tableLabel: _t("TABLE:"),
+            orderLabel: _t("ORDER:"),
+            waiterLabel: _t("WAITER:"),
+            noteLabel: _t("NOTE:"),
+            paxLabel: _t("PAX:"),
         };
 
         // 4. Render KitchenOrderReceipt using renderToElement (direct QWeb DOM generation)
@@ -176,5 +207,8 @@ patch(PosStore.prototype, {
             const printRes = await qzPrinterService.printReceiptImage(imageBase64, kitchenPrinterName);
             console.log(`[Kitchen Printing] Successfully printed kitchen ticket to: ${printRes.printer_name}`);
         }
+
+        // 7. Track that this order has completed a kitchen print, so subsequent prints on this order are updates
+        order.kitchen_print_count = (order.kitchen_print_count || 0) + 1;
     },
 });

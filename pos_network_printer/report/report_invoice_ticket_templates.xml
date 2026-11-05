@@ -11,23 +11,78 @@
                     padding: 0 !important;
                     font-family: Arial, Helvetica, sans-serif !important;
                     font-size: 13px !important;
-                    line-height: 1.3 !important;
-                    color: #000 !important;
+                    line-height: 1.35 !important;
+                    color: #000000 !important;
+                    box-sizing: border-box !important;
+                    -webkit-font-smoothing: antialiased !important;
+                }
+                .pos-ticket-wrap,
+                .pos-ticket-wrap * {
+                    color: #000000 !important;
                     box-sizing: border-box !important;
                 }
                 .pos-ticket-wrap table {
                     width: 100% !important;
                     border-collapse: collapse !important;
                     border: none !important;
+                    border-width: 0 !important;
+                    outline: none !important;
+                    box-shadow: none !important;
                     margin: 0 !important;
                 }
                 .pos-ticket-wrap table tr,
                 .pos-ticket-wrap table td,
                 .pos-ticket-wrap table th {
                     border: none !important;
+                    border-width: 0 !important;
+                    outline: none !important;
+                    box-shadow: none !important;
                     background: transparent !important;
                     padding: 2px 0 !important;
                     vertical-align: top !important;
+                }
+                .pos-ticket-wrap .ticket-line-item {
+                    border: none !important;
+                    border-width: 0 !important;
+                    outline: none !important;
+                    box-shadow: none !important;
+                    margin: 5px 0 !important;
+                    padding: 0 !important;
+                }
+                .pos-ticket-wrap .ticket-line-combo {
+                    border: none !important;
+                    border-left: 2px solid #000000 !important;
+                    outline: none !important;
+                    box-shadow: none !important;
+                    margin: 3px 0 4px 12px !important;
+                    padding: 0 0 0 8px !important;
+                }
+                .pos-ticket-wrap .ticket-line-details {
+                    font-size: 11px !important;
+                    font-weight: 600 !important;
+                    color: #000000 !important;
+                    padding-left: 4px !important;
+                }
+                .pos-ticket-wrap .ticket-divider {
+                    border-top: 1px dashed #000000 !important;
+                    margin: 6px 0 !important;
+                    height: 1px !important;
+                }
+                @media print {
+                    html, body {
+                        margin: 0 !important;
+                        padding: 0 !important;
+                    }
+                    .pos-ticket-wrap {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                        page-break-after: avoid !important;
+                        break-after: avoid !important;
+                    }
+                    .pos-ticket-wrap * {
+                        page-break-inside: avoid !important;
+                        break-inside: avoid !important;
+                    }
                 }
             </style>
 
@@ -45,13 +100,13 @@
                     Nº Factura: <strong><span t-field="o.name"/></strong>
                 </t>
                 <t t-elif="o.pos_order_ids">
-                    Ticket Number: <strong><span t-esc="o.pos_order_ids[0].name"/></strong>
+                    Nº de Ticket: <strong><span t-esc="o.pos_order_ids[0].name"/></strong>
                 </t>
                 <t t-elif="o.invoice_origin">
-                    Ticket Number: <strong><span t-field="o.invoice_origin"/></strong>
+                    Nº de Ticket: <strong><span t-field="o.invoice_origin"/></strong>
                 </t>
                 <t t-else="">
-                    Ticket Number: <strong><span t-field="o.name"/></strong>
+                    Nº de Ticket: <strong><span t-field="o.name"/></strong>
                 </t>
             </div>
 
@@ -61,29 +116,29 @@
                     <img t-att-src="image_data_uri(o.company_id.logo)" style="max-height: 50px; max-width: 50mm; object-fit: contain; margin: 0 auto; display: block;" alt="Logo"/>
                 </div>
             </t>
-            <div style="text-align: center; font-size: 11px; margin-bottom: 12px;">
-                <div><t t-esc="o.company_id.name"/></div>
-                <div t-if="o.company_id.phone">Tel:<span t-field="o.company_id.phone"/></div>
+            <div style="text-align: center; font-size: 11px; margin-bottom: 10px;">
+                <div><strong><t t-esc="o.company_id.name"/></strong></div>
+                <div t-if="o.company_id.phone">Tel: <span t-field="o.company_id.phone"/></div>
                 <t t-if="o.company_id.vat">
                     <div>
                         <t t-if="o.company_id.account_fiscal_country_id.vat_label" t-out="o.company_id.account_fiscal_country_id.vat_label"/>
-                        <t t-else="">VAT</t>: <span t-field="o.company_id.vat"/>
+                        <t t-else="">NIF</t>: <span t-field="o.company_id.vat"/>
                     </div>
                 </t>
                 <div t-if="o.company_id.email"><span t-field="o.company_id.email"/></div>
                 <div t-if="o.company_id.website"><span t-field="o.company_id.website"/></div>
-                <div style="margin: 4px 0;">--------------------------------</div>
+                <div class="ticket-divider"></div>
                 <t t-if="o.pos_order_ids and o.pos_order_ids[0].user_id">
-                    <div>Served by <t t-esc="o.pos_order_ids[0].user_id.name"/></div>
+                    <div>Atendido por <t t-esc="o.pos_order_ids[0].user_id.name"/></div>
                 </t>
                 <t t-elif="o.invoice_user_id">
-                    <div>Served by <t t-esc="o.invoice_user_id.name"/></div>
+                    <div>Atendido por <t t-esc="o.invoice_user_id.name"/></div>
                 </t>
                 <t t-if="o.pos_order_ids and o.pos_order_ids[0].table_id">
-                    <div>at table <t t-esc="o.pos_order_ids[0].table_id.name"/></div>
+                    <div>en mesa <t t-esc="o.pos_order_ids[0].table_id.name"/></div>
                 </t>
                 <t t-if="o.pos_order_ids and o.pos_order_ids[0].customer_count">
-                    <div>Guests: <t t-esc="o.pos_order_ids[0].customer_count"/></div>
+                    <div>Comensales: <t t-esc="o.pos_order_ids[0].customer_count"/></div>
                 </t>
                 <t t-if="o.pos_order_ids and o.pos_order_ids[0].tracking_number">
                     <div style="font-size: 16px; font-weight: bold; margin-top: 2px;"><t t-esc="o.pos_order_ids[0].tracking_number"/></div>
@@ -92,26 +147,26 @@
 
             <!-- Customer Details (matches POS OrderReceipt) -->
             <t t-if="o.partner_id and o.partner_id != o.company_id.partner_id">
-                <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 0; margin: 8px 0; font-size: 11px; text-align: left;">
-                    <div style="font-weight: bold; text-decoration: underline; margin-bottom: 2px;">Customer Details:</div>
-                    <div><strong>Customer: </strong><span t-field="o.partner_id.name"/></div>
-                    <div t-if="o.partner_id.vat"><strong>VAT: </strong><span t-field="o.partner_id.vat"/></div>
-                    <div t-if="o.partner_id.phone or o.partner_id.mobile"><strong>Phone: </strong><t t-esc="o.partner_id.phone or o.partner_id.mobile"/></div>
-                    <div t-if="o.partner_id.email"><strong>Email: </strong><span t-field="o.partner_id.email"/></div>
+                <div style="border-top: 1px dashed #000000; border-bottom: 1px dashed #000000; padding: 4px 0; margin: 8px 0; font-size: 11px; text-align: left;">
+                    <div style="font-weight: bold; text-decoration: underline; margin-bottom: 2px;">Datos del cliente:</div>
+                    <div><strong>Cliente: </strong><span t-field="o.partner_id.name"/></div>
+                    <div t-if="o.partner_id.vat"><strong>NIF: </strong><span t-field="o.partner_id.vat"/></div>
+                    <div t-if="o.partner_id.phone or o.partner_id.mobile"><strong>Teléfono: </strong><t t-esc="o.partner_id.phone or o.partner_id.mobile"/></div>
+                    <div t-if="o.partner_id.email"><strong>Correo: </strong><span t-field="o.partner_id.email"/></div>
                     <t t-set="addr" t-value="', '.join(filter(bool, [o.partner_id.street, o.partner_id.street2, o.partner_id.zip, o.partner_id.city, o.partner_id.country_id.name if o.partner_id.country_id else '']))"/>
-                    <div t-if="addr"><strong>Address: </strong><t t-esc="addr"/></div>
+                    <div t-if="addr"><strong>Dirección: </strong><t t-esc="addr"/></div>
                 </div>
             </t>
 
             <!-- 3. Orderlines (matches POS OrderReceipt & Orderline) -->
-            <div style="margin: 10px 0;">
+            <div style="margin: 8px 0; border: none !important;">
                 <t t-foreach="o._get_ticket_lines()" t-as="line">
                     <t t-if="line['is_combo_child']">
-                        <!-- Combo Child Item (matches border-start border-3 ms-4 in POS Orderline) -->
-                        <div style="margin-top: 3px; margin-bottom: 5px; margin-left: 14px; padding-left: 8px; border-left: 2px solid #6c757d;">
-                            <table style="width: 100%;">
+                        <!-- Combo Child Item -->
+                        <div class="ticket-line-combo">
+                            <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
                                 <tr>
-                                    <td style="text-align: left; vertical-align: top; word-break: break-word; font-size: 13px;">
+                                    <td style="text-align: left; vertical-align: top; word-break: break-word; font-size: 13px; font-weight: bold;">
                                         <t t-esc="line['name']"/>
                                     </td>
                                     <td style="text-align: right; vertical-align: top; white-space: nowrap; font-size: 13px; font-weight: bold; padding-left: 8px;">
@@ -119,7 +174,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2" style="font-size: 11px; color: #444;">
+                                    <td colspan="2" class="ticket-line-details">
                                         <t t-esc="line['qty_str']"/> <t t-esc="line['unit_name']"/>
                                         <span> x </span>
                                         <span t-esc="line['price_unit']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
@@ -127,7 +182,7 @@
                                         <t t-esc="line['unit_name']"/>
                                         <t t-if="line['discount'] and line['discount'] > 0">
                                             <span style="margin-left: 4px; font-style: italic;">
-                                                (<t t-esc="line['discount']"/>% desc.)
+                                                (<t t-esc="line['discount']"/>% dto.)
                                             </span>
                                         </t>
                                     </td>
@@ -137,10 +192,10 @@
                     </t>
                     <t t-else="">
                         <!-- Regular Product Line / Combo Parent Line -->
-                        <div style="margin-top: 8px; margin-bottom: 4px;">
-                            <table style="width: 100%;">
+                        <div class="ticket-line-item">
+                            <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
                                 <tr>
-                                    <td style="text-align: left; vertical-align: top; word-break: break-word; font-size: 13px;">
+                                    <td style="text-align: left; vertical-align: top; word-break: break-word; font-size: 13px; font-weight: bold;">
                                         <t t-esc="line['name']"/>
                                     </td>
                                     <td style="text-align: right; vertical-align: top; white-space: nowrap; font-size: 13px; font-weight: bold; padding-left: 8px;">
@@ -148,7 +203,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td colspan="2" style="font-size: 11px; color: #444; padding-left: 6px;">
+                                    <td colspan="2" class="ticket-line-details">
                                         <t t-esc="line['qty_str']"/> <t t-esc="line['unit_name']"/>
                                         <span> x </span>
                                         <span t-esc="line['price_unit']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
@@ -156,7 +211,7 @@
                                         <t t-esc="line['unit_name']"/>
                                         <t t-if="line['discount'] and line['discount'] > 0">
                                             <span style="margin-left: 4px; font-style: italic;">
-                                                (<t t-esc="line['discount']"/>% desc.)
+                                                (<t t-esc="line['discount']"/>% dto.)
                                             </span>
                                         </t>
                                     </td>
@@ -167,9 +222,9 @@
                 </t>
             </div>
 
-            <!-- 4. TOTAL (matches POS Receipt TOTAL with dashes) -->
-            <div style="text-align: right; font-weight: bold; margin-top: 6px;">--------</div>
-            <table style="width: 100%; margin: 4px 0 14px 0; font-size: 16px; font-weight: bold;">
+            <!-- 4. TOTAL -->
+            <div class="ticket-divider"></div>
+            <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; margin: 4px 0 8px 0; font-size: 17px; font-weight: 900;">
                 <tr>
                     <td style="text-align: left;">TOTAL</td>
                     <td style="text-align: right; white-space: nowrap;">
@@ -177,15 +232,22 @@
                     </td>
                 </tr>
             </table>
+            <div class="ticket-divider"></div>
 
             <!-- 5. Tax Breakdown (matches POS pos-receipt-taxes 4-column grid) -->
-            <table style="width: 100%; font-size: 11px; margin: 10px 0;">
+            <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; font-size: 11px; margin: 8px 0;">
                 <thead>
-                    <tr style="font-weight: bold;">
-                        <th style="text-align: left; width: 25%;">Tax</th>
-                        <th style="text-align: right; width: 25%;">Amount</th>
-                        <th style="text-align: right; width: 25%;">Base</th>
-                        <th style="text-align: right; width: 25%;">Total</th>
+                    <tr style="font-weight: bold; border-bottom: 1px dashed #000000 !important;">
+                        <th style="text-align: left; width: 25%; padding-bottom: 3px;">Impuesto</th>
+                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Cuota</th>
+                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Base</th>
+                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Total</th>
+                    </tr>
+                </thead>
+                        <th style="text-align: left; width: 25%; padding-bottom: 3px;">Tax</th>
+                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Amount</th>
+                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Base</th>
+                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -196,30 +258,30 @@
                                 <t t-set="tax_base" t-value="tax_group.get('tax_group_base_amount', 0)"/>
                                 <t t-set="tax_amt" t-value="tax_group.get('tax_group_amount', 0)"/>
                                 <tr>
-                                    <td style="text-align: left;">
+                                    <td style="text-align: left; padding: 2px 0;">
                                         <t t-esc="tax_group.get('tax_group_name')"/>
                                     </td>
-                                    <td style="text-align: right; white-space: nowrap;">
+                                    <td style="text-align: right; white-space: nowrap; padding: 2px 0;">
                                         <t t-esc="'%.2f' % tax_amt"/>
                                     </td>
-                                    <td style="text-align: right; white-space: nowrap;">
+                                    <td style="text-align: right; white-space: nowrap; padding: 2px 0;">
                                         <t t-esc="'%.2f' % tax_base"/>
                                     </td>
-                                    <td style="text-align: right; white-space: nowrap;">
+                                    <td style="text-align: right; white-space: nowrap; padding: 2px 0;">
                                         <t t-esc="'%.2f' % (tax_base + tax_amt)"/>
                                     </td>
                                 </tr>
                             </t>
                         </t>
-                        <tr style="font-weight: bold;">
-                            <td></td>
-                            <td style="text-align: right; white-space: nowrap;">
+                        <tr style="font-weight: bold; border-top: 1px dashed #000000 !important;">
+                            <td style="padding-top: 3px;"></td>
+                            <td style="text-align: right; white-space: nowrap; padding-top: 3px;">
                                 <t t-esc="'%.2f' % o.amount_tax"/>
                             </td>
-                            <td style="text-align: right; white-space: nowrap;">
+                            <td style="text-align: right; white-space: nowrap; padding-top: 3px;">
                                 <t t-esc="'%.2f' % o.amount_untaxed"/>
                             </td>
-                            <td style="text-align: right; white-space: nowrap;">
+                            <td style="text-align: right; white-space: nowrap; padding-top: 3px;">
                                 <t t-esc="'%.2f' % o.amount_total"/>
                             </td>
                         </tr>
@@ -238,15 +300,16 @@
             <!-- 6. Veri*Factu QR (Spanish EDI) -->
             <t t-set="verifactu_qr" t-value="o._get_verifactu_qr_data_uri()"/>
             <t t-if="verifactu_qr">
-                <div style="text-align: center; margin: 14px 0 10px 0;">
+                <div style="text-align: center; margin: 12px 0 8px 0;">
                     <div style="font-size: 11px; font-weight: bold; margin-bottom: 4px;">QR tributario:</div>
-                    <img t-att-src="verifactu_qr" style="width: 32mm; height: 32mm; margin: 0 auto; display: block;" alt="Veri*Factu QR"/>
+                    <img t-att-src="verifactu_qr" style="width: 32mm; height: 32mm; margin: 0 auto; display: block; image-rendering: pixelated;" alt="Veri*Factu QR"/>
                     <div style="font-size: 11px; font-weight: bold; margin-top: 4px;">VERI*FACTU</div>
                 </div>
             </t>
 
             <!-- 7. Footer (matches POS OrderReceipt footer) -->
-            <div style="text-align: center; font-size: 11px; color: #000; margin-top: 14px;">
+            <div style="text-align: center; font-size: 11px; color: #000000; margin-top: 12px;">
+                <div class="ticket-divider"></div>
                 <div>Powered by Odoo</div>
                 <div style="margin-top: 2px;">
                     <t t-if="o.pos_order_ids">

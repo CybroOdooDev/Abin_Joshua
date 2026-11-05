@@ -20,7 +20,7 @@ class AccountMove(models.Model):
             result = []
             for ol in pos_lines:
                 is_child = bool(ol.combo_parent_id)
-                qty_str = ('%.0f' % ol.qty) if (ol.qty % 1 == 0 and is_child) else ('%.2f' % ol.qty)
+                qty_str = ('%.0f' % ol.qty) if (ol.qty % 1 == 0) else ('%.2f' % ol.qty)
                 uom_name = ol.product_uom_id.name or (ol.product_id.uom_id.name if ol.product_id else 'Units')
                 result.append({
                     'name': ol.product_id.name or ol.full_product_name or '',
@@ -37,7 +37,7 @@ class AccountMove(models.Model):
         # Fallback for invoices not created from a POS order
         result = []
         for line in self.invoice_line_ids.filtered(lambda l: l.display_type in ('product', False)):
-            qty_str = ('%.2f' % line.quantity)
+            qty_str = ('%.0f' % line.quantity) if (line.quantity % 1 == 0) else ('%.2f' % line.quantity)
             uom_name = line.product_uom_id.name or 'Units'
             result.append({
                 'name': line.product_id.name if line.product_id else (line.name or ''),

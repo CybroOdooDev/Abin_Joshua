@@ -124,7 +124,27 @@ class QZPrinterService {
     }
 
     /**
-     * Prints an 80mm receipt image snapshot directly through QZ Tray.
+     * Inspects base64 image dimensions to calculate exact ticket height in millimeters.
+     * Ensures print spooler treats long tickets as a single continuous sheet.
+     */
+    getImageDimensions(base64) {
+        return new Promise(function (resolve) {
+            var img = new Image();
+            img.onload = function () {
+                resolve({
+                    width: img.naturalWidth || img.width || 576,
+                    height: img.naturalHeight || img.height || 800,
+                });
+            };
+            img.onerror = function () {
+                resolve({ width: 576, height: 800 });
+            };
+            img.src = base64.indexOf("data:") === 0 ? base64 : "data:image/png;base64," + base64;
+        });
+    }
+
+    /**
+     * Prints an 80mm receipt image snapshot directly through QZ Tray on a single continuous sheet.
      * @param {string} imageBase64 Pure base64 data of the rendered receipt image.
      * @param {string} preferredPrinterName Name of the printer (e.g. 'Bitaspain', 'POS-80').
      */
@@ -136,13 +156,17 @@ class QZPrinterService {
         await this.connect();
         const targetPrinter = await this.resolvePrinter(preferredPrinterName);
 
+        // Compute exact physical height in mm to tell OS print spooler to print on a single continuous sheet
+        const dims = await this.getImageDimensions(imageBase64);
+        const heightMm = Math.max(80, Math.ceil((dims.height / dims.width) * 80));
+
         const qzConfig = window.qz.configs.create(targetPrinter, {
-            size: { width: 80, height: 297 },
+            size: { width: 80, height: heightMm },
             units: "mm",
             margins: 0,
-            scaleContent: true,
+            scaleContent: false,
             colorType: "blackwhite",
-            interpolation: "nearest-neighbor",
+            interpolation: "bicubic",
             rasterize: true,
         });
 

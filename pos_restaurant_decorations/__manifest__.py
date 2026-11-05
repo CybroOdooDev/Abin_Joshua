@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'POS Restaurant Customizable Decor & Surrounding Tables',
-    'version': '17.0.1.1.0',
+    'version': '17.0.1.2.1',
     'category': 'Point of Sale',
     'summary': 'Customizable surrounding tables, bar items, flowerpots, barrels, chairs and decorations for POS Restaurant',
     'description': """
@@ -13,12 +13,15 @@ fully responsive on mobile, tablet, and desktop screens.
     'website': 'https://www.cybrosys.com',
     'depends': ['point_of_sale', 'pos_restaurant'],
     'data': [
+        'security/ir.model.access.csv',
         'views/restaurant_table_views.xml',
+        'views/restaurant_decor_image_views.xml',
     ],
     'assets': {
         'point_of_sale._assets_pos': [
             'pos_restaurant_decorations/static/src/css/decorations.css',
             'pos_restaurant_decorations/static/src/js/decor_presets.js',
+            'pos_restaurant_decorations/static/src/js/decor_storage.js',
             'pos_restaurant_decorations/static/src/js/decor_preset_popup.js',
             'pos_restaurant_decorations/static/src/js/decor_preset_popup.xml',
             'pos_restaurant_decorations/static/src/js/table_customization_popup.js',

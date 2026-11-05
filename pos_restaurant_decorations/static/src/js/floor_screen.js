@@ -5,11 +5,12 @@ import { FloorScreen } from "@pos_restaurant/app/floor_screen/floor_screen";
 import { Navbar } from "@point_of_sale/app/navbar/navbar";
 import { DecorPresetPopup } from "@pos_restaurant_decorations/js/decor_preset_popup";
 import { TableCustomizationPopup } from "@pos_restaurant_decorations/js/table_customization_popup";
+import { saveDecorImageLocally } from "@pos_restaurant_decorations/js/decor_storage";
 
 patch(Navbar.prototype, {
     onSwitchButtonClick() {
         super.onSwitchButtonClick(...arguments);
-        if (this.pos.mainScreen?.component?.name === "FloorScreen") {
+        if (this.pos.mainScreen && this.pos.mainScreen.component && this.pos.mainScreen.component.name === "FloorScreen") {
             this.pos.showScreen("FloorScreen", { floor: this.pos.currentFloor });
         }
     },
@@ -30,7 +31,9 @@ patch(FloorScreen.prototype, {
     },
 
     onPatched() {
-        super.onPatched?.();
+        if (super.onPatched) {
+            super.onPatched();
+        }
         this.autoFitFloorMap();
     },
 
@@ -87,11 +90,23 @@ patch(FloorScreen.prototype, {
 
     async onSaveTable(table) {
         if (!table || !table.id) return;
-        table.active = true;
-        if (this.pos.tables_by_id[table.id]) {
-            this.pos.tables_by_id[table.id].active = true;
+        const liveTable = this.pos.tables_by_id[table.id];
+        // Do not re-save or resurrect tables that are being deleted or inactive
+        if (!liveTable || !liveTable.active || table.active === false) {
+            return;
         }
         await this._save(table);
+    },
+
+    async deleteFloorOrTable() {
+        await super.deleteFloorOrTable(...arguments);
+        // If tables were successfully deleted, ensure activeFloor.table_ids does not keep orphan IDs
+        if (this.activeFloor && Array.isArray(this.activeFloor.table_ids)) {
+            this.activeFloor.table_ids = this.activeFloor.table_ids.filter((id) => {
+                const t = this.pos.tables_by_id[id];
+                return t && t.active;
+            });
+        }
     },
 
     async addDecor() {
@@ -167,6 +182,34 @@ patch(FloorScreen.prototype, {
         this.activeFloor.table_ids.push(newTable.id);
         this.pos.tables_by_id[newTable.id] = newTable;
         this.state.selectedTableIds = [newTable.id];
+
+        if (payload.isCustom && payload.custom_image) {
+            saveDecorImageLocally({
+                id: newTable.id || "saved_" + Date.now(),
+                name: payload.name,
+                custom_image: payload.custom_image,
+                is_decoration: payload.is_decoration,
+                seats: payload.seats || 0,
+                table_type: payload.table_type || "decoration",
+            });
+            try {
+                await this.orm.call(
+                    "pos.session",
+                    "save_decor_image",
+                    [
+                        this.pos.pos_session.id,
+                        payload.name,
+                        payload.custom_image,
+                        payload.is_decoration,
+                        payload.seats || 0,
+                        payload.table_type || "decoration",
+                    ]
+                );
+            } catch {
+                // Backend method not yet loaded by host server
+            }
+        }
+
         return newTable;
     },
 
@@ -233,7 +276,7 @@ patch(FloorScreen.prototype, {
     },
 
     async _save(table) {
-        table.active = true;
+        if (!table || table.active === false) return;
         const tableCopy = {
             floor_id: table.floor ? table.floor.id : (Array.isArray(table.floor_id) ? table.floor_id[0] : table.floor_id),
             color: table.color,
@@ -253,12 +296,12 @@ patch(FloorScreen.prototype, {
             show_seats: table.show_seats !== false,
             rotation: typeof table.rotation === "number" ? table.rotation : 0,
             z_index: typeof table.z_index === "number" ? table.z_index : 10,
-            active: true,
         };
 
         if (table.id) {
             await this.orm.write("restaurant.table", [table.id], tableCopy);
         } else {
+            tableCopy.active = true;
             const tableId = await this.orm.create("restaurant.table", [tableCopy]);
             table.id = tableId[0];
             table.active = true;

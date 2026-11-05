@@ -62,13 +62,16 @@ def image_to_escpos_raster(image_input, paper_width='80mm', cut=True, drawer=Fal
     aspect_ratio = height / float(width)
     target_height = int(target_width * aspect_ratio)
 
-    # Resize image using high-quality resampling (compatible with all Pillow versions)
-    resample_filter = getattr(Image, 'Resampling', None)
-    resample_method = resample_filter.LANCZOS if resample_filter else getattr(Image, 'LANCZOS', getattr(Image, 'BILINEAR', 2))
-    img = img.resize((target_width, target_height), resample_method)
+    # Resize image if not already at target width
+    if width != target_width:
+        resample_filter = getattr(Image, 'Resampling', None)
+        resample_method = resample_filter.LANCZOS if resample_filter else getattr(Image, 'LANCZOS', getattr(Image, 'BILINEAR', 2))
+        img = img.resize((target_width, target_height), resample_method)
 
-    # Convert to 1-bit monochrome (dithered for smooth logos and crisp text)
-    img = img.convert('1')
+    # Convert to 1-bit monochrome with high-contrast thresholding to eliminate dithering blur
+    if img.mode != '1':
+        img_gray = img.convert('L')
+        img = img_gray.point(lambda p: 255 if p > 200 else 0, mode='1')
 
     # ESC/POS raster chunking: Print in slices of up to 512 vertical pixels
     # to avoid buffer overflows on printers with limited memory.

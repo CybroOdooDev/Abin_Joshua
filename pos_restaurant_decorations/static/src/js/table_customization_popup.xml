@@ -2,7 +2,7 @@
 <templates id="template" xml:space="preserve">
 
     <t t-name="pos_restaurant_decorations.TableCustomizationPopup">
-        <div class="popup table-customization-popup" style="max-width: 600px; width: 90vw;">
+        <div class="popup table-customization-popup" style="max-width: 640px; width: 92vw;">
             <header class="modal-header bg-dark text-white p-3 d-flex align-items-center justify-content-between">
                 <div class="d-flex align-items-center gap-2">
                     <i class="fa fa-sliders fs-4 text-info"></i>
@@ -10,29 +10,89 @@
                 </div>
             </header>
 
-            <main class="modal-body p-4 bg-white">
+            <main class="modal-body p-4 bg-white" style="max-height: 75vh; overflow-y: auto;">
                 <!-- Current Item Visual Banner -->
-                <div class="d-flex align-items-center gap-3 p-3 bg-light rounded-3 mb-4 border">
-                    <div class="d-flex align-items-center justify-content-center bg-white rounded-3 border shadow-sm"
-                         style="width: 72px; height: 72px; overflow: hidden; flex-shrink: 0; padding: 4px;">
-                        <t t-if="state.imagePreview">
-                            <img t-att-src="state.imagePreview" alt="Item Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;"/>
-                        </t>
-                        <t t-else="">
-                            <i class="fa fa-cutlery text-muted fs-2"></i>
+                <div class="p-3 bg-light rounded-3 mb-4 border">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center justify-content-center bg-white rounded-3 border shadow-sm"
+                             style="width: 72px; height: 72px; overflow: hidden; flex-shrink: 0; padding: 4px;">
+                            <t t-if="state.imagePreview">
+                                <img t-att-src="state.imagePreview" alt="Item Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;"/>
+                            </t>
+                            <t t-else="">
+                                <i class="fa fa-cutlery text-muted fs-2"></i>
+                            </t>
+                        </div>
+
+                        <div class="flex-grow-1">
+                            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                                <h5 class="m-0 fw-bold text-dark"><t t-esc="state.name || 'Floor Item'"/></h5>
+                                <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><t t-esc="itemCategoryBadge"/></span>
+                            </div>
+                            <small class="text-muted d-block">
+                                <t t-if="isDiningTable">Configure el nombre de la mesa, el número de comensales y los gráficos.</t>
+                                <t t-else="">Configure la identidad del elemento decorativo, opciones visuales y gráficos.</t>
+                            </small>
+                        </div>
+                    </div>
+
+                    <!-- Image Management Controls -->
+                    <div class="d-flex align-items-center gap-2 mt-3 pt-3 border-top flex-wrap">
+                        <button type="button" class="btn btn-sm"
+                                t-att-class="state.showSavedPicker ? 'btn-primary' : 'btn-outline-primary'"
+                                t-on-click="toggleSavedPicker">
+                            <i class="fa fa-bookmark me-1"></i> Elegir de gráficos guardados
+                        </button>
+                        <label class="btn btn-sm btn-outline-secondary m-0 cursor-pointer">
+                            <i class="fa fa-upload me-1"></i> Subir nuevo gráfico
+                            <input type="file" accept="image/*" class="d-none" t-on-change="onFileSelected"/>
+                        </label>
+                        <t t-if="state.custom_image">
+                            <button type="button" class="btn btn-sm btn-outline-success ms-auto"
+                                    t-on-click="saveCurrentToLibrary"
+                                    t-att-disabled="state.savedToLibrarySuccess">
+                                <i t-attf-class="fa {{ state.savedToLibrarySuccess ? 'fa-check' : 'fa-save' }} me-1"></i>
+                                <t t-if="state.savedToLibrarySuccess">¡Guardado en biblioteca!</t>
+                                <t t-else="">Guardar en biblioteca</t>
+                            </button>
                         </t>
                     </div>
 
-                    <div class="flex-grow-1">
-                        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                            <h5 class="m-0 fw-bold text-dark"><t t-esc="state.name || 'Floor Item'"/></h5>
-                            <span class="badge bg-primary-subtle text-primary border border-primary-subtle"><t t-esc="itemCategoryBadge"/></span>
+                    <!-- Collapsible Saved Graphics Drawer -->
+                    <t t-if="state.showSavedPicker">
+                        <div class="mt-3 p-3 bg-white rounded-3 border">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <span class="fw-bold small text-dark"><i class="fa fa-th-large me-1"></i> Gráficos guardados del sistema</span>
+                                <button type="button" class="btn btn-sm btn-link text-muted p-0 text-decoration-none" t-on-click="toggleSavedPicker">
+                                    <i class="fa fa-times"></i> Cerrar
+                                </button>
+                            </div>
+                            <t t-if="state.isLoadingSaved">
+                                <div class="py-3 text-center text-muted">
+                                    <i class="fa fa-spinner fa-spin me-1"></i> Cargando gráficos guardados...
+                                </div>
+                            </t>
+                            <t t-elif="state.savedImages.length === 0">
+                                <div class="py-3 text-center text-muted small">
+                                    No se encontraron gráficos guardados. Suba un gráfico para guardarlo automáticamente para su reutilización.
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="d-flex gap-2 overflow-auto py-2" style="max-height: 130px;">
+                                    <t t-foreach="state.savedImages" t-as="savedItem" t-key="savedItem.id">
+                                        <div class="d-flex flex-column align-items-center p-2 rounded border bg-light cursor-pointer text-center flex-shrink-0"
+                                             style="width: 80px;"
+                                             title="Haga clic para aplicar"
+                                             t-on-click="() => this.selectSavedImage(savedItem)">
+                                            <img t-att-src="'data:image/png;base64,' + savedItem.custom_image"
+                                                 style="width: 44px; height: 44px; object-fit: contain;" alt="Gráfico guardado"/>
+                                            <span class="text-truncate small mt-1 w-100" style="font-size: 11px;" t-esc="savedItem.name"/>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
                         </div>
-                        <small class="text-muted d-block">
-                            <t t-if="isDiningTable">Configure dining table identity, customer seats, and floor visibility.</t>
-                            <t t-else="">Configure decorative floor item identity, scenery options, and floor visibility.</t>
-                        </small>
-                    </div>
+                    </t>
                 </div>
 
                 <!-- Name & Seats Controls -->
@@ -43,7 +103,7 @@
                     </div>
                     <t t-if="!state.is_decoration">
                         <div class="col-4">
-                            <label class="form-label fw-bold">Customer Seats</label>
+                            <label class="form-label fw-bold">Comensales</label>
                             <input type="number" min="1" max="50" class="form-control" t-model.number="state.seats"/>
                         </div>
                     </t>
@@ -51,7 +111,7 @@
 
                 <!-- Toggles for Clean Display & Scenery -->
                 <div class="p-3 bg-light rounded-3 border">
-                    <span class="fw-bold text-dark d-block mb-2">Display &amp; Ordering Options</span>
+                    <span class="fw-bold text-dark d-block mb-2">Opciones de visualización y pedidos</span>
 
                     <!-- Dynamic Name/Label Toggle -->
                     <div class="form-check form-switch mb-2">
@@ -66,7 +126,7 @@
                         <div class="form-check form-switch mb-2">
                             <input class="form-check-input" type="checkbox" id="showSeatsSwitch" t-model="state.show_seats"/>
                             <label class="form-check-label" for="showSeatsSwitch">
-                                Show Seats Count badge on floor map
+                                Mostrar indicador de comensales en el plano de planta
                             </label>
                         </div>
                     </t>
@@ -77,11 +137,11 @@
                                t-att-checked="state.is_decoration"
                                t-on-change="onToggleIsDecoration"/>
                         <label class="form-check-label" for="isDecorSwitch">
-                            <strong>Visual Scenery Mode (Non-orderable)</strong>
+                            <strong>Modo elemento decorativo visual (No pedible)</strong>
                         </label>
                     </div>
                     <small class="text-muted ps-4 d-block">
-                        Enable for decorative items (flowerpots, barrels, fountains, dividers) so waitstaff won't accidentally open an order on them.
+                        Habilite esta opción para elementos decorativos (macetas, barriles, fuentes, separadores) para que los camareros no abran pedidos por error en ellos.
                     </small>
                 </div>
             </main>

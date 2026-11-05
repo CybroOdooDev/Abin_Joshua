@@ -2,8 +2,13 @@
 
 import { AbstractAwaitablePopup } from "@point_of_sale/app/popup/abstract_awaitable_popup";
 import { _t } from "@web/core/l10n/translation";
-import { useState } from "@odoo/owl";
+import { useState, useRef } from "@odoo/owl";
 import { getPresetUrl, getPresetById } from "@pos_restaurant_decorations/js/decor_presets";
+import {
+    fetchAllSavedDecorImages,
+    getLocalSavedImages,
+    saveDecorImageLocally,
+} from "@pos_restaurant_decorations/js/decor_storage";
 
 export class TableCustomizationPopup extends AbstractAwaitablePopup {
     static template = "pos_restaurant_decorations.TableCustomizationPopup";
@@ -29,6 +34,9 @@ export class TableCustomizationPopup extends AbstractAwaitablePopup {
         }
 
         this.preset = preset;
+        this.fileInputRef = useRef("custom-file-input");
+        const cached = getLocalSavedImages();
+
         this.state = useState({
             name: table.name || "",
             seats: table.seats || 1,
@@ -41,6 +49,10 @@ export class TableCustomizationPopup extends AbstractAwaitablePopup {
             imagePreview: currentImagePreview,
             rotation: typeof table.rotation === "number" ? table.rotation : 0,
             z_index: typeof table.z_index === "number" ? table.z_index : 10,
+            showSavedPicker: false,
+            savedImages: cached,
+            isLoadingSaved: false,
+            savedToLibrarySuccess: false,
         });
     }
 
@@ -95,6 +107,113 @@ export class TableCustomizationPopup extends AbstractAwaitablePopup {
                 this.state.seats = this.preset && this.preset.seats ? this.preset.seats : 4;
             }
             this.state.show_seats = true;
+        }
+    }
+
+    async toggleSavedPicker() {
+        this.state.showSavedPicker = !this.state.showSavedPicker;
+        if (this.state.showSavedPicker) {
+            this.state.isLoadingSaved = true;
+            try {
+                const images = await fetchAllSavedDecorImages(this.orm, this.pos);
+                this.state.savedImages = images || [];
+            } catch (err) {
+                console.error("Failed to load saved images:", err);
+            } finally {
+                this.state.isLoadingSaved = false;
+            }
+        }
+    }
+
+    selectSavedImage(item) {
+        this.state.custom_image = item.custom_image;
+        this.state.imagePreview = `data:image/png;base64,${item.custom_image}`;
+        this.state.decor_preset_id = null;
+        this.state.image_url = null;
+        this.preset = null;
+        this.state.showSavedPicker = false;
+    }
+
+    onFileSelected(ev) {
+        const file = ev.target.files && ev.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const result = e.target.result;
+            const base64 = result.split(",")[1];
+            this.state.custom_image = base64;
+            this.state.imagePreview = result;
+            this.state.decor_preset_id = null;
+            this.state.image_url = null;
+            this.preset = null;
+            this.state.showSavedPicker = false;
+
+            // Auto-save to library
+            const savedItem = {
+                id: "saved_" + Date.now(),
+                name: this.state.name || file.name.replace(/\.[^/.]+$/, "") || _t("Custom Decor"),
+                custom_image: base64,
+                is_decoration: this.state.is_decoration,
+                seats: this.state.seats || 0,
+                table_type: this.state.is_decoration ? "decoration" : "table",
+            };
+            saveDecorImageLocally(savedItem);
+            this.state.savedImages = [savedItem, ...this.state.savedImages];
+
+            try {
+                await this.orm.call(
+                    "pos.session",
+                    "save_decor_image",
+                    [
+                        this.pos.pos_session.id,
+                        savedItem.name,
+                        base64,
+                        savedItem.is_decoration,
+                        savedItem.seats,
+                        savedItem.table_type,
+                    ]
+                );
+            } catch {
+                // Backend method not yet loaded by host server
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    async saveCurrentToLibrary() {
+        if (!this.state.custom_image) return;
+        const savedItem = {
+            id: "saved_" + Date.now(),
+            name: this.state.name || _t("Custom Decor"),
+            custom_image: this.state.custom_image,
+            is_decoration: this.state.is_decoration,
+            seats: this.state.seats || 0,
+            table_type: this.state.is_decoration ? "decoration" : "table",
+        };
+        saveDecorImageLocally(savedItem);
+        this.state.savedImages = [savedItem, ...this.state.savedImages.filter((s) => s.custom_image !== savedItem.custom_image)];
+
+        this.state.savedToLibrarySuccess = true;
+        setTimeout(() => {
+            this.state.savedToLibrarySuccess = false;
+        }, 3000);
+
+        try {
+            await this.orm.call(
+                "pos.session",
+                "save_decor_image",
+                [
+                    this.pos.pos_session.id,
+                    savedItem.name,
+                    this.state.custom_image,
+                    this.state.is_decoration,
+                    this.state.seats || 0,
+                    this.state.is_decoration ? "decoration" : "table",
+                ]
+            );
+        } catch {
+            // Backend method not yet loaded by host server
         }
     }
 

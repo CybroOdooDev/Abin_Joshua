@@ -446,3 +446,36 @@
     transform: scale(var(--scale, 1));
     transform-origin: 0 0;
 }
+
+/* Saved Decor Library Card Actions */
+.decor-card-del-btn {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    color: #ef4444 !important;
+    opacity: 0.6;
+    transition: all 0.15s ease;
+    z-index: 5;
+    padding: 0 !important;
+    cursor: pointer;
+}
+
+.decor-card:hover .decor-card-del-btn {
+    opacity: 1;
+}
+
+.decor-card-del-btn:hover {
+    background: #fee2e2 !important;
+    border-color: #fca5a5 !important;
+    color: #dc2626 !important;
+    transform: scale(1.1);
+}
+

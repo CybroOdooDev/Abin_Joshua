@@ -29,7 +29,7 @@
                     </strong>
                 </t>
                 <t t-else="">
-                    Ticket Number:
+                    Nº de Ticket:
                     <strong>
                         <t t-esc="props.data.name"/>
                     </strong>
@@ -48,14 +48,14 @@
                 <div class="payment-info">
 
                     <div>
-                        Payment Method:
+                        Forma de pago:
                         <span class="pos-receipt-right-align">
                             <t t-esc="line.name"/>
                         </span>
                     </div>
 
                     <div>
-                        Amount Received:
+                        Importe recibido:
                         <span class="pos-receipt-right-align">
                             <t t-esc="props.formatCurrency(line.amount)"/>
                         </span>
@@ -73,7 +73,7 @@
 
             <div class="pos-receipt-amount receipt-change mt-2">
 
-                Change:
+                Cambio:
 
                 <span
                     t-esc="props.formatCurrency(props.data.change)"
@@ -90,22 +90,22 @@
                 <div class="pos-receipt-customer" style="margin: 8px 0; font-size: 13px;">
                     <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
                     <div style="font-weight: bold; margin-bottom: 4px; text-decoration: underline;">
-                        <t t-esc="props.data.partner.labels ? props.data.partner.labels.header : 'Customer Details:'"/>
+                        <t t-esc="props.data.partner.labels ? props.data.partner.labels.header : 'Datos del cliente:'"/>
                     </div>
                     <div>
-                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.customer : 'Customer:'"/> </strong><t t-esc="props.data.partner.name"/>
+                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.customer : 'Cliente:'"/> </strong><t t-esc="props.data.partner.name"/>
                     </div>
                     <div t-if="props.data.partner.vat">
-                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.vat : 'VAT:'"/> </strong><t t-esc="props.data.partner.vat"/>
+                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.vat : 'NIF:'"/> </strong><t t-esc="props.data.partner.vat"/>
                     </div>
                     <div t-if="props.data.partner.phone">
-                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.phone : 'Phone:'"/> </strong><t t-esc="props.data.partner.phone"/>
+                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.phone : 'Teléfono:'"/> </strong><t t-esc="props.data.partner.phone"/>
                     </div>
                     <div t-if="props.data.partner.email">
-                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.email : 'Email:'"/> </strong><t t-esc="props.data.partner.email"/>
+                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.email : 'Correo electrónico:'"/> </strong><t t-esc="props.data.partner.email"/>
                     </div>
                     <div t-if="props.data.partner.address or props.data.partner.street or props.data.partner.city">
-                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.address : 'Address:'"/> </strong>
+                        <strong><t t-esc="props.data.partner.labels ? props.data.partner.labels.address : 'Dirección:'"/> </strong>
                         <t t-if="props.data.partner.address">
                             <t t-esc="props.data.partner.address"/>
                         </t>

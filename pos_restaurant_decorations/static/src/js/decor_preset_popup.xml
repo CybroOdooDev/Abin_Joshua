@@ -3,7 +3,7 @@
 
     <t t-name="pos_restaurant_decorations.DecorPresetPopup">
         <div class="popup decor-picker-popup">
-            <header class="modal-header decor-picker-header d-flex align-items-center justify-content-between">
+            <header class="modal-header decor-picker-header d-flex align-items-center justify-content-between flex-wrap gap-2">
                 <div class="d-flex align-items-center gap-2">
                     <i class="fa fa-paint-brush fs-4 text-warning"></i>
                     <h4 class="modal-title m-0 fw-bold text-white"><t t-esc="props.title"/></h4>
@@ -12,12 +12,17 @@
                     <button type="button" class="btn btn-sm"
                             t-attf-class="{{ state.activeTab === 'presets' ? 'btn-primary' : 'btn-outline-light' }}"
                             t-on-click="() => this.state.activeTab = 'presets'">
-                        <i class="fa fa-th-large me-1"></i> Preset Library
+                        <i class="fa fa-th-large me-1"></i> Diseños Predeterminados
+                    </button>
+                    <button type="button" class="btn btn-sm"
+                            t-attf-class="{{ state.activeTab === 'saved' ? 'btn-primary' : 'btn-outline-light' }}"
+                            t-on-click="() => this.state.activeTab = 'saved'">
+                        <i class="fa fa-bookmark me-1"></i> Biblioteca Guardada
                     </button>
                     <button type="button" class="btn btn-sm"
                             t-attf-class="{{ state.activeTab === 'custom' ? 'btn-primary' : 'btn-outline-light' }}"
                             t-on-click="() => this.state.activeTab = 'custom'">
-                        <i class="fa fa-upload me-1"></i> Custom Upload
+                        <i class="fa fa-upload me-1"></i> Subir Nueva
                     </button>
                 </div>
             </header>
@@ -43,7 +48,7 @@
                             <i class="fa fa-search text-muted"></i>
                         </span>
                         <input type="text" class="form-control border-start-0 ps-0"
-                               placeholder="Search decorations, tables, chairs, bar items..."
+                               placeholder="Buscar decoraciones, mesas, sillas, elementos de bar..."
                                t-model="state.searchWord"/>
                     </div>
                 </div>
@@ -53,7 +58,7 @@
                     <t t-if="filteredPresets.length === 0">
                         <div class="col-12 py-5 text-center text-muted">
                             <i class="fa fa-info-circle fs-3 mb-2 d-block"></i>
-                            <span>No items match your search.</span>
+                            <span>No hay elementos que coincidan con la búsqueda.</span>
                         </div>
                     </t>
                     <t t-foreach="filteredPresets" t-as="preset" t-key="preset.id">
@@ -66,7 +71,7 @@
                             </div>
                             <div class="decor-card-name" t-esc="preset.name" t-att-title="preset.name"/>
                             <div class="decor-card-badges">
-                                <span class="decor-card-badge badge-scenery" t-if="preset.is_decoration">Scenery</span>
+                                <span class="decor-card-badge badge-scenery" t-if="preset.is_decoration">Decoración</span>
                                 <span class="decor-card-badge badge-seats" t-else="">
                                     <i class="fa fa-user me-1"></i><t t-esc="preset.seats"/>
                                 </span>
@@ -79,7 +84,72 @@
                 </main>
             </t>
 
-            <!-- TAB 2: CUSTOM UPLOAD -->
+            <!-- TAB 2: SAVED IMAGES LIBRARY -->
+            <t t-elif="state.activeTab === 'saved'">
+                <!-- Search Bar -->
+                <div class="px-3 pt-3 bg-white border-bottom">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fa fa-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control border-start-0 ps-0"
+                               placeholder="Buscar gráficos y decoraciones guardadas..."
+                               t-model="state.savedSearchWord"/>
+                    </div>
+                </div>
+
+                <!-- Saved Images Grid -->
+                <main class="decor-items-grid">
+                    <t t-if="state.isLoadingSaved">
+                        <div class="col-12 py-5 text-center text-muted">
+                            <i class="fa fa-spinner fa-spin fs-2 mb-2 d-block text-primary"></i>
+                            <span>Cargando gráficos guardados...</span>
+                        </div>
+                    </t>
+                    <t t-elif="filteredSavedImages.length === 0">
+                        <div class="col-12 py-5 text-center text-muted">
+                            <i class="fa fa-folder-open-o fs-1 mb-2 text-secondary d-block"></i>
+                            <h5 class="text-dark fw-bold mb-1">No se encontraron gráficos guardados</h5>
+                            <p class="text-muted mb-3" style="font-size: 13px;">
+                                Los gráficos subidos al sistema se conservan aquí para poder reutilizarlos en cualquier mesa o plano de planta sin tener que volver a subirlos.
+                            </p>
+                            <button type="button" class="btn btn-outline-primary btn-sm px-3"
+                                    t-on-click="() => this.state.activeTab = 'custom'">
+                                <i class="fa fa-upload me-1"></i> Subir un gráfico ahora
+                            </button>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <t t-foreach="filteredSavedImages" t-as="item" t-key="item.id">
+                            <div class="decor-card position-relative"
+                                 t-att-class="{ 'selected': state.selectedSavedImageId === item.id }"
+                                 t-on-click="() => this.selectSavedImage(item.id)"
+                                 t-on-dblclick="() => this.onSavedImageDoubleClick(item.id)">
+                                <!-- Delete Button -->
+                                <button type="button"
+                                        class="decor-card-del-btn"
+                                        title="Eliminar de la biblioteca del sistema"
+                                        t-on-click="(ev) => this.deleteSavedImage(ev, item.id)">
+                                    <i class="fa fa-trash-o"></i>
+                                </button>
+                                <div class="decor-card-preview">
+                                    <img t-att-src="'data:image/png;base64,' + item.custom_image" t-att-alt="item.name" loading="lazy"/>
+                                </div>
+                                <div class="decor-card-name" t-esc="item.name" t-att-title="item.name"/>
+                                <div class="decor-card-badges">
+                                    <span class="decor-card-badge badge-scenery" t-if="item.is_decoration">Decoración</span>
+                                    <span class="decor-card-badge badge-seats" t-else="">
+                                        <i class="fa fa-user me-1"></i><t t-esc="item.seats"/>
+                                    </span>
+                                    <span class="decor-card-badge badge-dims text-primary bg-primary-subtle border-primary-subtle">Guardado</span>
+                                </div>
+                            </div>
+                        </t>
+                    </t>
+                </main>
+            </t>
+
+            <!-- TAB 3: CUSTOM UPLOAD -->
             <t t-else="">
                 <main class="p-4 bg-white" style="min-height: 380px;">
                     <div class="row g-4">
@@ -89,38 +159,63 @@
                                     <img t-att-src="state.customImagePreview" alt="Custom Preview"
                                          style="max-width: 180px; max-height: 180px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));"/>
                                     <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 rounded-circle"
-                                            title="Remove Image" t-on-click="clearCustomImage">
+                                            title="Eliminar imagen" t-on-click="clearCustomImage">
                                         <i class="fa fa-times"></i>
                                     </button>
                                 </div>
-                                <span class="badge bg-success">Image Loaded</span>
+                                <div class="d-flex align-items-center gap-1 flex-wrap justify-content-center">
+                                    <span class="badge bg-success">Imagen cargada</span>
+                                    <span t-if="state.autoSavedNotice" class="badge bg-primary">
+                                        <i class="fa fa-check me-1"></i>Guardada en biblioteca
+                                    </span>
+                                </div>
                             </t>
                             <t t-else="">
                                 <i class="fa fa-cloud-upload text-muted display-4 mb-2"></i>
-                                <p class="text-muted text-center mb-3">Upload your custom graphic (PNG, JPG, or SVG)</p>
+                                <p class="text-muted text-center mb-3">Subir gráfico personalizado (PNG, JPG o SVG)</p>
                             </t>
                             <input type="file" accept="image/*" class="form-control mt-2" t-ref="file-input-ref" t-on-change="onFileSelected"/>
+                            <small t-if="state.autoSavedNotice" class="text-success mt-1 text-center fw-semibold">
+                                <i class="fa fa-check-circle me-1"></i>¡Añadida automáticamente a la biblioteca guardada!
+                            </small>
                         </div>
 
                         <div class="col-md-6 d-flex flex-column justify-content-center">
                             <div class="mb-3">
-                                <label class="form-label fw-bold">Item Name</label>
-                                <input type="text" class="form-control" placeholder="e.g. Vintage Tapestry, Plant Pot..." t-model="state.customName"/>
+                                <label class="form-label fw-bold">Nombre del elemento</label>
+                                <input type="text" class="form-control" placeholder="p. ej. Tapiz vintage, Maceta..." t-model="state.customName"/>
                             </div>
                             <div class="mb-3">
                                 <div class="form-check form-switch">
                                     <input class="form-check-input" type="checkbox" id="customIsDecorSwitch" t-model="state.customIsDecoration"/>
                                     <label class="form-check-label fw-semibold" for="customIsDecorSwitch">
-                                        Visual Floor Scenery (Non-orderable)
+                                        Elemento decorativo visual (No pedible)
                                     </label>
                                 </div>
-                                <small class="text-muted">If enabled, clicking this item will not open a customer order or guest prompt.</small>
+                                <small class="text-muted">Si está habilitado, hacer clic en este elemento no abrirá un pedido ni aviso de comensales.</small>
                             </div>
                             <t t-if="!state.customIsDecoration">
                                 <div class="mb-3">
-                                    <label class="form-label fw-bold">Customer Seats</label>
+                                    <label class="form-label fw-bold">Comensales / Asientos</label>
                                     <input type="number" min="1" max="50" class="form-control" t-model.number="state.customSeats"/>
                                 </div>
+                            </t>
+                            <div class="p-3 bg-light rounded-3 border mb-3">
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" id="saveToLibSwitch" t-model="state.saveToLibrary"/>
+                                    <label class="form-check-label fw-bold text-dark" for="saveToLibSwitch">
+                                        Guardar en biblioteca del sistema
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block ps-4">
+                                    Conserve este gráfico guardado en el sistema para que usted y su equipo puedan reutilizarlo en cualquier plano de planta sin volver a subirlo.
+                                </small>
+                            </div>
+                            <t t-if="state.customImageBase64">
+                                <button type="button" class="btn btn-outline-secondary btn-sm align-self-start"
+                                        t-on-click="onSaveToLibraryOnly">
+                                    <i class="fa fa-bookmark me-1"></i> Solo guardar en biblioteca (No añadir al plano todavía)
+                                </button>
                             </t>
                         </div>
                     </div>
@@ -132,7 +227,7 @@
                     <t t-esc="props.cancelText"/>
                 </button>
                 <button type="button" class="btn btn-primary px-4 fw-bold" t-on-click="confirm"
-                        t-att-disabled="state.activeTab === 'custom' and !state.customImageBase64">
+                        t-att-disabled="(state.activeTab === 'custom' and !state.customImageBase64) or (state.activeTab === 'saved' and !state.selectedSavedImageId)">
                     <t t-esc="props.confirmText"/>
                 </button>
             </footer>
