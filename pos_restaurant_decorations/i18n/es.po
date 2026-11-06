@@ -1,0 +1,585 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* pos_restaurant_decorations
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-05 12:00+0000\n"
+"PO-Revision-Date: 2026-11-05 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: Spanish (Castilian)\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model,name:pos_restaurant_decorations.model_restaurant_decor_image
+msgid "Saved Floor Decor & Custom Table Image"
+msgstr "Imagen de decoración de plano y mesa personalizada guardada"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_decor_image__name
+msgid "Name"
+msgstr "Nombre"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_decor_image__image
+msgid "Image Graphic"
+msgstr "Gráfico de imagen"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_decor_image__table_type
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_table__table_type
+msgid "Item Type"
+msgstr "Tipo de elemento"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_decor_image__is_decoration
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_table__is_decoration
+msgid "Is Decoration (Scenery)"
+msgstr "Es decoración (escenario)"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,help:pos_restaurant_decorations.field_restaurant_decor_image__is_decoration
+#: model:ir.model.fields,help:pos_restaurant_decorations.field_restaurant_table__is_decoration
+msgid "If checked, this item acts as visual floor scenery and will not trigger diner counts or orders."
+msgstr "Si está marcado, este elemento actúa como decoración visual del plano y no abrirá pedidos ni comensales."
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_decor_image__seats
+msgid "Customer Seats"
+msgstr "Comensales"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_decor_image__active
+msgid "Active"
+msgstr "Activo"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_decor_image__table_type__table
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_table__table_type__table
+msgid "Table"
+msgstr "Mesa"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_decor_image__table_type__chair
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_table__table_type__chair
+msgid "Chair"
+msgstr "Silla"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_decor_image__table_type__bar
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_table__table_type__bar
+msgid "Bar Item"
+msgstr "Elemento de bar"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_decor_image__table_type__flowerpot
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_table__table_type__flowerpot
+msgid "Flowerpot & Plant"
+msgstr "Maceta y planta"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_decor_image__table_type__barrel
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_table__table_type__barrel
+msgid "Barrel"
+msgstr "Barril"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_decor_image__table_type__decoration
+#: model:ir.model.fields.selection,name:pos_restaurant_decorations.selection__restaurant_table__table_type__decoration
+msgid "Decoration"
+msgstr "Decoración"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_table__decor_preset_id
+msgid "Decor Preset Identifier"
+msgstr "Identificador de diseño predeterminado"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_table__image_url
+msgid "Image URL"
+msgstr "URL de la imagen"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_table__custom_image
+msgid "Custom Image"
+msgstr "Imagen personalizada"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_table__show_label
+msgid "Show Table Name / Label"
+msgstr "Mostrar nombre / etiqueta de mesa"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_table__show_seats
+msgid "Show Seats Count"
+msgstr "Mostrar número de comensales"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_table__rotation
+msgid "Rotation (Degrees)"
+msgstr "Rotación (grados)"
+
+#. module: pos_restaurant_decorations
+#: model:ir.model.fields,field_description:pos_restaurant_decorations.field_restaurant_table__z_index
+msgid "Layer (Z-Index)"
+msgstr "Capa (Z-Index)"
+
+#. module: pos_restaurant_decorations
+#: model:ir.actions.act_window,name:pos_restaurant_decorations.action_restaurant_decor_image
+#: model:ir.ui.menu,name:pos_restaurant_decorations.menu_restaurant_decor_image
+msgid "Saved Floor Decor Images"
+msgstr "Imágenes de decoración guardadas"
+
+#. module: pos_restaurant_decorations
+#: model:ir.ui.view,arch_db:pos_restaurant_decorations.view_restaurant_decor_image_tree
+msgid "Saved Floor Decor Images"
+msgstr "Imágenes de decoración guardadas"
+
+#. module: pos_restaurant_decorations
+#: model:ir.ui.view,arch_db:pos_restaurant_decorations.view_restaurant_decor_image_form
+msgid "Saved Floor Decor Image"
+msgstr "Imagen de decoración guardada"
+
+#. module: pos_restaurant_decorations
+#: model:ir.ui.view,arch_db:pos_restaurant_decorations.view_restaurant_decor_image_form
+msgid "Configuration"
+msgstr "Configuración"
+
+#. module: pos_restaurant_decorations
+#: model:ir.ui.view,arch_db:pos_restaurant_decorations.view_restaurant_decor_image_form
+msgid "Status"
+msgstr "Estado"
+
+#. module: pos_restaurant_decorations
+#: model:ir.ui.view,arch_db:pos_restaurant_decorations.view_restaurant_table_form_inherit_decorations
+msgid "Decoration & Customization"
+msgstr "Decoración y personalización"
+
+#. module: pos_restaurant_decorations
+#: model:ir.ui.view,arch_db:pos_restaurant_decorations.view_restaurant_decor_image_form
+msgid "e.g. Vintage Tapestry, Flowerpot..."
+msgstr "p. ej. Tapiz vintage, Maceta..."
+
+#. module: pos_restaurant_decorations
+#: model:ir.actions.act_window,help:pos_restaurant_decorations.action_restaurant_decor_image
+msgid "Upload and manage saved custom graphics and decor images for restaurant floors."
+msgstr "Suba y gestione gráficos personalizados y elementos de decoración guardados para planos de restaurante."
+
+# --- POS JS / OWL COMPONENT TRANSLATIONS ---
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_preset_popup.js:0
+#, python-format
+msgid "Add Decoration or Preset Table"
+msgstr "Añadir decoración o mesa predeterminada"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_preset_popup.js:0
+#, python-format
+msgid "Add to Floor"
+msgstr "Añadir al plano"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_preset_popup.js:0
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Cancel"
+msgstr "Cancelar"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_preset_popup.js:0
+#, python-format
+msgid "Delete Saved Graphic"
+msgstr "Eliminar gráfico guardado"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_preset_popup.js:0
+#, python-format
+msgid "Are you sure you want to remove '%s' from your saved system library?"
+msgstr "¿Está seguro de que desea eliminar '%s' de su biblioteca del sistema guardada?"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_preset_popup.js:0
+#, python-format
+msgid "this graphic"
+msgstr "este gráfico"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_preset_popup.js:0
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Custom Decor"
+msgstr "Decoración personalizada"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Customize Item"
+msgstr "Personalizar elemento"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Apply Changes"
+msgstr "Aplicar cambios"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Customize Dining Table"
+msgstr "Personalizar mesa de comedor"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Customize Decoration Item"
+msgstr "Personalizar elemento decorativo"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Dining Table"
+msgstr "Mesa de comedor"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Plant / Flower"
+msgstr "Planta / Flor"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Decor Preset"
+msgstr "Diseño predeterminado"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Custom Graphic"
+msgstr "Gráfico personalizado"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Standard Table"
+msgstr "Mesa estándar"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Table Name / Number"
+msgstr "Nombre / Número de mesa"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Item Name / Label"
+msgstr "Nombre / Etiqueta del elemento"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Show Table Name on floor map"
+msgstr "Mostrar nombre de mesa en plano de planta"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/table_customization_popup.js:0
+#, python-format
+msgid "Show Item Name on floor map"
+msgstr "Mostrar nombre del elemento en plano de planta"
+
+# --- CATEGORIES & PRESETS ---
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "All Items"
+msgstr "Todos los elementos"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Bar Items"
+msgstr "Elementos de bar"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Flowerpots & Plants"
+msgstr "Macetas y plantas"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Barrels"
+msgstr "Barriles"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Tables"
+msgstr "Mesas"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Chairs"
+msgstr "Sillas"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Decorations"
+msgstr "Decoraciones"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Bar Counter"
+msgstr "Barra de bar"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Bar Stool"
+msgstr "Taburete de bar"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Beer Dispenser Taps"
+msgstr "Tiradores de cerveza"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Cocktail Station"
+msgstr "Estación de cócteles"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Wine Cellar Rack"
+msgstr "Botellero de bodega"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Potted Flowerpot"
+msgstr "Maceta con flores"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Monstera Planter"
+msgstr "Maceta de costilla de Adán"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Bonsai Planter"
+msgstr "Maceta de bonsái"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Tall Topiary Shrub"
+msgstr "Arbusto topiario alto"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Cactus Planter"
+msgstr "Maceta de cactus"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Rustic Oak Barrel"
+msgstr "Barril de roble rústico"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Barrel with Tap"
+msgstr "Barril con grifo"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Stainless Beer Keg"
+msgstr "Barril de cerveza de acero inox."
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Stacked Barrels"
+msgstr "Barriles apilados"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Round Dining Table"
+msgstr "Mesa de comedor redonda"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Square Dining Table"
+msgstr "Mesa de comedor cuadrada"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Restaurant Booth"
+msgstr "Cabina de restaurante"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Bistro Glass Table"
+msgstr "Mesa de cristal bistro"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Banquet Long Table"
+msgstr "Mesa larga de banquete"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Billiard / Pool Table"
+msgstr "Mesa de billar"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Dining Armchair"
+msgstr "Sillón de comedor"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Lounge Club Chair"
+msgstr "Sillón de club lounge"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Chesterfield Sofa"
+msgstr "Sofá Chesterfield"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Scandinavian Chair"
+msgstr "Silla escandinava"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Partition Wall Divider"
+msgstr "Biombo separador"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Marble Column Pillar"
+msgstr "Columna de mármol"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Water Fountain"
+msgstr "Fuente de agua"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Hearth Fireplace"
+msgstr "Chimenea de leña"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Entrance Door Marker"
+msgstr "Indicador de entrada"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Restroom Sign"
+msgstr "Señal de aseos"
+
+#. module: pos_restaurant_decorations
+#. odoo-javascript
+#: code:addons/pos_restaurant_decorations/static/src/js/decor_presets.js:0
+#, python-format
+msgid "Live Music Stage"
+msgstr "Escenario de música en vivo"
+

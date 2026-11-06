@@ -37,7 +37,7 @@
     <div style="display:flex; align-items:center; gap:8px;">
 
         <span style="font-size:16px; font-weight:600;">
-            Payment
+            Pago
         </span>
 
         <span style="
@@ -53,8 +53,8 @@
 
     </div>
 
-                <div style="font-size:12px; color:#888;">
-        Select method to complete order
+    <div style="font-size:12px; color:#888;">
+        Seleccione la forma de pago para completar el pedido
     </div>
 
 </div>
@@ -203,7 +203,7 @@
                 font-weight:500;
                 color:#333;
             ">
-                Amount Due
+                Total a pagar
             </span>
 
             <span style="
@@ -260,7 +260,7 @@
                            cursor:pointer;
                            font-size:13px;
                            color:#888;">
-                Cancel
+                Cancelar
             </button>
 
         </div>

@@ -1,0 +1,478 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* pos_customizable_sales_report
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 17.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-11-06 12:00+0000\n"
+"PO-Revision-Date: 2026-11-06 12:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: pos_customizable_sales_report
+#: model:ir.actions.act_window,name:pos_customizable_sales_report.action_pos_customizable_sales_report_wizard
+#: model:ir.ui.menu,name:pos_customizable_sales_report.menu_pos_customizable_sales_report
+msgid "Customizable Sales Report"
+msgstr "Informe de Ventas Personalizable"
+
+#. module: pos_customizable_sales_report
+#: model:ir.actions.report,name:pos_customizable_sales_report.action_report_customizable_sales
+msgid "Customizable Sales Report (PDF)"
+msgstr "Informe de Ventas Personalizable (PDF)"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__start_date
+msgid "Start Date"
+msgstr "Fecha de Inicio"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__end_date
+msgid "End Date"
+msgstr "Fecha de Fin"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__config_ids
+msgid "Point of Sale Terminals"
+msgstr "Terminales de Punto de Venta"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__session_ids
+msgid "POS Sessions"
+msgstr "Sesiones de TPV"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__pos_category_ids
+msgid "POS Categories"
+msgstr "Categorías de TPV"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__product_category_ids
+msgid "Product Categories"
+msgstr "Categorías de Producto"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__product_ids
+msgid "Specific Products"
+msgstr "Productos Específicos"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__price_min
+msgid "Min Price"
+msgstr "Precio Mínimo"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__price_max
+msgid "Max Price"
+msgstr "Precio Máximo"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__discount_filter
+msgid "Discount Filter"
+msgstr "Filtro de Descuento"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields.selection,name:pos_customizable_sales_report.selection__pos_customizable_sales_report_wizard__discount_filter__all
+msgid "All Lines"
+msgstr "Todas las Líneas"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields.selection,name:pos_customizable_sales_report.selection__pos_customizable_sales_report_wizard__discount_filter__discounted
+msgid "Discounted Lines Only (> 0%)"
+msgstr "Solo Líneas con Descuento (> 0%)"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields.selection,name:pos_customizable_sales_report.selection__pos_customizable_sales_report_wizard__discount_filter__no_discount
+msgid "Non-Discounted Lines Only (0%)"
+msgstr "Solo Líneas sin Descuento (0%)"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields.selection,name:pos_customizable_sales_report.selection__pos_customizable_sales_report_wizard__discount_filter__custom_range
+msgid "Specific Discount Range (%)"
+msgstr "Rango Específico de Descuento (%)"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields,field_description:pos_customizable_sales_report.field_pos_customizable_sales_report_wizard__revenue_attribution
+msgid "Revenue Attribution"
+msgstr "Atribución de Ingresos"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields.selection,name:pos_customizable_sales_report.selection__pos_customizable_sales_report_wizard__revenue_attribution__menu_level
+msgid "Menu-Level Revenue (Quantity Tracking for Components)"
+msgstr "Ingresos a Nivel de Menú (Conteo de Cantidades de Componentes)"
+
+#. module: pos_customizable_sales_report
+#: model:ir.model.fields.selection,name:pos_customizable_sales_report.selection__pos_customizable_sales_report_wizard__revenue_attribution__pro_rata
+msgid "Prorated Revenue (Distribute Menu Price to Components)"
+msgstr "Ingresos Prorrateados (Distribuir Precio del Menú a Componentes)"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "POS SALES REPORT"
+msgstr "INFORME DE VENTAS TPV"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "CUSTOMIZABLE COMBOS & TAXES"
+msgstr "COMBOS Y TASAS PERSONALIZABLES"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Period:"
+msgstr "Período:"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Terminals:"
+msgstr "Terminales:"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Printed:"
+msgstr "Impreso:"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "NET SALES (EXCL. VAT)"
+msgstr "VENTAS NETAS (SIN IVA)"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "TOTAL VAT AMOUNT"
+msgstr "IMPORTE TOTAL IVA"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "GROSS SALES (INCL. VAT)"
+msgstr "VENTAS BRUTAS (CON IVA)"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "TOTAL ORDERS"
+msgstr "TOTAL PEDIDOS"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "VAT / Tax Breakdown"
+msgstr "Desglose de IVA / Impuestos"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Tax Rule / Rate"
+msgstr "Regla de Impuesto / Tasa"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Tax Rate"
+msgstr "Tasa de IVA"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Base Amount (Excl. VAT)"
+msgstr "Base Imponible (Sin IVA)"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "VAT Amount"
+msgstr "Importe IVA"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Total Amount (Incl. VAT)"
+msgstr "Importe Total (Con IVA)"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Total Taxes"
+msgstr "Total Impuestos"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Sales by Category & Combo Breakdown"
+msgstr "Ventas por Categoría y Desglose de Combos"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Units"
+msgstr "Unidades"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Product / Component"
+msgstr "Producto / Componente"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Ref"
+msgstr "Ref"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Qty"
+msgstr "Cant."
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Unit Price"
+msgstr "Precio Unitario"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Net (Excl. VAT)"
+msgstr "Neto (Sin IVA)"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "VAT"
+msgstr "IVA"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Gross (Incl. VAT)"
+msgstr "Bruto (Con IVA)"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "COMBO"
+msgstr "COMBO"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "in combos"
+msgstr "en combos"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Consolidated Product Consumption Matrix"
+msgstr "Matriz Consolidada de Consumo de Productos"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Shows the exact count of physical units consumed across both standalone sales and combo inclusions."
+msgstr "Muestra el recuento exacto de unidades físicas consumidas entre ventas individuales e inclusiones en combos."
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Product"
+msgstr "Producto"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Category"
+msgstr "Categoría"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Standalone Qty"
+msgstr "Cant. Individual"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "In-Combo Qty"
+msgstr "Cant. en Combo"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Total Units"
+msgstr "Unidades Totales"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Payment Methods"
+msgstr "Métodos de Pago"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Method"
+msgstr "Método"
+
+#. module: pos_customizable_sales_report
+#: model_terms:ir.ui.view,arch_db:pos_customizable_sales_report.report_sales_template
+msgid "Total Paid"
+msgstr "Total Pagado"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Menu-Level (Quantity Tracking)"
+msgstr "Nivel de Menú (Seguimiento de Cantidades)"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Prorated (Financial Distribution)"
+msgstr "Prorrateado (Distribución Financiera)"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Sessions"
+msgstr "Sesiones"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Session"
+msgstr "Sesión"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "All Sessions"
+msgstr "Todas las Sesiones"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "All Terminals"
+msgstr "Todas las Terminales"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Terminals"
+msgstr "Terminales"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Exempt / No Tax"
+msgstr "Exento / Sin Impuesto"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Unknown"
+msgstr "Desconocido"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Combo Menu"
+msgstr "Menú Combo"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Uncategorized"
+msgstr "Sin Categorizar"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Sales & Combos Breakdown"
+msgstr "Ventas y Desglose de Combos"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "POS CUSTOMIZABLE SALES REPORT"
+msgstr "INFORME DE VENTAS TPV PERSONALIZABLE"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Period"
+msgstr "Período"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Attribution Mode"
+msgstr "Modo de Atribución"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "TOTAL SALES (EXCL. VAT)"
+msgstr "VENTAS TOTALES (SIN IVA)"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Reference"
+msgstr "Referencia"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Quantity"
+msgstr "Cantidad"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "TOTAL"
+msgstr "TOTAL"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "VAT Breakdown"
+msgstr "Desglose de IVA"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "TAX / VAT BREAKDOWN"
+msgstr "DESGLOSE DE IMPUESTOS / IVA"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Tax Name / Rule"
+msgstr "Nombre de Impuesto / Regla"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Tax Rate (%)"
+msgstr "Tasa de IVA (%)"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Tax Amount"
+msgstr "Importe de Impuesto"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Total (Incl. VAT)"
+msgstr "Total (Con IVA)"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Consolidated Product Matrix"
+msgstr "Matriz Consolidada de Productos"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "CONSOLIDATED PRODUCT CONSUMPTION MATRIX"
+msgstr "MATRIZ CONSOLIDADA DE CONSUMO DE PRODUCTOS"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Shows total units sold combining standalone sales and in-combo inclusions"
+msgstr "Muestra el total de unidades vendidas combinando ventas individuales e inclusiones en combos"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Total Qty Sold"
+msgstr "Cant. Total Vendida"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Net Amount"
+msgstr "Importe Neto"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "Gross Amount"
+msgstr "Importe Bruto"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "NIF/CIF/VAT"
+msgstr "NIF/CIF/IVA"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Tel"
+msgstr "Tel."
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "Printed"
+msgstr "Impreso"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/report/report_customizable_sales.py:0
+msgid "No Tax / Exempt"
+msgstr "Sin Impuesto / Exento"
+
+#. module: pos_customizable_sales_report
+#: code:addons/pos_customizable_sales_report/wizard/pos_customizable_sales_report_wizard.py:0
+msgid "TOTAL SALES (INCL. VAT)"
+msgstr "VENTAS TOTALES (CON IVA)"

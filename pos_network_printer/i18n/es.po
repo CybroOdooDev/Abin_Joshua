@@ -368,3 +368,255 @@ msgid "SENT TO KITCHEN"
 msgstr "ENVIADO A COCINA"
 
 
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/OrderPatch.js:0
+#, python-format
+msgid "Customer Details:"
+msgstr "Datos del cliente:"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/OrderPatch.js:0
+#, python-format
+msgid "Customer:"
+msgstr "Cliente:"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/OrderPatch.js:0
+#, python-format
+msgid "Phone:"
+msgstr "Teléfono:"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/OrderPatch.js:0
+#, python-format
+msgid "Email:"
+msgstr "Correo electrónico:"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/OrderPatch.js:0
+#, python-format
+msgid "Address:"
+msgstr "Dirección:"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/OrderPatch.js:0
+#, python-format
+msgid "Free"
+msgstr "Gratis"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/xml/ReceiptScreenDownloadInvoice.xml:0
+#, python-format
+msgid "Download Invoice (80mm PDF)"
+msgstr "Descargar factura (PDF 80mm)"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ReceiptScreenPatch.js:0
+#, python-format
+msgid "Could not synchronize order ID with the server."
+msgstr "No se pudo sincronizar el ID del pedido con el servidor."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ReceiptScreenPatch.js:0
+#, python-format
+msgid "Failed to capture receipt image."
+msgstr "Error al capturar la imagen del ticket."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ReceiptScreenPatch.js:0
+#, python-format
+msgid "Receipt saved in history (Simulation Mode: physical print skipped)"
+msgstr "Ticket guardado en el historial (Modo simulación: impresión física omitida)"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ReceiptScreenPatch.js:0
+#, python-format
+msgid "Receipt printed via QZ Tray (%s)"
+msgstr "Ticket impreso a través de QZ Tray (%s)"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ReceiptScreenPatch.js:0
+#, python-format
+msgid "QZ Tray Print Error: %s"
+msgstr "Error de impresión QZ Tray: %s"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ReceiptScreenPatch.js:0
+#, python-format
+msgid "Order not yet synced to server."
+msgstr "El pedido aún no se ha sincronizado con el servidor."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ReceiptScreenPatch.js:0
+#, python-format
+msgid "No invoice found for this order."
+msgstr "No se encontró ninguna factura para este pedido."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ReceiptScreenPatch.js:0
+#, python-format
+msgid "Error downloading invoice PDF: %s"
+msgstr "Error al descargar el PDF de la factura: %s"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/QZPrinterService.js:0
+#, python-format
+msgid "QZ Tray connector library is not loaded in the browser."
+msgstr "La biblioteca conectora QZ Tray no está cargada en el navegador."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/QZPrinterService.js:0
+#, python-format
+msgid "Failed to load QZ certificate from server."
+msgstr "Error al cargar el certificado QZ desde el servidor."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/QZPrinterService.js:0
+#, python-format
+msgid "Failed to sign QZ request on server."
+msgstr "Error al firmar la solicitud QZ en el servidor."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/QZPrinterService.js:0
+#, python-format
+msgid "QZ Tray connector library is not loaded."
+msgstr "La biblioteca conectora QZ Tray no está cargada."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/QZPrinterService.js:0
+#, python-format
+msgid "Could not connect to QZ Tray. Please make sure QZ Tray is installed and running on this computer."
+msgstr "No se pudo conectar con QZ Tray. Asegúrese de que QZ Tray esté instalado y en ejecución en este equipo."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/QZPrinterService.js:0
+#, python-format
+msgid "No default printer found in QZ Tray. Please check your OS printer settings or configure a printer name."
+msgstr "No se encontró una impresora predeterminada en QZ Tray. Verifique la configuración de la impresora en su sistema operativo o configure un nombre de impresora."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/QZPrinterService.js:0
+#, python-format
+msgid "No receipt image data provided for printing."
+msgstr "No se proporcionaron datos de imagen de ticket para imprimir."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/PrintBillPatch.js:0
+#, python-format
+msgid "Failed to capture bill receipt image."
+msgstr "Error al capturar la imagen de la cuenta."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/PrintBillPatch.js:0
+#, python-format
+msgid "Pre-payment bill saved in history (Simulation Mode: physical print skipped)"
+msgstr "Cuenta previa guardada en el historial (Modo simulación: impresión física omitida)"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/PrintBillPatch.js:0
+#, python-format
+msgid "Pre-payment bill printed via QZ Tray (%s)"
+msgstr "Cuenta previa impresa a través de QZ Tray (%s)"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ClosePosPopupPatch.js:0
+#, python-format
+msgid "Could not retrieve session closing report data."
+msgstr "No se pudieron obtener los datos del informe de cierre de sesión."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ClosePosPopupPatch.js:0
+#, python-format
+msgid "Failed to generate thermal receipt element."
+msgstr "Error al generar el elemento del ticket térmico."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ClosePosPopupPatch.js:0
+#, python-format
+msgid "Failed to render thermal receipt image snapshot."
+msgstr "Error al generar la captura de imagen del ticket térmico."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ClosePosPopupPatch.js:0
+#, python-format
+msgid "Cash Closing Report printed via QZ Tray (%s)"
+msgstr "Informe de cierre de caja impreso a través de QZ Tray (%s)"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ClosePosPopupPatch.js:0
+#, python-format
+msgid "Cash Closing Report printed via POS printer"
+msgstr "Informe de cierre de caja impreso a través de impresora POS"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/ClosePosPopupPatch.js:0
+#, python-format
+msgid "Error printing Cash Closing Report: %s"
+msgstr "Error al imprimir el informe de cierre de caja: %s"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/TicketScreenPatch.js:0
+#, python-format
+msgid "Original ticket reprinted via QZ Tray (%s)"
+msgstr "Ticket original reimpreso a través de QZ Tray (%s)"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/TicketScreenPatch.js:0
+#, python-format
+msgid "Receipt element could not be found or rendered."
+msgstr "No se pudo encontrar o generar el elemento del ticket."
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/TicketScreenPatch.js:0
+#, python-format
+msgid "Ticket reprint simulated (Simulation Mode: physical print skipped)"
+msgstr "Reimpresión de ticket simulada (Modo simulación: impresión física omitida)"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/TicketScreenPatch.js:0
+#, python-format
+msgid "Ticket reprinted via QZ Tray (%s)"
+msgstr "Ticket reimpreso a través de QZ Tray (%s)"
+
+#. module: pos_network_printer
+#. odoo-javascript
+#: code:addons/pos_network_printer/static/src/js/TicketScreenPatch.js:0
+#, python-format
+msgid "QZ Tray Reprint Error: %s"
+msgstr "Error de reimpresión QZ Tray: %s"

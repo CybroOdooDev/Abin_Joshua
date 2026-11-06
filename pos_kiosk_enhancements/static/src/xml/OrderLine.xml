@@ -17,13 +17,13 @@
     <xpath expr="//ul[contains(@class,'info-list')]"
            position="inside">
         <li t-if="line.allow_quantity and line.selected_qty and line.display_qty != 1">
-            Selected:
+            Seleccionado:
             <strong><t t-esc="line.selected_qty"/></strong>
             |
-            Free:
+            Gratis:
             <strong><t t-esc="line.free_qty"/></strong>
             |
-            Paid:
+            De pago:
             <strong><t t-esc="line.paid_qty"/></strong>
         </li>
     </xpath>

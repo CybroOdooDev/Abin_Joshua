@@ -59,7 +59,7 @@ msgstr "Importe recibido:"
 #: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
 #, python-format
 msgid "BASE IMPONIBLE"
-msgstr ""
+msgstr "Base imponible"
 
 #. module: pos_kiosk_enhancements
 #: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_config__show_barcode
@@ -119,7 +119,7 @@ msgstr "El pago de CashSecurity ha fallado."
 #: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
 #, python-format
 msgid "Change:"
-msgstr ""
+msgstr "Cambio:"
 
 #. module: pos_kiosk_enhancements
 #: model_terms:ir.ui.view,arch_db:pos_kiosk_enhancements.view_pos_order_cancel_view_form
@@ -149,14 +149,14 @@ msgstr "Mensaje de pantalla cerrada"
 #: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_line__combo_price
 #: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_order_line__combo_price
 msgid "Combo Price"
-msgstr ""
+msgstr "Precio del combo"
 
 #. module: pos_kiosk_enhancements
 #. odoo-javascript
 #: code:addons/pos_kiosk_enhancements/static/src/js/PosScanPaymentPopup.js:0
 #, python-format
 msgid "Could not load receipt."
-msgstr ""
+msgstr "No se pudo cargar el ticket."
 
 #. module: pos_kiosk_enhancements
 #: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_kiosk_close_session__create_uid
@@ -271,12 +271,12 @@ msgstr "Límite gratuito"
 #. module: pos_kiosk_enhancements
 #: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order_line__free_qty
 msgid "Free Qty"
-msgstr ""
+msgstr "Cant. gratis"
 
 #. module: pos_kiosk_enhancements
 #: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_order_line__free_qty
 msgid "Free Quantity"
-msgstr ""
+msgstr "Cantidad gratis"
 
 #. module: pos_kiosk_enhancements
 #: model:ir.model,name:pos_kiosk_enhancements.model_ir_http
@@ -303,7 +303,7 @@ msgstr "IDENTIFICACIÓN"
 #: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
 #, python-format
 msgid "IVA"
-msgstr ""
+msgstr "IVA"
 
 #. module: pos_kiosk_enhancements
 #: model:ir.model.fields,field_description:pos_kiosk_enhancements.field_pos_order__kiosk_combo_tax_amount
@@ -431,7 +431,7 @@ msgstr "Pedidos"
 #: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
 #, python-format
 msgid "PAGO EN MOSTRADOR"
-msgstr ""
+msgstr "PAGO EN MOSTRADOR"
 
 #. module: pos_kiosk_enhancements
 #. odoo-javascript
@@ -707,7 +707,7 @@ msgstr "ESTE DOCUMENTO NO CONSTITUYE UN PAGO."
 #: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
 #, python-format
 msgid "TOTAL"
-msgstr ""
+msgstr "TOTAL"
 
 #. module: pos_kiosk_enhancements
 #. odoo-javascript
@@ -715,7 +715,7 @@ msgstr ""
 #: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
 #, python-format
 msgid "TOTAL IVA"
-msgstr ""
+msgstr "TOTAL IVA"
 
 #. module: pos_kiosk_enhancements
 #. odoo-javascript
@@ -794,7 +794,7 @@ msgstr "Error inesperado"
 #: code:addons/pos_kiosk_enhancements/static/src/xml/PaymentReceipt.xml:0
 #, python-format
 msgid "Unid"
-msgstr ""
+msgstr "Ud."
 
 #. module: pos_kiosk_enhancements
 #: model:ir.model.fields,help:pos_kiosk_enhancements.field_pos_combo__free_limit
@@ -898,7 +898,7 @@ msgstr "Teléfono:"
 #: code:addons/pos_kiosk_enhancements/static/src/xml/OrderReceipt.xml:0
 #, python-format
 msgid "Email:"
-msgstr "Email:"
+msgstr "Correo electrónico:"
 
 #. module: pos_kiosk_enhancements
 #. odoo-javascript

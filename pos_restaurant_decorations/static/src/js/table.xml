@@ -11,7 +11,7 @@
                 </div>
             </t>
             <t t-if="props.table.is_decoration and pos.isEditMode and (!props.table.seats or props.table.seats === 0)">
-                <span class="decor-scenery-pill">Decor</span>
+                <span class="decor-scenery-pill">Decoración</span>
             </t>
         </xpath>
         <xpath expr="//span[contains(@class,'label')]" position="attributes">

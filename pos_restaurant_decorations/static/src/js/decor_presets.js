@@ -1,20 +1,22 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
+
 export const DECOR_CATEGORIES = [
-    { id: "all", name: "All Items", icon: "fa-th-large" },
-    { id: "bar", name: "Bar Items", icon: "fa-glass" },
-    { id: "flowerpot", name: "Flowerpots & Plants", icon: "fa-leaf" },
-    { id: "barrel", name: "Barrels", icon: "fa-database" },
-    { id: "table", name: "Tables", icon: "fa-cutlery" },
-    { id: "chair", name: "Chairs", icon: "fa-wheelchair" },
-    { id: "decoration", name: "Decorations", icon: "fa-star" },
+    { id: "all", get name() { return _t("All Items"); }, icon: "fa-th-large" },
+    { id: "bar", get name() { return _t("Bar Items"); }, icon: "fa-glass" },
+    { id: "flowerpot", get name() { return _t("Flowerpots & Plants"); }, icon: "fa-leaf" },
+    { id: "barrel", get name() { return _t("Barrels"); }, icon: "fa-database" },
+    { id: "table", get name() { return _t("Tables"); }, icon: "fa-cutlery" },
+    { id: "chair", get name() { return _t("Chairs"); }, icon: "fa-wheelchair" },
+    { id: "decoration", get name() { return _t("Decorations"); }, icon: "fa-star" },
 ];
 
 export const DECOR_PRESETS = [
     // 1. BAR ITEMS
     {
         id: "bar_counter",
-        name: "Bar Counter",
+        get name() { return _t("Bar Counter"); },
         category: "bar",
         table_type: "bar",
         is_decoration: true,
@@ -26,7 +28,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "bar_stool",
-        name: "Bar Stool",
+        get name() { return _t("Bar Stool"); },
         category: "bar",
         table_type: "chair",
         is_decoration: true,
@@ -38,7 +40,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "beer_tap",
-        name: "Beer Dispenser Taps",
+        get name() { return _t("Beer Dispenser Taps"); },
         category: "bar",
         table_type: "bar",
         is_decoration: true,
@@ -50,7 +52,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "cocktail_station",
-        name: "Cocktail Station",
+        get name() { return _t("Cocktail Station"); },
         category: "bar",
         table_type: "bar",
         is_decoration: true,
@@ -62,7 +64,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "wine_rack",
-        name: "Wine Cellar Rack",
+        get name() { return _t("Wine Cellar Rack"); },
         category: "bar",
         table_type: "bar",
         is_decoration: true,
@@ -76,7 +78,7 @@ export const DECOR_PRESETS = [
     // 2. FLOWERPOTS & PLANTS
     {
         id: "flowerpot_potted",
-        name: "Potted Flowerpot",
+        get name() { return _t("Potted Flowerpot"); },
         category: "flowerpot",
         table_type: "flowerpot",
         is_decoration: true,
@@ -88,7 +90,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "flowerpot_monstera",
-        name: "Monstera Planter",
+        get name() { return _t("Monstera Planter"); },
         category: "flowerpot",
         table_type: "flowerpot",
         is_decoration: true,
@@ -100,7 +102,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "flowerpot_bonsai",
-        name: "Bonsai Planter",
+        get name() { return _t("Bonsai Planter"); },
         category: "flowerpot",
         table_type: "flowerpot",
         is_decoration: true,
@@ -112,7 +114,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "flowerpot_tall_shrub",
-        name: "Tall Topiary Shrub",
+        get name() { return _t("Tall Topiary Shrub"); },
         category: "flowerpot",
         table_type: "flowerpot",
         is_decoration: true,
@@ -124,7 +126,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "flowerpot_cactus",
-        name: "Cactus Planter",
+        get name() { return _t("Cactus Planter"); },
         category: "flowerpot",
         table_type: "flowerpot",
         is_decoration: true,
@@ -138,7 +140,7 @@ export const DECOR_PRESETS = [
     // 3. BARRELS
     {
         id: "barrel_wooden",
-        name: "Rustic Oak Barrel",
+        get name() { return _t("Rustic Oak Barrel"); },
         category: "barrel",
         table_type: "barrel",
         is_decoration: true,
@@ -150,7 +152,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "barrel_wine_tap",
-        name: "Barrel with Tap",
+        get name() { return _t("Barrel with Tap"); },
         category: "barrel",
         table_type: "barrel",
         is_decoration: true,
@@ -162,7 +164,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "barrel_beer_keg",
-        name: "Stainless Beer Keg",
+        get name() { return _t("Stainless Beer Keg"); },
         category: "barrel",
         table_type: "barrel",
         is_decoration: true,
@@ -174,7 +176,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "barrel_stacked",
-        name: "Stacked Barrels",
+        get name() { return _t("Stacked Barrels"); },
         category: "barrel",
         table_type: "barrel",
         is_decoration: true,
@@ -188,7 +190,7 @@ export const DECOR_PRESETS = [
     // 4. TABLES
     {
         id: "table_round_wood",
-        name: "Round Dining Table",
+        get name() { return _t("Round Dining Table"); },
         category: "table",
         table_type: "table",
         is_decoration: false,
@@ -200,7 +202,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "table_square_wood",
-        name: "Square Dining Table",
+        get name() { return _t("Square Dining Table"); },
         category: "table",
         table_type: "table",
         is_decoration: false,
@@ -212,7 +214,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "table_booth",
-        name: "Restaurant Booth",
+        get name() { return _t("Restaurant Booth"); },
         category: "table",
         table_type: "table",
         is_decoration: false,
@@ -224,7 +226,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "table_bistro_glass",
-        name: "Bistro Glass Table",
+        get name() { return _t("Bistro Glass Table"); },
         category: "table",
         table_type: "table",
         is_decoration: false,
@@ -236,7 +238,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "table_banquet_long",
-        name: "Banquet Long Table",
+        get name() { return _t("Banquet Long Table"); },
         category: "table",
         table_type: "table",
         is_decoration: false,
@@ -248,7 +250,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "table_billiard",
-        name: "Billiard / Pool Table",
+        get name() { return _t("Billiard / Pool Table"); },
         category: "table",
         table_type: "table",
         is_decoration: false,
@@ -262,7 +264,7 @@ export const DECOR_PRESETS = [
     // 5. CHAIRS
     {
         id: "chair_dining",
-        name: "Dining Armchair",
+        get name() { return _t("Dining Armchair"); },
         category: "chair",
         table_type: "chair",
         is_decoration: true,
@@ -274,7 +276,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "chair_lounge",
-        name: "Lounge Club Chair",
+        get name() { return _t("Lounge Club Chair"); },
         category: "chair",
         table_type: "chair",
         is_decoration: true,
@@ -286,7 +288,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "chair_sofa",
-        name: "Chesterfield Sofa",
+        get name() { return _t("Chesterfield Sofa"); },
         category: "chair",
         table_type: "chair",
         is_decoration: true,
@@ -298,7 +300,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "chair_wooden",
-        name: "Scandinavian Chair",
+        get name() { return _t("Scandinavian Chair"); },
         category: "chair",
         table_type: "chair",
         is_decoration: true,
@@ -312,7 +314,7 @@ export const DECOR_PRESETS = [
     // 6. GENERAL DECORATIONS
     {
         id: "decor_divider",
-        name: "Partition Wall Divider",
+        get name() { return _t("Partition Wall Divider"); },
         category: "decoration",
         table_type: "decoration",
         is_decoration: true,
@@ -324,7 +326,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "decor_pillar",
-        name: "Marble Column Pillar",
+        get name() { return _t("Marble Column Pillar"); },
         category: "decoration",
         table_type: "decoration",
         is_decoration: true,
@@ -336,7 +338,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "decor_fountain",
-        name: "Water Fountain",
+        get name() { return _t("Water Fountain"); },
         category: "decoration",
         table_type: "decoration",
         is_decoration: true,
@@ -348,7 +350,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "decor_fireplace",
-        name: "Hearth Fireplace",
+        get name() { return _t("Hearth Fireplace"); },
         category: "decoration",
         table_type: "decoration",
         is_decoration: true,
@@ -360,7 +362,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "decor_entrance",
-        name: "Entrance Door Marker",
+        get name() { return _t("Entrance Door Marker"); },
         category: "decoration",
         table_type: "decoration",
         is_decoration: true,
@@ -372,7 +374,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "decor_restroom",
-        name: "Restroom Sign",
+        get name() { return _t("Restroom Sign"); },
         category: "decoration",
         table_type: "decoration",
         is_decoration: true,
@@ -384,7 +386,7 @@ export const DECOR_PRESETS = [
     },
     {
         id: "decor_stage",
-        name: "Live Music Stage",
+        get name() { return _t("Live Music Stage"); },
         category: "decoration",
         table_type: "decoration",
         is_decoration: true,

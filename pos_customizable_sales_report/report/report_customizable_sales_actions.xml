@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_customizable_sales" model="ir.actions.report">
+        <field name="name">Customizable Sales Report</field>
+        <field name="model">pos.customizable.sales.report.wizard</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">pos_customizable_sales_report.report_sales_template</field>
+        <field name="report_file">pos_customizable_sales_report.report_sales_template</field>
+        <field name="print_report_name">'Sales_Report_' + (time.strftime('%Y%m%d'))</field>
+    </record>
+</odoo>
+

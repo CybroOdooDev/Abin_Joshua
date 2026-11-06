@@ -48,7 +48,7 @@
                      t-attf-id="scrollspy_{{selfOrder.currentCategory ? selfOrder.currentCategory.id : 0}}"
                      t-attf-categId="{{selfOrder.currentCategory ? selfOrder.currentCategory.id : 0}}">
                 <h2 class="pt-4 pb-2 px-3 mb-4 mx-n3 bg-200 display-6 fw-bold">
-                    Search Results
+                    Resultados de búsqueda
                 </h2>
                 <div class="o-so-products-row">
                     <t t-foreach="globalSearchResults"

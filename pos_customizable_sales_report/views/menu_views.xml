@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Reporting Menu Item -->
+    <menuitem id="menu_pos_customizable_sales_report"
+              name="Customizable Sales Report"
+              action="action_pos_customizable_sales_report_wizard"
+              parent="point_of_sale.menu_point_rep"
+              sequence="5"/>
+</odoo>
+

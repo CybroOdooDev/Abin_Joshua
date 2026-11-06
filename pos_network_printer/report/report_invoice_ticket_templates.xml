@@ -244,12 +244,6 @@
                         <th style="text-align: right; width: 25%; padding-bottom: 3px;">Total</th>
                     </tr>
                 </thead>
-                        <th style="text-align: left; width: 25%; padding-bottom: 3px;">Tax</th>
-                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Amount</th>
-                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Base</th>
-                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Total</th>
-                    </tr>
-                </thead>
                 <tbody>
                     <t t-set="tax_totals" t-value="o.tax_totals or {}"/>
                     <t t-if="tax_totals and 'groups_by_subtotal' in tax_totals">

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Wizard Form View -->
+    <record id="view_pos_customizable_sales_report_wizard_form" model="ir.ui.view">
+        <field name="name">pos.customizable.sales.report.wizard.form</field>
+        <field name="model">pos.customizable.sales.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Customizable Sales Report">
+                <sheet>
+                    <group>
+                        <group string="Period &amp; Terminals">
+                            <field name="start_date"/>
+                            <field name="end_date"/>
+                            <field name="config_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <field name="session_ids" widget="many2many_tags" options="{'no_create': True}" domain="[('config_id', 'in', config_ids)] if config_ids else []"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                        <group string="Revenue Attribution Mode">
+                            <field name="revenue_attribution" widget="radio"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Product &amp; Category Filters" name="page_filters">
+                            <group>
+                                <field name="pos_category_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                <field name="product_category_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                                <field name="product_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            </group>
+                        </page>
+
+                        <page string="Pricing &amp; Discounts" name="page_pricing">
+                            <group>
+                                <group string="Price Limits">
+                                    <field name="price_min"/>
+                                    <field name="price_max"/>
+                                </group>
+                                <group string="Discount Filters">
+                                    <field name="discount_filter"/>
+                                    <field name="discount_min" invisible="discount_filter != 'custom_range'"/>
+                                    <field name="discount_max" invisible="discount_filter != 'custom_range'"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <footer>
+                    <button name="action_print_pdf" string="Print PDF Report" type="object" class="btn-primary" icon="fa-file-pdf-o"/>
+                    <button name="action_export_xlsx" string="Export Excel (XLSX)" type="object" class="btn-success" icon="fa-file-excel-o"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Wizard Action Window -->
+    <record id="action_pos_customizable_sales_report_wizard" model="ir.actions.act_window">
+        <field name="name">Customizable Sales Report</field>
+        <field name="res_model">pos.customizable.sales.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

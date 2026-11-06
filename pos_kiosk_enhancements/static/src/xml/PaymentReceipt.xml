@@ -45,32 +45,32 @@
                     </div>
                     <br/>
                     <div style="text-align:center;font-weight:bold;">
-                        PAYMENT PENDING
+                        PENDIENTE DE PAGO
                     </div>
                     <div style="text-align:center;font-weight:bold;margin-top:6px;">
                         PAGO EN MOSTRADOR
                     </div>
                     <br/>
                     <div style="font-size:20px; font-weight:bold;margin-left:10px; margin-right:10px;">
-                        ORDER:
+                        PEDIDO:
                         <t t-esc="data.order.name"/>
                     </div>
                     <div>
-                        Date:
+                        Fecha:
                         <t t-esc="new Date().toLocaleDateString()"/>
                     </div>
                     <div>
-                        Hour:
+                        Hora:
                         <t t-esc="new Date().toLocaleTimeString()"/>
                     </div>
                     <div style="border-top:1px dashed #000;margin:8px 0;"></div>
                     <table style="width:100%;">
                         <thead>
                             <tr style="font-weight:550;">
-                                <th style="width:40%; text-align:left; font-weight:550;">Description</th>
-                                <th style="width:10%; text-align:center; font-weight:550;">Unid</th>
-                                <th style="width:25%; text-align:right; font-weight:550;">Price</th>
-                                <th style="width:25%; text-align:right; font-weight:550;">Amount</th>
+                                <th style="width:40%; text-align:left; font-weight:550;">Descripción</th>
+                                <th style="width:10%; text-align:center; font-weight:550;">Ud.</th>
+                                <th style="width:25%; text-align:right; font-weight:550;">Precio</th>
+                                <th style="width:25%; text-align:right; font-weight:550;">Importe</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -184,10 +184,10 @@
                     </div>
                     <br/>
                     <div style="text-align:center;">
-                        Selected Method:
+                        Método seleccionado:
                     </div>
                     <div style="text-align:center;font-weight:bold;">
-                        PAY AT THE COUNTER
+                        PAGO EN MOSTRADOR
                     </div>
                     <br/>
                     <div style="text-align:center;">
@@ -244,18 +244,18 @@
                     </t>
                     <div style="border-top:1px dashed #000;margin:10px 0;"></div>
                     <div style="text-align:center;font-weight:bold;">
-                        THIS DOCUMENT DOES NOT CONSTITUTE PAYMENT
+                        ESTE DOCUMENTO NO CONSTITUYE JUSTIFICANTE DE PAGO
                     </div>
 
                     <br/>
 
                     <div style="text-align:center;">
-                        PLEASE PRESENT THIS RECEIPT AT THE CASHIER
+                        POR FAVOR, PRESENTE ESTE TICKET EN CAJA
                     </div>
 
                     <br/>
                     <div style="text-align:center;font-size:11px;">
-                        Thank you for your order.
+                        Gracias por su pedido.
                     </div>
                 </t>
                 <t t-else="">
@@ -286,27 +286,27 @@
                         text-align:center;
                         font-weight:bold;
                     ">
-                        SIMPLIFIED INVOICE
+                        FACTURA SIMPLIFICADA
                     </div>
                     <div style="font-size:20px; font-weight:bold;">
-                        ORDER:
+                        PEDIDO:
                         <t t-esc="data.order.name"/>
                     </div>
                     <div>
-                        Series:
+                        Serie:
                         <t t-esc="data.pos.name"/>
                     </div>
                     <div>
-                        Number:
+                        Número:
                         <t t-esc="data.order.reference"/>
                     </div>
                     <br/>
                     <div>
-                        Date:
+                        Fecha:
                         <t t-esc="new Date().toLocaleDateString()"/>
                     </div>
                     <div>
-                        Hour:
+                        Hora:
                         <t t-esc="new Date().toLocaleTimeString()"/>
                     </div>
                     <div style="
@@ -322,10 +322,10 @@
                     ">
                         <thead>
                             <tr>
-                                <th style="width:40%; text-align:left;">Description</th>
-                                <th style="width:10%; text-align:center;">Unid</th>
-                                <th style="width:25%; text-align:right;">Price</th>
-                                <th style="width:25%; text-align:right;">Amount</th>
+                                <th style="width:40%; text-align:left;">Descripción</th>
+                                <th style="width:10%; text-align:center;">Ud.</th>
+                                <th style="width:25%; text-align:right;">Precio</th>
+                                <th style="width:25%; text-align:right;">Importe</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -444,11 +444,11 @@
                     <br/>
                     <!-- PAYMENT -->
                     <div>
-                        Payment Method:
+                        Forma de pago:
                         <t t-esc="data.order.payment_method"/>
                     </div>
                     <div>
-                        Status: PAID
+                        Estado: PAGADO
                     </div>
                     <!-- VERIFACTU QR -->
                     <t t-if="data.config_flags.show_verifactu_qr and data.verifactu_qr_base64">
@@ -467,7 +467,7 @@
                         text-align:center;
                         font-size:11px;
                     ">
-                        Thank you for your visit
+                        Gracias por su visita
                     </div>
                 </t>
             </div>

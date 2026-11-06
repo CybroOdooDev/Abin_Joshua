@@ -39,8 +39,8 @@
             </table>
 
             <div style="text-align: center; margin: 8px 0; padding: 4px 0; border-top: 2px solid #000; border-bottom: 2px solid #000;">
-                <div style="font-weight: 900; font-size: 15px; letter-spacing: 1px; text-transform: uppercase;">*** CASH CLOSING (Z) ***</div>
-                <div style="font-size: 11px; font-weight: bold; text-transform: uppercase;">SESSION CLOSING REPORT</div>
+                <div style="font-weight: 900; font-size: 15px; letter-spacing: 1px; text-transform: uppercase;">*** CIERRE DE CAJA (Z) ***</div>
+                <div style="font-size: 11px; font-weight: bold; text-transform: uppercase;">INFORME DE CIERRE DE SESIÓN</div>
             </div>
 
             <!-- Meta details (Table-based layout: immune to flex wrapping collisions) -->
@@ -50,19 +50,19 @@
                     <td style="width: 68%; text-align: right; padding: 2px 0; vertical-align: top;" t-esc="props.data.session.pos_name"/>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold; padding: 2px 0; vertical-align: top;">Session:</td>
+                    <td style="font-weight: bold; padding: 2px 0; vertical-align: top;">Sesión:</td>
                     <td style="text-align: right; font-weight: bold; padding: 2px 0; vertical-align: top;" t-esc="props.data.session.name"/>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold; padding: 2px 0; vertical-align: top;">Cashier:</td>
+                    <td style="font-weight: bold; padding: 2px 0; vertical-align: top;">Cajero:</td>
                     <td style="text-align: right; padding: 2px 0; vertical-align: top;" t-esc="props.data.session.cashier"/>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold; padding: 2px 0; vertical-align: top;">Opening:</td>
+                    <td style="font-weight: bold; padding: 2px 0; vertical-align: top;">Apertura:</td>
                     <td style="text-align: right; white-space: nowrap; padding: 2px 0; vertical-align: top;" t-esc="props.data.session.start_at || '-'"/>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold; padding: 2px 0; vertical-align: top;">Closing:</td>
+                    <td style="font-weight: bold; padding: 2px 0; vertical-align: top;">Cierre:</td>
                     <td style="text-align: right; white-space: nowrap; padding: 2px 0; vertical-align: top;" t-esc="props.data.session.stop_at || '-'"/>
                 </tr>
             </table>
@@ -70,39 +70,39 @@
             <!-- Cash Drawer Balance (CashSecurity Integration) -->
             <div style="border-top: 1px solid #000; padding-top: 4px; margin-bottom: 6px;">
                 <div style="font-weight: 800; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">
-                    CASH DRAWER BALANCE
+                    SALDO DEL CAJÓN PORTAMONEDAS
                 </div>
                 <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                     <tr>
-                        <td style="padding: 2px 0; vertical-align: top;">Starting Float:</td>
+                        <td style="padding: 2px 0; vertical-align: top;">Fondo inicial:</td>
                         <td style="text-align: right; font-weight: bold; white-space: nowrap; padding: 2px 0; vertical-align: top;" t-esc="props.formatCurrency(props.data.cash_details.opening_cash)"/>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 0; vertical-align: top;">(+) Cash Sales:</td>
+                        <td style="padding: 2px 0; vertical-align: top;">(+) Ventas en efectivo:</td>
                         <td style="text-align: right; font-weight: bold; white-space: nowrap; padding: 2px 0; vertical-align: top;" t-esc="props.formatCurrency(props.data.cash_details.cash_sales)"/>
                     </tr>
                     <t t-if="props.data.cash_details.cash_in > 0">
                         <tr>
-                            <td style="padding: 2px 0; vertical-align: top;">(+) Cash In:</td>
+                            <td style="padding: 2px 0; vertical-align: top;">(+) Entrada de efectivo:</td>
                             <td style="text-align: right; font-weight: bold; white-space: nowrap; padding: 2px 0; vertical-align: top;" t-esc="props.formatCurrency(props.data.cash_details.cash_in)"/>
                         </tr>
                     </t>
                     <t t-if="props.data.cash_details.cash_out > 0">
                         <tr>
-                            <td style="padding: 2px 0; vertical-align: top;">(-) Cash Out:</td>
+                            <td style="padding: 2px 0; vertical-align: top;">(-) Salida de efectivo:</td>
                             <td style="text-align: right; font-weight: bold; white-space: nowrap; padding: 2px 0; vertical-align: top;" t-esc="props.formatCurrency(props.data.cash_details.cash_out)"/>
                         </tr>
                     </t>
                     <tr style="border-top: 1px dashed #666;">
-                        <td style="padding: 3px 0; font-weight: bold; vertical-align: top;">Expected Cash:</td>
+                        <td style="padding: 3px 0; font-weight: bold; vertical-align: top;">Efectivo esperado:</td>
                         <td style="text-align: right; font-weight: bold; white-space: nowrap; padding: 3px 0; vertical-align: top;" t-esc="props.formatCurrency(props.data.cash_details.expected_cash)"/>
                     </tr>
                     <tr style="background-color: #f2f2f2;">
-                        <td style="padding: 3px 2px; font-weight: 800; vertical-align: top;">Counted Cash (Drawer):</td>
+                        <td style="padding: 3px 2px; font-weight: 800; vertical-align: top;">Efectivo contado (Cajón):</td>
                         <td style="text-align: right; font-weight: 800; white-space: nowrap; padding: 3px 2px; vertical-align: top;" t-esc="props.formatCurrency(props.data.cash_details.counted_cash)"/>
                     </tr>
                     <tr style="border-top: 1px solid #000; border-bottom: 1px solid #000;">
-                        <td style="padding: 3px 0; font-weight: bold; vertical-align: top;">Difference:</td>
+                        <td style="padding: 3px 0; font-weight: bold; vertical-align: top;">Diferencia:</td>
                         <td style="text-align: right; font-weight: 800; white-space: nowrap; padding: 3px 0; vertical-align: top;" t-att-class="{'text-danger': Math.abs(props.data.cash_details.difference) > 0.01}" t-esc="props.formatCurrency(props.data.cash_details.difference)"/>
                     </tr>
                 </table>
@@ -111,14 +111,14 @@
             <!-- Dynamic Payment Breakdown -->
             <div style="border-top: 1px solid #000; padding-top: 4px; margin-bottom: 6px;">
                 <div style="font-weight: 800; font-size: 11px; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">
-                    SALES BY PAYMENT METHOD
+                    VENTAS POR FORMA DE PAGO
                 </div>
                 <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
                     <tr t-foreach="props.data.payment_methods" t-as="pm" t-key="pm.id" style="border-bottom: 1px dotted #888;">
                         <td style="padding: 3px 0; vertical-align: middle;">
                             <div style="font-weight: bold;" t-esc="pm.name"/>
                             <div style="font-size: 10px; color: #555;">
-                                <t t-esc="pm.count"/> <span>Transactions</span>
+                                <t t-esc="pm.count"/> <span>operaciones</span>
                             </div>
                         </td>
                         <td style="text-align: right; font-weight: bold; white-space: nowrap; padding: 3px 0; vertical-align: middle;" t-esc="props.formatCurrency(pm.amount)"/>
@@ -130,26 +130,26 @@
             <div style="border-top: 2px solid #000; padding-top: 4px; margin-bottom: 8px;">
                 <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
                     <tr>
-                        <td style="padding: 2px 0; vertical-align: top;">Total Orders / Tickets:</td>
+                        <td style="padding: 2px 0; vertical-align: top;">Total de pedidos / tickets:</td>
                         <td style="text-align: right; font-weight: bold; padding: 2px 0; vertical-align: top;" t-esc="props.data.sales_summary.total_orders"/>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 0; vertical-align: top;">Net Sales (Untaxed):</td>
+                        <td style="padding: 2px 0; vertical-align: top;">Ventas netas (Base):</td>
                         <td style="text-align: right; white-space: nowrap; padding: 2px 0; vertical-align: top;" t-esc="props.formatCurrency(props.data.sales_summary.net_sales)"/>
                     </tr>
                     <tr>
-                        <td style="padding: 2px 0; vertical-align: top;">Taxes:</td>
+                        <td style="padding: 2px 0; vertical-align: top;">Impuestos:</td>
                         <td style="text-align: right; white-space: nowrap; padding: 2px 0; vertical-align: top;" t-esc="props.formatCurrency(props.data.sales_summary.tax_total)"/>
                     </tr>
                     <tr style="border-top: 2px solid #000; border-bottom: 2px solid #000; font-size: 15px;">
-                        <td style="padding: 5px 0; font-weight: 900; vertical-align: middle; white-space: nowrap;">TOTAL SALES</td>
+                        <td style="padding: 5px 0; font-weight: 900; vertical-align: middle; white-space: nowrap;">TOTAL VENTAS</td>
                         <td style="text-align: right; font-weight: 900; white-space: nowrap; padding: 5px 0; vertical-align: middle;" t-esc="props.formatCurrency(props.data.sales_summary.gross_sales)"/>
                     </tr>
                 </table>
             </div>
 
             <div style="text-align: center; margin-top: 10px; font-size: 9px; color: #555;">
-                <span>Printed on</span> <t t-esc="props.currentDate || ''"/>
+                <span>Impreso el</span> <t t-esc="props.currentDate || ''"/>
             </div>
 
         </div>
