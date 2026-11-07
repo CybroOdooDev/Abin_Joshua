@@ -1,6 +1,6 @@
-.. |license| image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
 
 .. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
     :target: https://www.odoo.com
@@ -18,7 +18,7 @@
 Undo and Redo
 =============
 
-Adds global undo and redo support in Odoo, letting users easily revert or restore changes across all records except one2many records.
+Adds global undo and redo support across standard Odoo form views, letting users easily revert or restore field changes and record modifications across records.
 
 Key Features
 ------------
@@ -26,7 +26,7 @@ Key Features
 * Global Undo and Redo buttons on form views in Odoo backend.
 * Revert unsaved or accidental changes with a single click.
 * Restore previously undone modifications with Redo.
-* Tracks field modifications and record deletions smoothly.
+* Tracks field modifications and record updates smoothly.
 
 Installation
 ------------
@@ -42,8 +42,8 @@ Company
 
 License
 -------
-Affero General Public License, Version 3 (AGPL v3).
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+GNU Lesser General Public License, Version 3 (LGPL v3).
+(https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 Contacts
 --------
@@ -51,10 +51,9 @@ Contacts
 * Website : https://cybrosys.com
 
 Maintainer
-==========
+----------
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
-
 
 This module is maintained by Cybrosys Technologies.
 

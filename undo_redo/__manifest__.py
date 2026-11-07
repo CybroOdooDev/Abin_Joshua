@@ -9,21 +9,23 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
 #############################################################################
 {
     'name': 'Undo and Redo',
-    'version': '19.5.1.0.0',
+    'version': '20.1.0.0',
     'category': 'Tools',
-    'summary': 'Module for undo and redo in Odoo',
-    'description': """This module adds global undo and
-     redo support in Odoo, letting users easily revert
-     or restore changes and deletions across all records 
-     except one2many records.""",
+    'summary': 'Enables global undo and redo functionality across form views in Odoo.',
+    'description': """Adds global undo and redo support across standard Odoo form views,
+allowing users to quickly revert or restore field changes and record modifications.""",
     'sequence': -333,
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
@@ -31,6 +33,7 @@
     'website': 'https://www.cybrosys.com',
     'depends': ['web'],
     'data': [
+        'security/undo_redo_groups.xml',
         'security/ir.access.csv',
     ],
     'assets': {
@@ -42,7 +45,7 @@
     'post_init_hook': 'post_init_hook',
     'uninstall_hook': 'uninstall_hook',
     'images': ['static/description/banner.jpg'],
-    'license': 'AGPL-3',
+    'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
     'application': False,

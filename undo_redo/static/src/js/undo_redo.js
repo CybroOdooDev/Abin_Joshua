@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { FormController } from '@web/views/form/form_controller';
+import { FormController } from "@web/views/form/form_controller";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { proxy, effect, onMounted, onWillDestroy, onWillStart } from "@odoo/owl";
@@ -8,7 +8,7 @@ import { proxy, effect, onMounted, onWillDestroy, onWillStart } from "@odoo/owl"
 patch(FormController.prototype, {
     setup() {
         super.setup();
-        this.orm = useService('orm');
+        this.orm = useService("orm");
         this.state = proxy({
             ...(this.state || {}),
             undo: [],
@@ -32,12 +32,14 @@ patch(FormController.prototype, {
                 }
             });
         });
-        onWillDestroy(disposeUndoEffect);
+        onWillDestroy(() => {
+            disposeUndoEffect();
+        });
     },
 
     async setData() {
-        this.state.undo = await this.getData('undo');
-        this.state.redo = await this.getData('redo');
+        this.state.undo = await this.getData("undo");
+        this.state.redo = await this.getData("redo");
     },
 
     async undo() {

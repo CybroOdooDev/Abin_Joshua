@@ -9,10 +9,14 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
 import logging
@@ -21,7 +25,8 @@ _logger = logging.getLogger(__name__)
 
 
 def post_init_hook(env):
-
+    """Post initialization hook to create PostgreSQL triggers and functions
+    for tracking record updates and deletions across database tables."""
     env.cr.execute("""
         CREATE OR REPLACE FUNCTION log_update_data()
         RETURNS TRIGGER AS $$
@@ -33,7 +38,7 @@ def post_init_hook(env):
         BEGIN
             old_row = to_jsonb(OLD);
             new_row = to_jsonb(NEW);
-           
+
             FOR column_name IN SELECT jsonb_object_keys(old_row)
             LOOP
                 IF old_row ->> column_name IS DISTINCT FROM new_row ->> column_name THEN
@@ -44,25 +49,28 @@ def post_init_hook(env):
                     );
                 END IF;
             END LOOP;
-        
+
             IF jsonb_typeof(changed_fields) != 'null' AND changed_fields != '{}'::JSONB THEN
                 BEGIN
-                    INSERT INTO undo_redo (user_id,
+                    INSERT INTO undo_redo (
+                        user_id,
                         table_name,
                         record_id,
-                        updated_data,mode
+                        updated_data,
+                        mode
                     )
                     VALUES (
                         OLD.write_uid,
                         TG_TABLE_NAME,
                         OLD.id,
-                        changed_fields,'undo'
+                        changed_fields,
+                        'undo'
                     );
                     EXCEPTION WHEN OTHERS THEN
                         RETURN NEW;
                 END;
             END IF;
-        
+
             RETURN NEW;
         END;
         $$ LANGUAGE plpgsql;
@@ -90,25 +98,24 @@ def post_init_hook(env):
                 WHERE c.relkind = 'r'
                 AND n.nspname NOT IN ('pg_catalog', 'information_schema') AND c.relname != 'undo_redo'
                  AND EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_schema = n.nspname
-        AND table_name = c.relname
-        AND column_name = 'id'
-    )
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_schema = n.nspname
+                    AND table_name = c.relname
+                    AND column_name = 'id'
+                )
             LOOP
                 EXECUTE format('
                     CREATE TRIGGER capture_delete_dynamic
                     AFTER UPDATE ON %I.%I
                     FOR EACH ROW
                     EXECUTE FUNCTION log_update_data();', rec.nspname, rec.relname);
-        EXECUTE format('
+                EXECUTE format('
                     CREATE TRIGGER log_delete_trigger
                     AFTER DELETE ON %I.%I
                     FOR EACH ROW
                     EXECUTE FUNCTION log_delete_data();',
                     rec.nspname, rec.relname);
-        
             END LOOP;
         END $$;
     """)
@@ -125,32 +132,37 @@ def post_init_hook(env):
                 WHERE c.relkind = 'r'
                 AND n.nspname NOT IN ('pg_catalog', 'information_schema')
                 AND EXISTS (
-        SELECT 1
-        FROM information_schema.columns
-        WHERE table_schema = n.nspname
-        AND table_name = c.relname
-        AND column_name = 'id'
-    )
+                    SELECT 1
+                    FROM information_schema.columns
+                    WHERE table_schema = n.nspname
+                    AND table_name = c.relname
+                    AND column_name = 'id'
+                )
             LOOP
                 IF NOT EXISTS (
                     SELECT 1
                     FROM pg_trigger
-                    WHERE tgrelid = (SELECT oid FROM pg_class WHERE relname = rec.relname AND relnamespace = (SELECT oid FROM pg_namespace WHERE nspname = rec.nspname))
+                    WHERE tgrelid = (
+                        SELECT oid FROM pg_class
+                        WHERE relname = rec.relname
+                        AND relnamespace = (
+                            SELECT oid FROM pg_namespace WHERE nspname = rec.nspname
+                        )
+                    )
                     AND tgname = 'capture_delete_dynamic'
                 ) THEN
-                IF rec.relname != 'undo_redo' THEN
-                    EXECUTE format('
-                        CREATE TRIGGER capture_delete_dynamic
-                        AFTER UPDATE ON %I.%I
-                        FOR EACH ROW
-                        EXECUTE FUNCTION log_update_data();', rec.nspname, rec.relname);
-            EXECUTE format('
-                    CREATE TRIGGER log_delete_trigger
-                    AFTER DELETE ON %I.%I
-                    FOR EACH ROW
-                    EXECUTE FUNCTION log_delete_data();',
-                    rec.nspname, rec.relname);
-        
+                    IF rec.relname != 'undo_redo' THEN
+                        EXECUTE format('
+                            CREATE TRIGGER capture_delete_dynamic
+                            AFTER UPDATE ON %I.%I
+                            FOR EACH ROW
+                            EXECUTE FUNCTION log_update_data();', rec.nspname, rec.relname);
+                        EXECUTE format('
+                            CREATE TRIGGER log_delete_trigger
+                            AFTER DELETE ON %I.%I
+                            FOR EACH ROW
+                            EXECUTE FUNCTION log_delete_data();',
+                            rec.nspname, rec.relname);
                     END IF;
                 END IF;
             END LOOP;
@@ -173,72 +185,75 @@ def post_init_hook(env):
                 WHEN TAG IN ('CREATE TABLE')
                 EXECUTE FUNCTION trigger_on_table_creation();
             """)
-    except Exception:
-        _logger.info("Database user lacks superuser privileges; event trigger skipped. Table triggers will be maintained via registry hook.")
+    except Exception as e:
+        _logger.info(
+            "Database user lacks superuser privileges; event trigger skipped (%s). "
+            "Table triggers will be maintained via registry hook.",
+            e,
+        )
     env.cr.execute("""
-    CREATE OR REPLACE FUNCTION handle_log_reinsert()
-    RETURNS TRIGGER AS $$
-    DECLARE
-        target_table TEXT; 
-        column_list TEXT;
-        value_list TEXT;
-        column_count INT;
-        new_mode TEXT;
-        latest_id INT; 
-    BEGIN
-       IF TG_TABLE_NAME = 'undo_redo' THEN
-        target_table := OLD.table_name;
-    
-        column_list := array_to_string(
-            array(SELECT jsonb_object_keys(OLD.updated_data)),
-            ', '
-        );
-        value_list := array_to_string(
-            array(
-                SELECT format('%L', OLD.updated_data->>key)
-                FROM jsonb_object_keys(OLD.updated_data) AS key
-            ),
-            ', '
-        );
-    
-        new_mode := CASE OLD.mode
-            WHEN 'undo' THEN 'redo'
-            ELSE 'undo'
-        END;
-        column_count := array_length(string_to_array(column_list, ','), 1);
-        IF column_count > 1 THEN
-            EXECUTE format(
-                'UPDATE %I SET (%s) = (%s) WHERE id = %L',
-                target_table,  
-                column_list,
-                value_list, 
-                OLD.record_id
-            );
-        ELSIF column_count = 1 THEN
-            EXECUTE format(
-                'UPDATE %I SET %s = %s WHERE id = %L',
-                target_table,   
-                column_list,	
-                value_list, 	
-                OLD.record_id
-            );
-        END IF;
-       SELECT id INTO latest_id
-        FROM undo_redo
-        WHERE table_name = OLD.table_name 
-        AND record_id = OLD.record_id
-        ORDER BY id DESC
-        LIMIT 1;
-        
-        UPDATE undo_redo
-        SET mode = new_mode
-        WHERE id = latest_id;
-    
-        RETURN OLD;
-       END IF;
-    END;
-    $$ LANGUAGE plpgsql;
+        CREATE OR REPLACE FUNCTION handle_log_reinsert()
+        RETURNS TRIGGER AS $$
+        DECLARE
+            target_table TEXT;
+            column_list TEXT;
+            value_list TEXT;
+            column_count INT;
+            new_mode TEXT;
+            latest_id INT;
+        BEGIN
+            IF TG_TABLE_NAME = 'undo_redo' THEN
+                target_table := OLD.table_name;
 
+                column_list := array_to_string(
+                    array(SELECT jsonb_object_keys(OLD.updated_data)),
+                    ', '
+                );
+                value_list := array_to_string(
+                    array(
+                        SELECT format('%L', OLD.updated_data->>key)
+                        FROM jsonb_object_keys(OLD.updated_data) AS key
+                    ),
+                    ', '
+                );
+
+                new_mode := CASE OLD.mode
+                    WHEN 'undo' THEN 'redo'
+                    ELSE 'undo'
+                END;
+                column_count := array_length(string_to_array(column_list, ','), 1);
+                IF column_count > 1 THEN
+                    EXECUTE format(
+                        'UPDATE %I SET (%s) = (%s) WHERE id = %L',
+                        target_table,
+                        column_list,
+                        value_list,
+                        OLD.record_id
+                    );
+                ELSIF column_count = 1 THEN
+                    EXECUTE format(
+                        'UPDATE %I SET %s = %s WHERE id = %L',
+                        target_table,
+                        column_list,
+                        value_list,
+                        OLD.record_id
+                    );
+                END IF;
+                SELECT id INTO latest_id
+                FROM undo_redo
+                WHERE table_name = OLD.table_name
+                AND record_id = OLD.record_id
+                ORDER BY id DESC
+                LIMIT 1;
+
+                UPDATE undo_redo
+                SET mode = new_mode
+                WHERE id = latest_id;
+
+                RETURN OLD;
+            END IF;
+        END;
+        $$ LANGUAGE plpgsql;
     """)
     env.cr.execute("""
         CREATE TRIGGER after_delete_trigger
@@ -247,14 +262,16 @@ def post_init_hook(env):
         EXECUTE FUNCTION handle_log_reinsert();
     """)
 
+
 def uninstall_hook(env):
+    """Uninstall hook to drop all created triggers and functions."""
     try:
         with env.cr.savepoint():
             env.cr.execute("""
                 DROP EVENT TRIGGER IF EXISTS auto_add_delete_triggers;
             """)
-    except Exception:
-        pass
+    except Exception as e:
+        _logger.warning("Could not drop event trigger auto_add_delete_triggers: %s", e)
     env.cr.execute("""
         DROP TRIGGER IF EXISTS after_delete_trigger ON undo_redo;
     """)
@@ -270,9 +287,9 @@ def uninstall_hook(env):
                 WHERE c.relkind = 'r'
                 AND n.nspname NOT IN ('pg_catalog', 'information_schema')
             LOOP
-                EXECUTE format('DROP TRIGGER IF EXISTS capture_delete_dynamic ON %I.%I;', 
+                EXECUTE format('DROP TRIGGER IF EXISTS capture_delete_dynamic ON %I.%I;',
                     rec.nspname, rec.relname);
-                EXECUTE format('DROP TRIGGER IF EXISTS log_delete_trigger ON %I.%I;', 
+                EXECUTE format('DROP TRIGGER IF EXISTS log_delete_trigger ON %I.%I;',
                     rec.nspname, rec.relname);
             END LOOP;
         END $$;

@@ -1,7 +1,7 @@
-## Module <undo_redo>
+## Module undo_redo
 
-#### 08.09.2026
-#### Version 20.0.1.0.0
-##### ADD
+#### 2026-10-19
+#### Version 20.1.0.0
+#### ADD
 
-- Initial Commit for Undo And Redo
+- Initial release for Odoo 20: Adds global undo and redo support across form views with PostgreSQL trigger tracking.
