@@ -20,8 +20,8 @@
     'version': '20.0.1.0.0',
     'category': 'Productivity',
     'summary': """Create Configurable Dashboards Easily.""",
-    'description': """Create Configurable Advanced Dynamic Dashboard to get the 
-    information that is relevant to your business, department, or a specific 
+    'description': """Create Configurable Advanced Dynamic Dashboard to get the
+    information that is relevant to your business, department, or a specific
     process or need.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',

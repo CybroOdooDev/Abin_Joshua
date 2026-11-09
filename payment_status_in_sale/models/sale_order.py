@@ -15,7 +15,7 @@
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #############################################################################
-from odoo import api, fields, models, _
+from odoo import api, fields, models
 
 
 class SaleOrder(models.Model):
@@ -24,20 +24,16 @@ class SaleOrder(models.Model):
     _inherit = "sale.order"
     _description = 'Sale order'
 
-    payment_status = fields.Char(string="Payment Status",
-                                 compute="_compute_payment_status",
+    payment_status = fields.Char(compute="_compute_payment_status",
                                  help="Field to check the payment status of the"
                                       " sale order")
-    payment_details = fields.Json(string="Payment Details",
-                                  compute="_compute_payment_details",
+    payment_details = fields.Json(compute="_compute_payment_details",
                                   help="Shows the payment done details "
                                        "including date and amount")
-    amount_due = fields.Float(string="Amount Due",
-                              compute='_compute_amount_due',
-                              help="Shows the amount that in due for the "
+    amount_due = fields.Float(compute='_compute_amount_due',
+                              help="Shows the amount that is due for the "
                                    "corresponding sale order")
-    invoice_state = fields.Char(string="Invoice State",
-                                compute="_compute_invoice_state",
+    invoice_state = fields.Char(compute="_compute_invoice_state",
                                 help="Field to check the invoice state of "
                                      "sale order")
 
@@ -148,7 +144,7 @@ class SaleOrder(models.Model):
         """
         self.ensure_one()
         return {
-            'name': _('Register Payment'),
+            'name': self.env._('Register Payment'),
             'res_model': 'account.payment.register',
             'view_mode': 'form',
             'context': {

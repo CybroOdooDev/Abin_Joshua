@@ -12,10 +12,10 @@
                     </group>
                 </sheet>
                 <footer>
-                    <button string="Cancel" class="btn-danger"
-                            special="cancel"/>
                     <button name="action_done" string="Execute" type="object"
                             class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary"
+                            special="cancel"/>
                 </footer>
             </form>
         </field>

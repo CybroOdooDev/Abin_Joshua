@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'Undo and Redo',
-    'version': '20.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Tools',
     'summary': 'Enables global undo and redo functionality across form views in Odoo.',
     'description': """Adds global undo and redo support across standard Odoo form views,

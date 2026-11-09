@@ -1,6 +1,6 @@
-.. |license| image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
 
 .. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
     :target: https://www.odoo.com
@@ -42,8 +42,8 @@ Company
 
 License
 -------
-Affero General Public License, Version 3 (AGPL v3).
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+GNU Lesser General Public License, Version 3 (LGPL v3).
+(https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 Contacts
 --------
@@ -51,7 +51,7 @@ Contacts
 * Website : https://cybrosys.com
 
 Maintainer
-==========
+----------
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 

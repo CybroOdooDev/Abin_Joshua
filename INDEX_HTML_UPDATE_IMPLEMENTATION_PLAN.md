@@ -16,8 +16,8 @@ The latest Cybrosys description layout is engineered specifically to **survive t
 
 ```mermaid
 graph TD
-    A[Legacy index.html] -->|Rename/Backup| B[index1.html]
-    C["Master Reference Template<br>(/reference_module/.../index.html)"] -->|Copy Skeleton| S[Target Module index.html]
+    A[Legacy index.html] -->|1. Rename/Backup| B[index1.html]
+    C["Master Reference Template<br>(/reference_module/.../index.html)"] -->|2. Copy Skeleton| S[Target Module index.html]
     S --> D[Hero & Capability Header]
     D --> E[Key Highlights - 6 Cards]
     E --> F[Tabbed Container - Bootstrap 5 & Static Fallback]
@@ -28,7 +28,8 @@ graph TD
     F --> G[Services Grid - 8 Badges]
     G --> H[Related Modules - 3 Relevant Cards]
     H --> I[Support & Guarantee Footer]
-    B & J[Manifest / Views / Screenshots] -->|Domain Content Injection| D & E & F & H
+    B & J[Manifest / Views / Screenshots] -->|3. Domain Content Injection & Parity Check| D & E & F & H
+    D & E & F & H -->|4. Quality Verified| K["Manual Comparison & Reminder:<br>Remind User to Delete index1.html<br>(Criteria 1.5 & 6.2 Compliance)"]
 ```
 
 ### Core Design Rules & Constraints
@@ -62,7 +63,7 @@ Before modifying any HTML, gather the module's domain data:
 | **Master Skeleton** | `/home/cybrosys/odoo20/migration/reference_module/static/description/index.html` | Base HTML table structure, inline CSS, Bootstrap 5 tab wiring, and responsive layout. |
 | **Master Icons** | `/home/cybrosys/odoo20/migration/reference_module/static/description/assets/icons/` | Standard Cybrosys vector chips (`ic-*.png`) for headers, highlights, services, and cards. |
 | **Module Meta** | `__manifest__.py` | Display name, summary, category, license, version (`20.0.1.0.0`), dependencies (`depends`). |
-| **Legacy Text** | `static/description/index1.html` | Prior features, workflows, and core user benefits. |
+| **Legacy Description & Support Matrix** | `static/description/index1.html` | Prior features, workflows, core user benefits, and **exact Edition/Availability support status** (`Community`, `Enterprise`, `Odoo Online`, `Odoo.sh`, `On-Premise`) as indicated by `tick.png` vs `close.png` icons or badges. |
 | **Actual Views** | `views/*.xml`, `models/*.py` | Real menus, button names, fields, smart buttons, actions, and wizards. |
 | **Screenshots** | `static/description/assets/screenshots/` | Exact filenames, image resolutions, and operational stages represented. |
 
@@ -73,8 +74,10 @@ Before modifying any HTML, gather the module's domain data:
 To prevent errors and ensure thorough quality control, follow this sequential execution order:
 
 ### Phase 1: Workspace Setup & Backup
-1. **Preserve Legacy Content**:
+1. **Preserve Legacy Content as Temporary Reference**:
    - Rename existing `static/description/index.html` to `static/description/index1.html`.
+   > [!IMPORTANT]
+   > `index1.html` is strictly a **temporary migration scratchpad and source-of-truth reference**. It is used during Phases 2–9 to extract legacy features, workflows, and platform availability (Odoo Online, Odoo.sh, On-Premise) and kept for manual user comparison. The assistant **must NOT delete `index1.html` automatically**; instead, the assistant must retain it for the developer's manual review and provide an explicit reminder to the developer to delete it before final submission (as leaving it triggers automatic AI Review failures under Criterion 1.5 and Criterion 6.2).
 2. **Initialize New Template from Master Reference**:
    - Copy the master structure:
      ```bash
@@ -92,7 +95,17 @@ To prevent errors and ensure thorough quality control, follow this sequential ex
 1. **HTML `<head>`**:
    - Set `<title>` to `{Module Display Name} for Odoo 20`.
 2. **Edition & Deployment Capability Rail**:
-   - Verify badges for **Community** (Supported), **Enterprise** (Supported), **Odoo.sh** (Supported), **On-Premise** (Supported), and **Odoo Online** (Unsupported for modules with custom Python code).
+   > [!IMPORTANT]
+   > **Odoo Online Support Standard**:
+   > **Do NOT mark Odoo Online as unsupported.** Legacy `index1.html` files from older Odoo versions frequently contained outdated boilerplate with `close.png` for Odoo Online. For all Odoo 20 modules, render **Odoo Online as fully Supported** by default alongside Community, Enterprise, Odoo.sh, and On-Premise unless explicitly instructed otherwise by the developer.
+   - **Editions**: Render both **Community** and **Enterprise** as supported (`assets/icons/ic-6db19ab6-b12126.png`).
+   - **Deployment Targets**: Render **Odoo.sh**, **On-Premise**, and **Odoo Online** as supported targets with the solid border and checkmark icon (`assets/icons/ic-6db19ab6-b12126.png`):
+     ```html
+     <span style="display: inline-block; background-color: #fdf3f4; border: 1px solid #f3e0e2; color: #0f172a; border-radius: 20px; padding: 6px 14px; margin-right: 7px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;">
+         <img src="./assets/icons/ic-6db19ab6-b12126.png" alt="" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+         <span style="vertical-align: middle;">Odoo Online</span>
+     </span>
+     ```
 3. **Hero Headline & Subtitle**:
    - `<h1>`: Display full module name with the last phrase highlighted in red: `<span style="color: #b12126;">for Odoo 20</span>`.
    - Subtitle `<p>`: Clear 2-sentence summary detailing business value, primary interface locations, and core automation.
@@ -151,7 +164,7 @@ Replace all generic accounting Q&As with 3 tailored, accurate module FAQs:
   - Divider: `1px solid #f6eaea`.
   - `A` Box: 36×36px `#fdf2f2` light tint box with red text. Answer text in `#64748b`.
 * **Standard Question Breakdown**:
-  1. **Q1 (Compatibility)**: Confirmation of support for Odoo 20 Community, Enterprise, and Odoo.sh.
+  1. **Q1 (Compatibility)**: Confirmation of support for all 5 platforms: Odoo 20 Community Edition, Odoo 20 Enterprise, Odoo.sh, On-Premise, and Odoo Online.
   2. **Q2 (Navigation/Location)**: Exact menu path where the user accesses the feature after installation (e.g. `Manufacturing -> Products Kanban`).
   3. **Q3 (Core Mechanism)**: Specific explanation of how key operations work (e.g. drilling down from counter badges, permissions, or calculations).
 
@@ -193,6 +206,35 @@ The related modules section displays 3 cards linking to official Cybrosys Odoo A
 
 ---
 
+### Phase 10: Retain for Manual Comparison & Remind Developer to Delete (`index1.html`)
+
+> [!IMPORTANT]
+> **Do NOT Automatically Delete `index1.html`**:
+> The assistant must NOT delete `index1.html`. It must be retained in `static/description/` so the developer can manually inspect, diff, and compare the old and new pages. The assistant must explicitly **remind the user to delete `index1.html`** before final submission.
+
+> [!CAUTION]
+> **Dual-Criterion Blocking Review Failure Warning for Developer (Criteria 1.5 & 6.2):**
+> Before committing the final module or submitting for review, the developer must manually delete `index1.html`, as leaving it triggers automatic AI Review failures:
+> - **Criterion 1.5 (No missing, unused or duplicate files)**: 60/100 penalty (*"The file 'static/description/index1.html' exists in the tree but is not referenced in the manifest or used by the system"*).
+> - **Criterion 6.2 (No junk in the submission - Blocking)**: 70/100 penalty (*"The file 'static/description/index1.html' is present in the submission but serves no purpose, indicating junk/unwanted files"*).
+
+**Developer Manual Cleanup Instructions (Before Final Submission)**:
+1. Complete manual comparison between `index.html` and `index1.html`.
+2. Permanently delete `index1.html`:
+   ```bash
+   rm -f static/description/index1.html
+   ```
+3. Remove from Git tracking (if previously tracked):
+   ```bash
+   git rm -f static/description/index1.html 2>/dev/null || true
+   ```
+4. Verify absence before committing:
+   ```bash
+   test ! -f static/description/index1.html && echo "OK: index1.html successfully purged."
+   ```
+
+---
+
 ## 4. Quality Audit & Review Checklist (Pre-Commit)
 
 Before declaring the `index.html` update complete, perform the following automated and visual audits:
@@ -201,8 +243,10 @@ Before declaring the `index.html` update complete, perform the following automat
 | :--- | :--- | :--- |
 | **No Stale Boilerplate** | `grep -E "Accounting Kit|chart of accounts|PDC" index.html` | 0 unexpected hits (unless module is accounting). |
 | **Title Accuracy** | `grep "<title>" index.html` | Must match current module display name and Odoo 20. |
+| **Deployment Coverage** | Inspect `index.html` Capability Rail & FAQ Q1 | All 5 targets (Community, Enterprise, Odoo.sh, On-Premise, and Odoo Online) rendered as fully supported with solid checkmark badges unless explicitly exempted. |
 | **All Images Exist** | Inspect every `src` path in `assets/screenshots/` and `assets/icons/` | All referenced image files exist and have non-zero file size. |
 | **Link Parity** | Verify all `href` attributes in Related Modules | Valid `https://apps.odoo.com/apps/modules/...` URLs. |
 | **Grammar Standards** | Scan for phrases like "allows to [verb]" or broken pluralization | Clean active voice (*"Allows users to view..."* or *"Enables direct access..."*). |
 | **Table Tags Closed** | `grep -c "<table>" index.html` vs `grep -c "</table>" index.html` | Opening and closing tag counts match exactly. |
-| **Clean Repo State** | `git status` | `index1.html` retained, new `index.html` cleanly formatted, no junk `.pyc` files. |
+| **User Deletion Reminder** | Explicit reminder in assistant's response | Assistant leaves `index1.html` intact for manual comparison and explicitly reminds user to delete it before final submission. |
+| **Clean Repo State (Pre-Submission)** | `git status` (run by user after manual deletion) | `index1.html` manually deleted by user before commit, 0 untracked junk files, 0 `.pyc` files. |

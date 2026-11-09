@@ -1,6 +1,6 @@
-.. |license| image:: https://img.shields.io/badge/license-AGPL--3-blue.svg
-    :target: https://www.gnu.org/licenses/agpl-3.0-standalone.html
-    :alt: License: AGPL-3
+.. |license| image:: https://img.shields.io/badge/license-LGPL--3-blue.svg
+    :target: https://www.gnu.org/licenses/lgpl-3.0-standalone.html
+    :alt: License: LGPL-3
 
 .. |odoo| image:: https://img.shields.io/badge/Odoo-20.0-875A7B.svg
     :target: https://www.odoo.com
@@ -18,43 +18,48 @@
 Pip Installer
 =============
 
-Allows administrators to execute Python pip package management operations and inspect packages directly from the Odoo backend.
+Execute Python pip package management operations and inspect terminal outputs directly from the Odoo backend interface.
 
 Key Features
 ------------
 
 * Search, inspect, install, upgrade, and uninstall Python packages directly from Odoo.
-* View currently installed Python packages and their versions.
-* Simplifies environment management without needing direct terminal/SSH access.
+* View currently installed Python packages and real-time terminal output logs.
+* Simplifies Python runtime dependency management without requiring SSH server access.
 
 Installation
 ------------
-No external dependencies.
+
+No external dependencies are required.
 
 Configuration
 -------------
-Accessible to administrators under Settings -> Technical -> Pip Installer.
+
+Accessible to administrators under Settings -> Pip Installer.
 
 Company
 -------
+
 * `Cybrosys Techno Solutions <https://cybrosys.com/>`__
 
 License
 -------
-Affero General Public License, Version 3 (AGPL v3).
-(https://www.gnu.org/licenses/agpl-3.0-standalone.html)
+
+GNU Lesser General Public License, Version 3 (LGPL v3).
+(https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
 
 Contacts
 --------
+
 * Mail Contact : odoo@cybrosys.com
 * Website : https://cybrosys.com
 
 Maintainer
-==========
+----------
+
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
-
 This module is maintained by Cybrosys Technologies.
 
-For support and more information, please visit `Our Website <https://cybrosys.com/>`__
+For support and more information, please visit `Our Website <https://cybrosys.com/>`__.

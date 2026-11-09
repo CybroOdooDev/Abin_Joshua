@@ -1,7 +1,7 @@
 ## Module <website_scroll_buttons>
 
-#### 10.09.2026
+#### 2026-11-07
 #### Version 20.0.1.0.0
 ##### ADD
 
-- Initial commit for Scroll Button In Website
+- Initial release for Odoo 20: Adds floating scroll buttons on website pages for smooth top-to-bottom and bottom-to-top navigation.

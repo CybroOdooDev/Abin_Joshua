@@ -60,7 +60,7 @@ def post_init_hook(env):
                         mode
                     )
                     VALUES (
-                        OLD.write_uid,
+                        (old_row ->> 'write_uid')::integer,
                         TG_TABLE_NAME,
                         OLD.id,
                         changed_fields,
@@ -96,8 +96,14 @@ def post_init_hook(env):
                 FROM pg_class c
                 JOIN pg_namespace n ON c.relnamespace = n.oid
                 WHERE c.relkind = 'r'
-                AND n.nspname NOT IN ('pg_catalog', 'information_schema') AND c.relname != 'undo_redo'
-                 AND EXISTS (
+                AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+                AND c.relname NOT LIKE 'orm_signaling_%'
+                AND c.relname NOT LIKE 'ir_%'
+                AND c.relname NOT LIKE 'bus_%'
+                AND c.relname NOT IN (
+                    'undo_redo', 'base_module_uninstall', 'base_module_upgrade', 'base_module_update'
+                )
+                AND EXISTS (
                     SELECT 1
                     FROM information_schema.columns
                     WHERE table_schema = n.nspname
@@ -131,6 +137,12 @@ def post_init_hook(env):
                 JOIN pg_namespace n ON c.relnamespace = n.oid
                 WHERE c.relkind = 'r'
                 AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+                AND c.relname NOT LIKE 'orm_signaling_%'
+                AND c.relname NOT LIKE 'ir_%'
+                AND c.relname NOT LIKE 'bus_%'
+                AND c.relname NOT IN (
+                    'undo_redo', 'base_module_uninstall', 'base_module_upgrade', 'base_module_update'
+                )
                 AND EXISTS (
                     SELECT 1
                     FROM information_schema.columns
@@ -151,7 +163,12 @@ def post_init_hook(env):
                     )
                     AND tgname = 'capture_delete_dynamic'
                 ) THEN
-                    IF rec.relname != 'undo_redo' THEN
+                    IF rec.relname NOT LIKE 'orm_signaling_%'
+                        AND rec.relname NOT LIKE 'ir_%'
+                        AND rec.relname NOT LIKE 'bus_%'
+                        AND rec.relname NOT IN (
+                            'undo_redo', 'base_module_uninstall', 'base_module_upgrade', 'base_module_update'
+                        ) THEN
                         EXECUTE format('
                             CREATE TRIGGER capture_delete_dynamic
                             AFTER UPDATE ON %I.%I
@@ -280,24 +297,34 @@ def uninstall_hook(env):
         DECLARE
             rec RECORD;
         BEGIN
+            SET LOCAL lock_timeout = '200ms';
             FOR rec IN
-                SELECT n.nspname, c.relname
-                FROM pg_class c
+                SELECT n.nspname, c.relname, t.tgname
+                FROM pg_trigger t
+                JOIN pg_class c ON t.tgrelid = c.oid
                 JOIN pg_namespace n ON c.relnamespace = n.oid
-                WHERE c.relkind = 'r'
-                AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+                WHERE t.tgname IN ('capture_delete_dynamic', 'log_delete_trigger')
+                  AND NOT t.tgisinternal
             LOOP
-                EXECUTE format('DROP TRIGGER IF EXISTS capture_delete_dynamic ON %I.%I;',
-                    rec.nspname, rec.relname);
-                EXECUTE format('DROP TRIGGER IF EXISTS log_delete_trigger ON %I.%I;',
-                    rec.nspname, rec.relname);
+                BEGIN
+                    EXECUTE format('DROP TRIGGER IF EXISTS %I ON %I.%I;',
+                        rec.tgname, rec.nspname, rec.relname);
+                EXCEPTION WHEN OTHERS THEN
+                    NULL;
+                END;
             END LOOP;
         END $$;
     """)
-    env.cr.execute("""
-        DROP FUNCTION IF EXISTS log_update_data() CASCADE;
-        DROP FUNCTION IF EXISTS log_delete_data() CASCADE;
-        DROP FUNCTION IF EXISTS add_update_trigger_to_new_tables() CASCADE;
-        DROP FUNCTION IF EXISTS trigger_on_table_creation() CASCADE;
-        DROP FUNCTION IF EXISTS handle_log_reinsert() CASCADE;
-    """)
+    functions_to_drop = [
+        "log_update_data()",
+        "log_delete_data()",
+        "add_update_trigger_to_new_tables()",
+        "trigger_on_table_creation()",
+        "handle_log_reinsert()",
+    ]
+    for func in functions_to_drop:
+        try:
+            with env.cr.savepoint():
+                env.cr.execute(f"DROP FUNCTION IF EXISTS {func} CASCADE;")
+        except Exception as e:
+            _logger.warning("Could not drop function %s: %s", func, e)

@@ -123,4 +123,3 @@ class TestUndoRedo(TransactionCase):
         self.assertEqual(self.partner.name, 'Modified Partner Name')
         self.partner.write({'name': initial_name})
         self.assertEqual(self.partner.name, initial_name)
-

@@ -17,22 +17,23 @@
 #############################################################################
 {
     'name': 'Sale Order Payment Status',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Sales',
-    'summary': 'Displays the payment status and details in the Sale Order.',
-    'description': """This module is used to display the invoice status of the
-                    corresponding sale order in the form view. It provides details about the
-                    sale order's payment status, payment information and the amount due.""",
+    'summary': 'Displays payment status, payment details, and amount due in sale orders.',
+    'description': """This module displays the invoice and payment status of
+                    sale orders directly in form and list views. It provides
+                    real-time details regarding payment status, payment details,
+                    and amount due, with one-click payment registration.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
     'depends': ['sale_management', 'account'],
     'data': [
-        'views/sale_order_views.xml'
+        'views/sale_order_views.xml',
     ],
     'images': ['static/description/banner.jpg'],
-    'license': 'AGPL-3',
+    'license': 'LGPL-3',
     'installable': True,
     'auto_install': False,
     'application': False,

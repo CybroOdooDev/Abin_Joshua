@@ -2,8 +2,7 @@
 <odoo>
     <!-- Inherited sale order form view. -->
     <record id="view_order_form" model="ir.ui.view">
-        <field name="name">sales.order.view.form.inherit.payment.status.in.sale
-        </field>
+        <field name="name">sales.order.view.form.inherit.payment.status.in.sale</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
@@ -38,9 +37,7 @@
     </record>
     <!-- Inherited sale order tree view. -->
     <record id="view_order_tree" model="ir.ui.view">
-        <field name="name">sale.order.view.tree.inherit.payment.status.in
-            .sale
-        </field>
+        <field name="name">sale.order.view.tree.inherit.payment.status.in.sale</field>
         <field name="model">sale.order</field>
         <field name="inherit_id" ref="sale.view_order_tree"/>
         <field name="arch" type="xml">
@@ -57,9 +54,7 @@
     </record>
     <!-- Inherited sale order quotation tree view. -->
     <record id="view_quotation_tree_with_onboarding" model="ir.ui.view">
-        <field name="name">sale.order.view.tree.inherit.payment.status
-            .in.sale
-        </field>
+        <field name="name">sale.order.view.tree.inherit.payment.status.in.sale</field>
         <field name="model">sale.order</field>
         <field name="inherit_id"
                ref="sale.view_quotation_tree_with_onboarding"/>

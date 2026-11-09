@@ -23,15 +23,19 @@ graph TD
   2. On a fresh database **WITH** demo data.
 * **Unit Tests Pass (Double Weight)**: At least one test file in `tests/`, tagged `@tagged('post_install', '-at_install')`, **0 errors, 0 failures** across both environments.
 * **100% Public Method & Action Coverage**: Every public model method, compute method, constraint, button action (`action_*`), and wizard print/submit action must have a dedicated test case.
-* **Code Linters**: `pylint-odoo` reports **0 errors and 0 warnings** (strictly 0 `W8113` redundant string warnings), and `ruff` reports 0 errors.
+* **Code Linters & Static Analysis (Blocking)**: `pylint-odoo` reports **0 errors and 0 warnings** (strictly 0 `W8113` redundant string warnings), and `ruff` / `flake8` reports **0 errors** (strictly 0 `F401` unused imports and 0 `F841` unused local variables).
 
 ### Stage 2: AI Reviewer (Criteria 1.1 – 6.3)
 * **Structure & Manifest**: Exact `depends`, all files referenced exist, no dead assets.
-* **Criterion 1.5: No Missing, Unused or Duplicate Files (Blocking - Score Penalty down to 40/100)**:
+* **Criterion 1.5: No Missing, Unused or Duplicate Files (Blocking - Score Penalty down to 40/100 or 60/100)**:
   - **Mandatory Deprecation of `security/ir.model.access.csv` in Odoo 20**:
     In Odoo 20, the legacy access control file `security/ir.model.access.csv` is completely deprecated and replaced by `security/ir.access.csv`.
     - If `security/ir.model.access.csv` is present in the repository or still referenced in `__manifest__.py`, the reviewer awards a failing **40/100** score on Criterion 1.5 (*"security/ir.model.access.csv is used instead of security/ir.access.csv, which is deprecated in Odoo 20"*).
     - **Resolution**: Permanently delete `security/ir.model.access.csv` (`rm security/ir.model.access.csv`) and migrate all access rules into `security/ir.access.csv`. Update `'data'` in `__manifest__.py` to load `'security/ir.access.csv'`.
+  - **Mandatory Deletion of Legacy/Draft Description Files (`index1.html`) (Score Penalty down to 60/100)**:
+    - Temporary backup or reference files created during `index.html` description updates, specifically `static/description/index1.html`, MUST be permanently deleted before submitting for review.
+    - If `static/description/index1.html` exists in the module tree, the reviewer awards a failing **60/100** score on Criterion 1.5 (*"The file 'static/description/index1.html' exists in the tree but is not referenced in the manifest or used by the system"*).
+    - **Resolution**: Once data extraction and visual comparison are verified against the new `index.html`, immediately delete `static/description/index1.html` (`rm -f static/description/index1.html` and `git rm -f static/description/index1.html` if tracked).
   - No orphaned XML, JS, or image files that are not referenced in the manifest or code.
 * **Mandatory File Header**: **EVERY** Python file must contain the exact Cybrosys LGPL-3 header.
 * **Criterion 4.1: Coding Standards & Modernization (Blocking - Score Penalty down to 40/100)**:
@@ -64,9 +68,22 @@ graph TD
   - **Whitespace & Formatting Hygiene**:
     - Zero trailing whitespace and zero raw tabs (`\t`) in `.py`, `.js`, `.xml`, or `.csv` files.
     - Clean standard 4-space indentation across all Python logic.
+* **Criterion 4.4: Code Checkers (pylint-odoo & ruff / flake8 - Blocking - Score Penalty down to 40/100)**:
+  - **Zero Linter Errors or Warnings**:
+    - `pylint-odoo` must report **0 errors and 0 warnings** (specifically 0 `W8113` redundant string warnings).
+    - `ruff` / `flake8` must report **0 errors** across all module files including `models/`, `wizard/`, `report/`, `controllers/`, and `tests/`.
+  - **Zero Unused Imports (F401 - Blocking)**:
+    - Absolute prohibition against unused imports across models, wizards, controllers, and tests.
+    - Specifically beware when refactoring translations: when replacing `_("...")` with `self.env._("...")`, ensure `from odoo import _` is removed from imports if `_` is no longer used directly.
+  - **Zero Unused Local Variables (F841 - Blocking)**:
+    - Never assign expressions or method returns to local variables that are never read or asserted (e.g. `invoice = self.order._create_invoices()` where `invoice` is never referenced again).
+    - In unit tests and model logic, either assert the created record (e.g. `self.assertTrue(invoice)`) or call the method without assigning an unused return value (`self.order._create_invoices()`).
 * **Deprecated APIs**: Zero Odoo 16/17/18/19 deprecated code (including legacy `security/ir.model.access.csv`).
 * **Doc-to-Code Parity & Grammar (6.3)**: `index.html`, `README.rst`, and `RELEASE_NOTES.md` match actual code. No false claims in FAQs, no template boilerplate leftovers (e.g. `#cybrosys-acc-kit`), proper English grammar (no "allows to + verb"), singular/plural consistency, and synchronized release dates.
-* **No Junk (6.2 - Blocking)**: Zero `__pycache__`, `.pyc`, backup files, or unused assets in the archive or directory.
+* **Criterion 6.2: No Junk in the Submission (Blocking - Score Penalty down to 70/100)**:
+  - Zero `__pycache__`, `.pyc`, backup files (`*~`, `*.bak`), temporary draft files (`index1.html`), or unused assets in the module directory or archive.
+  - If `static/description/index1.html` or draft files remain in the module tree, the reviewer awards a failing **70/100** score on Criterion 6.2 (*"The file 'static/description/index1.html' is present in the submission but serves no purpose, indicating junk/unwanted files"*).
+  - Note the **Dual-Criterion Blocking Penalty**: leaving `index1.html` penalizes **both** Criterion 1.5 (unused unreferenced file - 60/100) and Criterion 6.2 (junk in submission - 70/100). Both criteria must pass with 100/100.
 
 ---
 
@@ -267,6 +284,41 @@ sequenceDiagram
      - Never leave models accessible to public users unless specifically required and secured.
      - `security/ir.model.access.csv` MUST be permanently deleted from disk and git.
 
+3. **Security Groups Architecture Migration (`res.groups` & `res.groups.privilege`) in Odoo 20**:
+   > [!IMPORTANT]
+   > **Odoo 20 Breaking Changes in `res.groups` Definitions**:
+   > In Odoo 20, the security group schema underwent two major breaking changes:
+   > 1. **`category_id` removed from `res.groups`**: Declaring `<field name="category_id" .../>` directly on `res.groups` causes a fatal installation crash: `ValueError: Invalid field 'category_id' in 'res.groups'`.
+   >    - Categories now attach to the intermediate model `res.groups.privilege`.
+   >    - `res.groups` references the privilege via `privilege_id` (pointing to `res.groups.privilege`).
+   > 2. **`users` renamed to `user_ids` on `res.groups`**: Declaring `<field name="users" .../>` on `res.groups` raises `ValueError: Invalid field 'users' in 'res.groups'`.
+   >
+   > **Standard Odoo 20 Security Groups XML Pattern**:
+   > ```xml
+   > <odoo>
+   >     <!-- 1. Application Category -->
+   >     <record id="module_category_<feature>" model="ir.module.category">
+   >         <field name="name">Feature Category</field>
+   >         <field name="sequence">25</field>
+   >     </record>
+   >
+   >     <!-- 2. Scope Privilege (links Category to Groups) -->
+   >     <record id="res_groups_privilege_<feature>" model="res.groups.privilege">
+   >         <field name="name">Feature Scope</field>
+   >         <field name="sequence">25</field>
+   >         <field name="category_id" ref="module_category_<feature>"/>
+   >     </record>
+   >
+   >     <!-- 3. Access Group (uses privilege_id and user_ids) -->
+   >     <record id="group_<feature>_user" model="res.groups">
+   >         <field name="name">User</field>
+   >         <field name="privilege_id" ref="res_groups_privilege_<feature>"/>
+   >         <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+   >         <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+   >     </record>
+   > </odoo>
+   > ```
+
 ---
 
 ### Phase 2: Python Code & Coding Standards (Section 4.1 & 4.3)
@@ -327,6 +379,15 @@ sequenceDiagram
   - Zero commented-out lines of code across all files (never leave `# my_code = 123` or `# print(...)`).
   - All hooks (`hooks.py`) and utility files must have clean docstrings on all functions, no floating empty lines before statements, and proper error handling.
   - Zero trailing whitespace and zero raw tabs (`\t`) in `.py`, `.js`, or `.xml` files.
+- **Import & Variable Hygiene (Criterion 4.4 - F401 & F841 - Blocking)**:
+  - **F401 (Unused Imports)**:
+    - Never leave unused module or symbol imports in any `.py` file.
+    - Common pitfall: when modernizing translations to `self.env._("...")`, developers often forget to remove `_` from `from odoo import api, fields, models, _`. This immediately fails Criterion 4.4 with `F401 'odoo._' imported but unused`.
+    - In `tests/`, only import test helpers or models actually instantiated or referenced.
+  - **F841 (Unused Local Variables)**:
+    - Never assign method return values to variables that are not subsequently read or asserted.
+    - Common pitfall in unit tests: writing `invoice = self.order._create_invoices()` without asserting `self.assertTrue(invoice)`. This immediately fails Criterion 4.4 with `F841 local variable 'invoice' is assigned to but never used`.
+    - Fix: Either assert `self.assertTrue(invoice)` or execute the action without assignment: `self.order._create_invoices()`.
 
 #### Odoo 20 Deprecated API Migrations
 
@@ -339,6 +400,8 @@ sequenceDiagram
 | `@api.constrains(...)`<br>`def _check(self):` without loop | `for record in self:` inside every constraint | Constraints must be multi-record safe. Never assign values inside a constraint. |
 | `_sql_constraints = [...]` | `models.Constraint(...)` | `_sql_constraints` is completely deprecated in Odoo 20. |
 | `groups_id` on `res.users` | `group_ids` | `groups_id` was renamed to `group_ids`. Using `groups_id` causes `KeyError` or install crash. |
+| `<field name="category_id" .../>` on `res.groups` | Use intermediate `res.groups.privilege` (`category_id` on privilege, `privilege_id` on `res.groups`) | `category_id` was removed from `res.groups` in Odoo 20. Direct usage causes `ValueError: Invalid field 'category_id' in 'res.groups'`. |
+| `<field name="users" .../>` on `res.groups` | `<field name="user_ids" .../>` | `users` was renamed to `user_ids` on `res.groups` in Odoo 20. Direct usage causes `ValueError: Invalid field 'users' in 'res.groups'`. |
 | `self._cr`, `self._context` | `self.env.cr`, `self.env.context` | Internal attributes are deprecated. |
 | `ir.attachment.create({'datas': b64})` | `ir.attachment.create({'raw': base64.b64decode(b64)})` | `datas` has been removed from `ir.attachment` in Odoo 20 and emits a `UserWarning`. |
 | Dynamic SQL joins without aliases (`JOIN rel_table ON ...`) | `JOIN rel_table AS rel_alias ON ...` | Self-referencing fields throw PostgreSQL `DuplicateAlias: table name specified more than once`. |
@@ -397,7 +460,10 @@ sequenceDiagram
    - No direct DOM manipulation: Use OWL refs (`useRef`) and reactive state instead of `document.getElementById` or jQuery `$`.
 
 4. **Static Assets & HTML Description (`static/description/`)**:
-   - Purge draft files: Delete any temporary files (e.g., `index1.html`, unreferenced mockups/draft images).
+   - **Mandatory Purge of `index1.html` and Draft Files (Criteria 1.5 & 6.2 - Blocking)**:
+     - While `index1.html` is used during migration as a temporary reference to extract legacy features and platform support (Odoo Online, Odoo.sh, On-Premise), it **must be permanently deleted** (`rm -f static/description/index1.html` and `git rm -f static/description/index1.html` if tracked) before concluding migration.
+     - Leaving `index1.html` in the module triggers failing scores under both Criterion 1.5 (60/100 unused file penalty) and Criterion 6.2 (70/100 junk submission penalty).
+     - Purge all unreferenced mockups, draft images, backup files (`*.bak`), and editor artifacts.
    - Container IDs: Replace copy-pasted container IDs (e.g., `#cybrosys-acc-kit`) with module-specific IDs (e.g., `#<technical_name>`).
 
 ---
@@ -521,6 +587,18 @@ if os.path.exists(manifest_p):
 print('[OK] 0 ir.model.access.csv files/references found. Passed Criterion 1.5 check.')
 "
 
+# 3b. Verify No index1.html or Draft Files Exist (Criteria 1.5 & 6.2 - Blocking)
+python3 -c "
+import os, sys
+
+base = 'migration/<technical_name>'
+draft_p = os.path.join(base, 'static', 'description', 'index1.html')
+if os.path.exists(draft_p):
+    print(f'[FAIL CRITERIA 1.5 & 6.2] Draft description file {draft_p} must be deleted before submission!')
+    sys.exit(1)
+print('[OK] 0 index1.html draft files found. Passed Criteria 1.5 & 6.2 check.')
+"
+
 # 4. Verify security/ir.access.csv Header and XML ID Format (Criterion 4.2 - Blocking)
 python3 -c "
 import csv, os, sys
@@ -550,11 +628,126 @@ else:
     print(f'[OK] security/ir.access.csv header and model_id:id XML IDs valid.')
 "
 
-# 5. Check for linter issues (pylint-odoo & ruff)
+# 4b. Verify res.groups XML Definitions (No deprecated category_id or users fields in res.groups)
+python3 -c "
+import os, sys
+import xml.etree.ElementTree as ET
+
+base = 'migration/<technical_name>'
+violations = []
+for root, _, files in os.walk(base):
+    for f in files:
+        if f.endswith('.xml'):
+            p = os.path.join(root, f)
+            try:
+                tree = ET.parse(p)
+                for rec in tree.findall('.//record'):
+                    if rec.get('model') == 'res.groups':
+                        for field in rec.findall('field'):
+                            fname = field.get('name')
+                            if fname == 'category_id':
+                                violations.append(f'{p}: res.groups uses deprecated category_id; use res.groups.privilege with privilege_id!')
+                            elif fname == 'users':
+                                violations.append(f'{p}: res.groups uses deprecated users field; use user_ids!')
+            except Exception:
+                pass
+
+if violations:
+    print(f'[FAIL CRITERION 4.2] Found {len(violations)} res.groups schema violation(s):')
+    for v in violations:
+        print(' ', v)
+    sys.exit(1)
+else:
+    print('[OK] res.groups definitions adhere to Odoo 20 privilege and user_ids schema.')
+"
+
+# 5. Check for linter issues (pylint-odoo & ruff / flake8 - Criterion 4.4)
 pylint --load-plugins=pylint_odoo --disable=all --enable=odoolint,attribute-string-redundant \
        --valid-odoo-versions=20.0 migration/<technical_name>
 
-ruff check migration/<technical_name>
+# Run ruff check (or flake8 fallback) for 0 errors (F401 unused imports, F841 unused variables)
+ruff check migration/<technical_name> 2>/dev/null || flake8 --max-line-length=120 --per-file-ignores="__init__.py:F401" migration/<technical_name>
+
+# 5b. Local AST Audit Script for Unused Imports (F401) and Unused Variables (F841)
+python3 -c "
+import ast, os, sys
+
+def check_unused_in_file(filepath):
+    if filepath.endswith('__init__.py'):
+        return []
+    with open(filepath, 'r', encoding='utf-8') as f:
+        try:
+            tree = ast.parse(f.read(), filename=filepath)
+        except Exception:
+            return []
+
+    imported_names = {}
+    assigned_vars = {}
+    used_names = set()
+
+    class Analyzer(ast.NodeVisitor):
+        def __init__(self):
+            self.func_depth = 0
+
+        def visit_Import(self, node):
+            for alias in node.names:
+                name = alias.asname or alias.name.split('.')[0]
+                imported_names[name] = node.lineno
+            self.generic_visit(node)
+
+        def visit_ImportFrom(self, node):
+            for alias in node.names:
+                name = alias.asname or alias.name
+                imported_names[name] = node.lineno
+            self.generic_visit(node)
+
+        def visit_FunctionDef(self, node):
+            self.func_depth += 1
+            self.generic_visit(node)
+            self.func_depth -= 1
+
+        def visit_AsyncFunctionDef(self, node):
+            self.func_depth += 1
+            self.generic_visit(node)
+            self.func_depth -= 1
+
+        def visit_Name(self, node):
+            if isinstance(node.ctx, ast.Store):
+                if self.func_depth > 0 and not node.id.startswith('_'):
+                    assigned_vars[(node.id, self.func_depth)] = node.lineno
+            elif isinstance(node.ctx, (ast.Load, ast.Del)):
+                used_names.add(node.id)
+            self.generic_visit(node)
+
+    analyzer = Analyzer()
+    analyzer.visit(tree)
+
+    violations = []
+    for name, lineno in imported_names.items():
+        if name not in used_names:
+            violations.append(f'{filepath}:{lineno} [F401 UNUSED IMPORT] \`{name}\` imported but unused')
+
+    for (name, depth), lineno in assigned_vars.items():
+        if name not in used_names:
+            violations.append(f'{filepath}:{lineno} [F841 UNUSED VARIABLE] Local variable \`{name}\` assigned but never used')
+
+    return violations
+
+base = 'migration/<technical_name>'
+all_v = []
+for root, _, files in os.walk(base):
+    for f in files:
+        if f.endswith('.py'):
+            all_v.extend(check_unused_in_file(os.path.join(root, f)))
+
+if all_v:
+    print(f'[FAIL CRITERION 4.4] Found {len(all_v)} violation(s):')
+    for v in all_v:
+        print(' ', v)
+    sys.exit(1)
+else:
+    print('[OK] Criterion 4.4: 0 F401 unused imports and 0 F841 unused variables found.')
+"
 
 # 6. Local AST Audit Script for Redundant String Attributes (pylint-odoo W8113)
 python3 -c "
@@ -643,15 +836,21 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
 ### Phase 7: Clean Packaging & Final Self-Review (Section 6.1 & 6.2)
 
 > [!CAUTION]
-> **Zero Junk Rule (6.2 - Blocking):** Running tests compiles bytecode (`__pycache__` and `.pyc`). You MUST run the purge commands immediately after testing. Even if the user requests to compress the zip manually, the module directory must be left completely purged of `__pycache__` and `.pyc`.
+> **Zero Junk Rule (6.2 - Blocking):** Running tests compiles bytecode (`__pycache__` and `.pyc`). You MUST run the purge commands immediately after testing. Furthermore, all draft files (`static/description/index1.html`) must be permanently deleted. Even if the user requests to compress the zip manually, the module directory must be left completely purged of `__pycache__`, `.pyc`, and `index1.html`.
 
-1. **Purge Junk Files (Mandatory across all module files)**:
+1. **Purge Junk and Draft Files (Mandatory across all module files)**:
    ```bash
    cd /home/cybrosys/odoo20/migration/<technical_name>
+   # Purge temporary draft/backup description files (Criteria 1.5 & 6.2)
+   rm -f static/description/index1.html
+   git rm -f static/description/index1.html 2>/dev/null || true
+
+   # Purge bytecode and junk
    find . -type d -name "__pycache__" -exec rm -rf {} +
    find . -type f -name "*.pyc" -delete
    find . -type f -name ".DS_Store" -delete
    find . -type f -name "*~" -delete
+   find . -type f -name "*.bak" -delete
    ```
 
 2. **Build Clean Archive (If building zip)**:
@@ -698,6 +897,10 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] Every model and wizard has an entry in `security/ir.access.csv`.
   - [ ] Least privilege enforced: infrastructure, connector, and credential models restricted to `base.group_system`.
   - [ ] Sensitive credential fields declare `groups="base.group_system"`.
+  - [ ] **Security Groups Modernization (`res.groups`)**:
+    - [ ] `category_id` removed from `res.groups` and declared on intermediate `res.groups.privilege`.
+    - [ ] `res.groups` uses `privilege_id` referencing `res.groups.privilege`.
+    - [ ] `user_ids` used instead of deprecated `users` on `res.groups`.
 - [ ] **Code Modernization (Odoo 20)**:
   - [ ] `fields.Date.context_today(self)` instead of `fields.Date.today()`.
   - [ ] `create(self, vals_list)` handles dict or list safely without crashing.
@@ -716,14 +919,17 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] QWeb reports: `table-condensed` converted to `table-sm`.
   - [ ] QWeb reports: No obsolete `align="center"` / `align="right"`; uses `class="text-center"` / `class="text-end"`.
   - [ ] JS uses OWL services (`useService`), no `var self = this`, no direct DOM access.
-- [ ] **Tests & Linters (Section 5)**:
+- [ ] **Tests & Linters (Section 5 & Criterion 4.4 - Blocking)**:
   - [ ] Clean install & unit tests pass on fresh database **WITHOUT demo data** (`--without-demo=all`) with **0 failed, 0 errors**.
   - [ ] Clean install & unit tests pass on fresh database **WITH demo data** with **0 failed, 0 errors**.
   - [ ] Unit tests cover 100% of public model functions and actions.
   - [ ] Test record creation populates all `required=True` fields.
   - [ ] Title assertions in tests match the correct singular/plural report title.
   - [ ] `models/` code coverage is >= 80%.
-  - [ ] `pylint-odoo` returns **0 errors and 0 warnings** (strictly 0 `W8113` redundant string warnings), and `ruff` returns 0 errors.
+  - [ ] `pylint-odoo` returns **0 errors and 0 warnings** (strictly 0 `W8113` redundant string warnings).
+  - [ ] `ruff` / `flake8` returns **0 errors** (strictly 0 `F401` unused imports and 0 `F841` unused local variables).
+  - [ ] Zero unused imports (`F401`): Remove unused imports immediately, especially after refactoring translation calls (e.g. `from odoo import _` when using `self.env._(...)`).
+  - [ ] Zero unused local variables (`F841`): Every assigned variable in models and tests must be asserted or used (e.g. `self.assertTrue(invoice)` rather than dangling `invoice = ...`).
 - [ ] **Documentation Parity & Grammar (Section 6.3)**:
   - [ ] No "allows to + verb" (use "allows users to + verb" or "allows + verb-ing").
   - [ ] Singular vs Plural: Report title and descriptions match single vs multiple records.
@@ -734,5 +940,6 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] `README.rst` headings and license are properly formatted.
   - [ ] `doc/RELEASE_NOTES.md` has ISO date and "Odoo 20" title.
 - [ ] **Packaging (Section 6.2)**:
+  - [ ] **Purge `index1.html` (Criterion 1.5 & 6.2 - Blocking)**: `static/description/index1.html` permanently deleted (0 occurrences on disk or in git).
   - [ ] Zero `__pycache__`, `.pyc`, `.gitkeep`, or unused asset files.
   - [ ] Zip named `<technical_name>-20.0.1.0.0.zip` with module folder at root.

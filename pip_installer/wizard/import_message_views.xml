@@ -10,7 +10,7 @@
                     <field name="message"/>
                 </sheet>
                 <footer>
-                    <button string="OK" class="btn-danger"
+                    <button string="OK" class="btn-primary"
                             special="cancel"/>
                 </footer>
             </form>
