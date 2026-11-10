@@ -1,6 +1,7 @@
-## Module <gatepass_slip>
+## Module gatepass_slip
 
-#### 14.09.2026
+#### 2026-11-10
 #### Version 20.0.1.0.0
-##### ADD
-- Initial commit for Delivery Gate Pass
+#### ADD
+
+- Initial release for Odoo 20: Delivery gate pass slip generation for delivery orders.

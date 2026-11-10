@@ -75,8 +75,14 @@ To prevent errors and ensure thorough quality control, follow this sequential ex
 
 ### Phase 1: Workspace Setup & Backup
 1. **Preserve Legacy Content as Temporary Reference**:
-   - Rename existing `static/description/index.html` to `static/description/index1.html`.
-   > [!IMPORTANT]
+   - Copy existing `static/description/index.html` to `static/description/index1.html`:
+     ```bash
+     cp static/description/index.html static/description/index1.html
+     ```
+   > [!CAUTION]
+   > **Do NOT use `git mv` (Criterion 1.2 Protection):**
+   > Never use `git mv` or move the original `index.html`. Moving it stages `index.html` as deleted in Git. If the new `index.html` is generated on disk but not staged with `git add`, the committed tree contains `index1.html` while `index.html` is missing, triggering a blocking failure under **Criterion 1.2** (*"Missing required static/description/index.html is NOT in the tree (index1.html is present, but manifest references index.html)"*). Always copy (`cp`), keeping `index.html` present and tracked.
+   >
    > `index1.html` is strictly a **temporary migration scratchpad and source-of-truth reference**. It is used during Phases 2–9 to extract legacy features, workflows, and platform availability (Odoo Online, Odoo.sh, On-Premise) and kept for manual user comparison. The assistant **must NOT delete `index1.html` automatically**; instead, the assistant must retain it for the developer's manual review and provide an explicit reminder to the developer to delete it before final submission (as leaving it triggers automatic AI Review failures under Criterion 1.5 and Criterion 6.2).
 2. **Initialize New Template from Master Reference**:
    - Copy the master structure:
@@ -175,7 +181,7 @@ Replace all generic accounting Q&As with 3 tailored, accurate module FAQs:
 * **Tile 1 (Release Tile)**:
   - Badge: `RELEASE` (pill in red `#b12126`).
   - Version: `v20.0.1.0.0`.
-  - Date: Current release month and year (e.g. `October 2026`).
+  - Date: Current release month and year matching migration time (e.g. `November 2026`). Never leave hardcoded past dates from earlier migration runs.
   - Description: `Initial release for Odoo 20.`
 
 ---
@@ -220,18 +226,20 @@ The related modules section displays 3 cards linking to official Cybrosys Odoo A
 
 **Developer Manual Cleanup Instructions (Before Final Submission)**:
 1. Complete manual comparison between `index.html` and `index1.html`.
-2. Permanently delete `index1.html`:
+2. Permanently delete `index1.html` (Criteria 1.5 & 6.2):
    ```bash
    rm -f static/description/index1.html
-   ```
-3. Remove from Git tracking (if previously tracked):
-   ```bash
    git rm -f static/description/index1.html 2>/dev/null || true
    ```
-4. Verify absence before committing:
+3. Ensure the real `index.html` is staged in Git (Criterion 1.2):
    ```bash
-   test ! -f static/description/index1.html && echo "OK: index1.html successfully purged."
+   git add static/description/index.html
    ```
+4. Verify Git tree status for `static/description/`:
+   ```bash
+   git ls-files static/description/
+   ```
+   *(Must show `static/description/index.html` and NEVER show `index1.html`)*
 
 ---
 
@@ -241,6 +249,7 @@ Before declaring the `index.html` update complete, perform the following automat
 
 | Audit Item | Validation Command / Method | Acceptance Criteria |
 | :--- | :--- | :--- |
+| **Git Tree Required Files (1.2)** | `git ls-files static/description/` | `static/description/index.html` is tracked; `index1.html` is completely absent. |
 | **No Stale Boilerplate** | `grep -E "Accounting Kit|chart of accounts|PDC" index.html` | 0 unexpected hits (unless module is accounting). |
 | **Title Accuracy** | `grep "<title>" index.html` | Must match current module display name and Odoo 20. |
 | **Deployment Coverage** | Inspect `index.html` Capability Rail & FAQ Q1 | All 5 targets (Community, Enterprise, Odoo.sh, On-Premise, and Odoo Online) rendered as fully supported with solid checkmark badges unless explicitly exempted. |
@@ -248,5 +257,6 @@ Before declaring the `index.html` update complete, perform the following automat
 | **Link Parity** | Verify all `href` attributes in Related Modules | Valid `https://apps.odoo.com/apps/modules/...` URLs. |
 | **Grammar Standards** | Scan for phrases like "allows to [verb]" or broken pluralization | Clean active voice (*"Allows users to view..."* or *"Enables direct access..."*). |
 | **Table Tags Closed** | `grep -c "<table>" index.html` vs `grep -c "</table>" index.html` | Opening and closing tag counts match exactly. |
+| **Release Note Date** | Inspect release tile in `cak-pane-4` | Reflects current release month and year (e.g. `November 2026`), never outdated past dates. |
 | **User Deletion Reminder** | Explicit reminder in assistant's response | Assistant leaves `index1.html` intact for manual comparison and explicitly reminds user to delete it before final submission. |
 | **Clean Repo State (Pre-Submission)** | `git status` (run by user after manual deletion) | `index1.html` manually deleted by user before commit, 0 untracked junk files, 0 `.pyc` files. |

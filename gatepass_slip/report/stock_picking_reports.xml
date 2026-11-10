@@ -16,14 +16,14 @@
         <field name="header_spacing">40</field>
         <field name="dpi">90</field>
     </record>
-    <!--Generate the pdf report-->
+    <!-- Generate the pdf report -->
     <record id="action_generate_gatepass" model="ir.actions.report">
         <field name="name">Gate Pass</field>
         <field name="model">stock.picking</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">gatepass_slip.report_gatepass_slip</field>
         <field name="paperformat_id" ref="gatepass_slip.paperformat_gatepass"/>
-        <field name="binding_model_id" ref="model_stock_picking"/>
+        <field name="binding_model_id" ref="stock.model_stock_picking"/>
         <field name="binding_type">report</field>
     </record>
 </odoo>

@@ -9,10 +9,14 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
 from odoo import fields, models
@@ -28,7 +32,7 @@ class ProductTemplate(models.Model):
         relation='product_template_res_users_rel',
         column1='product_template_id',
         column2='res_users_id',
-        string="Restrict users",
+        string="Restrict Users",
         help="Restrict the users for particular products")
     is_product = fields.Boolean(string='Product Restriction',
                                 default=True,
@@ -36,10 +40,3 @@ class ProductTemplate(models.Model):
     is_category = fields.Boolean(string='Category Restriction',
                                  default=True,
                                  help="Enable category restriction")
-
-    def write(self, vals):
-        """Clear access caches when product restrictions are changed."""
-        res = super().write(vals)
-        if 'restrict_user_ids' in vals:
-            self.env['ir.access']._clear_caches()
-        return res

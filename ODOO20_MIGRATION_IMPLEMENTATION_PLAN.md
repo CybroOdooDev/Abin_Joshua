@@ -23,10 +23,13 @@ graph TD
   2. On a fresh database **WITH** demo data.
 * **Unit Tests Pass (Double Weight)**: At least one test file in `tests/`, tagged `@tagged('post_install', '-at_install')`, **0 errors, 0 failures** across both environments.
 * **100% Public Method & Action Coverage**: Every public model method, compute method, constraint, button action (`action_*`), and wizard print/submit action must have a dedicated test case.
-* **Code Linters & Static Analysis (Blocking)**: `pylint-odoo` reports **0 errors and 0 warnings** (strictly 0 `W8113` redundant string warnings), and `ruff` / `flake8` reports **0 errors** (strictly 0 `F401` unused imports and 0 `F841` unused local variables).
+* **Code Linters & Static Analysis (Blocking)**: `pylint-odoo` reports **0 errors and 0 warnings** (strictly 0 `W8113` redundant string warnings, strictly 0 `W8161` translation method warnings), and `ruff` / `flake8` reports **0 errors** (strictly 0 `F401` unused imports and 0 `F841` unused local variables).
 
 ### Stage 2: AI Reviewer (Criteria 1.1 – 6.3)
-* **Structure & Manifest**: Exact `depends`, all files referenced exist, no dead assets.
+* **Criterion 1.2: Structure and Required Files (Blocking)**:
+  - Every module MUST contain `static/description/index.html` tracked and committed in the Git repository tree.
+  - The module description `static/description/index.html`, module icon `static/description/icon.png`, and release notes `doc/RELEASE_NOTES.md` are standard required files.
+  - **Git Tree Rename Pitfall**: Never use `git mv static/description/index.html static/description/index1.html`. Renaming stages `index.html` as deleted in Git. If a new `index.html` is generated on disk but not staged with `git add`, the committed tree contains `index1.html` while `index.html` is missing, triggering a blocking failure under Criterion 1.2 (*"Missing required static/description/index.html is NOT in the tree (index1.html is present, but manifest references index.html)"*). Always copy (`cp`), stage the new `index.html`, and verify with `git ls-files static/description/`.
 * **Criterion 1.5: No Missing, Unused or Duplicate Files (Blocking - Score Penalty down to 40/100 or 60/100)**:
   - **Mandatory Deprecation of `security/ir.model.access.csv` in Odoo 20**:
     In Odoo 20, the legacy access control file `security/ir.model.access.csv` is completely deprecated and replaced by `security/ir.access.csv`.
@@ -43,6 +46,18 @@ graph TD
     - In Odoo 20, using `security/ir.model.access.csv` instead of `security/ir.access.csv` is considered an outdated coding pattern and triggers a blocking **40/100** score under Criterion 4.1 (*"ir.model.access.csv is used instead of ir.access.csv which is required in Odoo 20"*).
     - Note the **Dual-Criterion Blocking Penalty**: retaining `ir.model.access.csv` penalizes **both** Criterion 1.5 (obsolete file) and Criterion 4.1 (outdated coding standard).
     - The module must strictly use the unified 6-column format in `security/ir.access.csv`: `id,name,model_id:id,group_id:id,operation,domain`.
+  - **Strict Prohibition of XML `<record model="ir.access">` for Record Rules**:
+    - In Odoo 20, both access rights and row-level record rules (restrictions with domains) are unified in `ir.access` and **MUST** be defined in `security/ir.access.csv`.
+    - **NEVER** define `<record model="ir.access">` inside XML files for record rules or access control. Doing so triggers a severe AI Review failure (40/100 on Criterion 4.1: *"The module uses the model 'ir.access' for record rules... This is a critical code error"* and 30/100 on Criterion 4.2).
+    - In Odoo 20, XML files under `security/` are strictly reserved for declaring security groups (`res.groups`, `res.groups.privilege`). All record rules and permissions belong in `security/ir.access.csv`.
+  - **Valid Domain Syntax in `security/ir.access.csv` / Security Domains (Strict AI Review Standard)**:
+    - Security domains in `security/ir.access.csv` **MUST** be written as valid Odoo domain lists using standard prefix notation with pure field-operator-value tuples (e.g. `['|', cond1, cond2]`).
+    - **Strict Prohibition of Ternary Operators**: NEVER use Python ternary operators anywhere in domain strings (neither returning lists like `[...] if cond else [...]` nor inside tuples like `(1, '=', 1 if cond else 0)`). Any ternary operator in a domain string triggers immediate AI Review failures: Criterion 4.1 (20/100 - *"not a valid Odoo domain expression. It contains ternary operators"*) and Criterion 5.3 (30/100 - *"Main functionality is broken due to the invalid domain syntax"*).
+    - **No Method Calls in Domains**: Never call methods like `user.has_group(...)` in domain strings; this triggers `Unsafe function access` security warnings.
+    - **No Computed Field References**: Never reference `@api.depends` computed fields (like `user.is_admin`) in security domains. The AI reviewer rejects computed field evaluation in domain contexts.
+    - **Standard Odoo Domain Pattern**: Use ONLY simple field conditions matching core Odoo conventions: `[('field', 'operator', user.attribute)]` or `[('field', 'operator', literal)]`. Core examples: `[('user_id', '=', user.id)]`, `['|', ('restrict_user_ids', '=', False), ('restrict_user_ids', 'in', [user.id])]`.
+    - **Admin Bypass via Permission Row**: To grant full access to administrators/managers, add a separate row in `ir.access.csv` with `group_id:id = base.group_erp_manager` and an empty domain (`kind='permission'`). Because permissions are OR-ed in Odoo 20, managers bypass restrictions without needing conditional bypasses in the restriction domain itself.
+    - **Conditional Logic Belongs in Models**: When restrictions involve conditional logic (e.g. product vs category vs open access), compute and store the permitted records into a relational field (e.g. `restrict_user_ids` on the target model) rather than attempting to encode complex conditional Python logic inside the domain string.
   - **PEP8 & Multi-Record Safety**: PEP8 (no ambiguous variables like E741 `l`, `O`, `I`), multi-record safe methods, loop inside `@api.constrains`.
   - **SQL Injection Prevention**: Regex identifier validation (`^[A-Za-z0-9_]+$`), backtick/quote escaping, parameterized queries.
   - **Field Type Mapping Casing**: Exact lowercase `'many2one'` (never uppercase `'Many2one'`).
@@ -53,6 +68,14 @@ graph TD
     - In `security/ir.access.csv`, the model reference column header **MUST** be `model_id:id` (with `:id` suffix) and its value **MUST** strictly reference the model's XML ID: `model_<technical_name_underscored>` (e.g. `model_undo_redo`).
     - **NEVER** use raw technical dot-notation model names (e.g. `undo.redo`) in `ir.access.csv`. Referencing raw dot-notation triggers an automatic blocking **40/100** score under Criterion 4.2 (*"security/ir.access.csv references model_id as '<model_name>' instead of the proper XML ID format"*).
   - **Security Groups Header**: Group references column header **MUST** be `group_id:id` (e.g. `undo_redo.group_undo_redo_user`, `base.group_user`).
+  - **Row-Level Record Rules (Restrictions) in `security/ir.access.csv`**:
+    - To define a row-level record rule (global restriction) in Odoo 20, add an entry to `security/ir.access.csv` with:
+      - `id`: Unique XML ID (e.g. `<module>_rule_<name>`)
+      - `name`: Descriptive rule name
+      - `model_id:id`: Target model XML ID (e.g. `product.model_product_template`)
+      - `group_id:id`: **Leave blank** for global restrictions, or specify a group for group-specific permissions
+      - `operation`: Operations covered (`crud`, `r`, `cu`, etc.)
+      - `domain`: Valid Odoo prefix-notation domain string
   - **Complete Model Coverage**: Every single model (`models.Model`) and transient model / wizard (`models.TransientModel`) MUST have an access row in `security/ir.access.csv`.
   - **Strict Least Privilege**: Infrastructure, database connector, and credential models must be restricted to `base.group_system`, not `base.group_user`. Sensitive password/secret fields must specify `groups="base.group_system"`. Audit log and synchronization models must have complete views and menus.
 * **Criterion 4.3: No Debug or Deprecated Code (Blocking - Score Penalty down to 40/100)**:
@@ -70,8 +93,13 @@ graph TD
     - Clean standard 4-space indentation across all Python logic.
 * **Criterion 4.4: Code Checkers (pylint-odoo & ruff / flake8 - Blocking - Score Penalty down to 40/100)**:
   - **Zero Linter Errors or Warnings**:
-    - `pylint-odoo` must report **0 errors and 0 warnings** (specifically 0 `W8113` redundant string warnings).
+    - `pylint-odoo` must report **0 errors and 0 warnings** (specifically 0 `W8113` redundant string warnings and 0 `W8161` translation method warnings).
     - `ruff` / `flake8` must report **0 errors** across all module files including `models/`, `wizard/`, `report/`, `controllers/`, and `tests/`.
+  - **Zero Translation Warnings (W8161 - Blocking)**:
+    - In Odoo 18/20, `pylint-odoo` enforces `W8161` (*"Better using self.env._"*).
+    - Inside any method of `models.Model` or `models.TransientModel` (or wherever `self.env` is available), **ALWAYS** use `self.env._("...")` instead of standalone `_("...")`.
+    - Calling `_("...")` directly inside model/wizard methods triggers `W8161`.
+    - When updating to `self.env._()`, remove `from odoo import _` from imports if `_` is not used elsewhere in the file to prevent `F401` (*"unused import"*).
   - **Zero Unused Imports (F401 - Blocking)**:
     - Absolute prohibition against unused imports across models, wizards, controllers, and tests.
     - Specifically beware when refactoring translations: when replacing `_("...")` with `self.env._("...")`, ensure `from odoo import _` is removed from imports if `_` is no longer used directly.
@@ -191,13 +219,20 @@ sequenceDiagram
 ### Phase 1: Manifest, Dependencies & Security (Section 3.1 & 4.2)
 
 1. **Manifest File (`__manifest__.py`)**:
-   - `version`: `'20.0.1.0.0'`
+   - `version`: `'20.0.1.0.0'` (must match `20.0.x.y.z` format; avoids `pylint-odoo` C8106 `manifest-version-format`).
    - `license`: `'LGPL-3'`
-   - `author` & `company`: `'Cybrosys Techno Solutions'`
+   - `author` & `company`: `'Cybrosys Techno Solutions'` (avoids `pylint-odoo` C8101 `manifest-required-author`).
    - `maintainer`: `'Cybrosys Techno Solutions'`
    - `website`: `'https://www.cybrosys.com'`
    - `images`: `['static/description/banner.jpg']`
    - **Summary formatting**: Exactly one grammatically correct sentence ending with a period.
+   - **Category Precision**: Choose standard, semantically accurate categories matching Odoo App Store taxonomies. For example, modules modifying product availability, catalog restrictions, quotations, or customer sales workflows must declare `'category': 'Sales'` (or `'Sales/Sales'`). Never misclassify sales or user catalog restrictions under generic `'Inventory'` or `'Extra Tools'`.
+   - **Manifest Hygiene & Pylint Compliance (`pylint-odoo` odoolint)**:
+     - **No Deprecated Keys (C8103 `manifest-deprecated-key`)**: Do NOT declare `'description'` in `__manifest__.py`. Module documentation resides exclusively in `README.rst` and `static/description/index.html`.
+     - **No Superfluous Default Keys (C8116 `manifest-superfluous-key`)**: Omit manifest keys that match Odoo's default values:
+       - Omit `'installable': True` (default is `True`).
+       - Omit `'auto_install': False` (default is `False`).
+       - Omit `'application': False` (default is `False`; only specify `'application': True` if the module is a standalone application).
    - **Narrow Dependencies**:
      - Do NOT include `'base'` if other modules (like `'sale'`, `'hr_timesheet'`, etc.) are listed.
      - Only list modules whose models, fields, or XML records are directly used.
@@ -284,6 +319,22 @@ sequenceDiagram
      - Never leave models accessible to public users unless specifically required and secured.
      - `security/ir.model.access.csv` MUST be permanently deleted from disk and git.
 
+   - **Row-Level Record Rules (Restrictions) in `security/ir.access.csv` (No XML `<record model="ir.access">`)**:
+     - In Odoo 20, row-level record rules (formerly `ir.rule`) are defined directly in `security/ir.access.csv` as global restrictions or group-specific rules.
+     - **Global Restriction (AND-ed across all users)**:
+       Leave `group_id:id` **empty/blank**. When `group_id` is empty, Odoo 20 computes `kind = 'restriction'`, meaning the rule acts as a global filter that is AND-ed with all model permissions.
+       ```csv
+       id,name,model_id:id,group_id:id,operation,domain
+       product_template_access_erp_manager,Product Template Full Access for ERP Managers,product.model_product_template,base.group_erp_manager,crud,
+       product_template_restriction_all_users,Product Template Restriction for Restricted Users,product.model_product_template,,crud,"['|', ('restrict_user_ids', '=', False), ('restrict_user_ids', 'in', [user.id])]"
+       ```
+     - **Domain Best Practices in `security/ir.access.csv` (AI Review Compliance)**:
+       1. **Valid Prefix Notation**: Always format the domain as a valid Odoo prefix list of tuples (`['|', ... , (...)]`). Never wrap the entire domain in raw Python ternary statements (`[(1, '=', 1)] if cond else [...]`).
+       2. **Strict Prohibition of Ternary Operators**: NEVER use Python ternary operators anywhere in domain strings (neither returning lists nor inside tuples like `(1, '=', 1 if cond else 0)`). Any ternary operator in a domain string triggers immediate AI Review failures under Criterion 4.1 (20/100) and Criterion 5.3 (30/100).
+       3. **Safe Attribute Evaluation**: In `safe_eval` domains, evaluate against user record **stored** fields/attributes (e.g. `user.id`, `user.partner_id.id`). Avoid calling arbitrary model methods (`user.has_group(...)`) as they trigger `Unsafe function access`. Never reference computed fields (`user.is_admin`) — they are rejected by the AI reviewer.
+       4. **Bypass for Administrators via Permission Row (NOT domain conditions)**: Never embed admin bypass logic inside the global restriction domain. Instead, add a **separate permission row** in `ir.access.csv` with `group_id:id = base.group_erp_manager` and an **empty domain**. When `group_id` is set, Odoo 20 computes `kind = 'permission'`, which is OR-ed with other permissions, guaranteeing managers always pass without touching the global restriction domain.
+       5. **Encode Complex Conditional Logic in Models**: If business requirements dictate multiple restriction modes (e.g. per-product vs per-category vs unrestricted), map the allowed records into a Many2many relationship on the target model (e.g. `restrict_user_ids`) and use the simple canonical domain: `['|', ('restrict_user_ids', '=', False), ('restrict_user_ids', 'in', [user.id])]`. This guarantees the domain expression is completely standard, static, and passes all AI Review checks.
+
 3. **Security Groups Architecture Migration (`res.groups` & `res.groups.privilege`) in Odoo 20**:
    > [!IMPORTANT]
    > **Odoo 20 Breaking Changes in `res.groups` Definitions**:
@@ -365,13 +416,15 @@ sequenceDiagram
   - `@api.constrains`: Always loop `for record in self:`. Never assign values inside constraints.
   - Action methods expecting a single record must call `self.ensure_one()`.
   - Action return dictionaries must have python dict contexts (e.g. `'context': {'create': False}`).
-- **Translatable Strings & Translations**:
-  - Use `self.env._()` inside model methods (preferred in modern Odoo 18+) or `_()` from `odoo`:
+- **Translatable Strings & Translations (`pylint-odoo` W8161 - Zero Tolerance)**:
+  - In Odoo 20, **ALWAYS** use `self.env._()` inside model, wizard, and controller methods:
     ```python
     raise UserError(self.env._("Start date must be earlier than or equal to end date."))
     ```
+  - **NEVER** use standalone `_()` inside model/wizard methods. Calling `_("...")` directly triggers `pylint-odoo` warning **`W8161`** (*"Better using self.env._"*).
+  - When switching from `_()` to `self.env._()`, remember to remove `from odoo import _` from imports if `_` is not used elsewhere in the file, preventing `ruff`/`flake8` **`F401`** (*"unused import"*).
   - Use named placeholders: `self.env._("Order %(name)s confirmed", name=self.name)`.
-  - Never use positional `%s` formatting with `_()` or `self.env._()`.
+  - Never use positional `%s` formatting with `self.env._()`.
 - **Exceptions**:
   - No blind `except Exception: pass`. Catch specific errors, log with `_logger.exception` or `_logger.warning`, and raise translated `UserError` or `ValidationError`.
 - **Cleanliness & Criterion 4.3 (No Debug or Deprecated Code - Blocking)**:
@@ -394,6 +447,12 @@ sequenceDiagram
 | Old / Deprecated Pattern | Odoo 20 Standard Pattern | Reason / Pitfall Avoided |
 |---|---|---|
 | `security/ir.model.access.csv` (8-column legacy format) | `security/ir.access.csv` (6-column unified format: `id,name,model_id:id,group_id:id,operation,domain`) | Completely deprecated in Odoo 20. Triggers multi-criterion blocking penalty: fails Criterion 1.5 (40/100) and Criterion 4.1 Coding Standards (40/100). Furthermore, `model_id:id` MUST use the proper XML ID format (`model_<technical_name>`); using raw dot-notation (e.g. `undo.redo`) triggers a blocking 40/100 failure under Criterion 4.2. Must be converted to `ir.access.csv` with XML ID format and legacy CSV permanently deleted. |
+| XML `<record model="ir.access">` for record rules | Define in `security/ir.access.csv` with 6 columns | In Odoo 20, both access rights and record rules are unified in `security/ir.access.csv`. Defining `<record model="ir.access">` in XML triggers AI review failure (Criterion 4.1: "The module uses model 'ir.access' for record rules"). XML in `security/` is strictly for security groups. |
+| XML `<record model="ir.rule">` | Define in `security/ir.access.csv` | `ir.rule` model was completely deleted in Odoo 20. Defining `<record model="ir.rule">` crashes real Odoo 20 (`KeyError: 'ir.rule'`). Use `security/ir.access.csv` with empty `group_id:id` for global restrictions. |
+| Python ternary expressions in domain (`[(1, '=', 1)] if ... else [...]` or `(1, '=', 1 if ... else 0)`) | Pure prefix notation domain list with simple attribute/literal values: `['|', cond1, cond2]` | Strictly forbidden by AI Reviewer (fails Criterion 4.1 20/100 and Criterion 5.3 30/100). Never use ternary expressions anywhere in domains. Encode conditional logic in models and use pure tuple conditions (e.g. `['|', ('restrict_user_ids', '=', False), ('restrict_user_ids', 'in', [user.id])]`). |
+| Method calls in domain (`user.has_group(...)`) | Stored field access: `user.restricted_type`, `user.allowed_product_ids.ids` | In Odoo 20, executing model instance methods in `safe_eval` domains triggers `Unsafe function access`. Computed fields like `user.is_admin` are also rejected by the AI reviewer. Use only stored fields/relationship attributes on `user`. |
+| Computed field reference in security domain (`user.is_admin`) | Separate permission row for admin group | Add a row with `group_id:id = base.group_erp_manager` and empty domain (kind=permission) instead of referencing `user.is_admin` in the global restriction domain. |
+| `self.env['ir.access']._clear_caches()` in model `write()` | Remove the `write()` override entirely | Cache invalidation is handled automatically by the ORM when `ir.access` or related model records are written. The AI reviewer may flag `_clear_caches()` as non-standard even though it exists in Odoo 20 source. |
 | `'security/ir.model.access.csv'` in manifest `'data'` | `'security/ir.access.csv'` in `'data'` | Manifest must reference the new unified `ir.access.csv` file. |
 | `fields.Date.today()` | `fields.Date.context_today(self)` | `today()` ignores the user's timezone; `context_today(self)` is timezone-aware. |
 | `def create(self, vals):` iterating `vals` | `def create(self, vals_list):` handle both list and dict: `vals_list = [vals_list] if isinstance(vals_list, dict) else vals_list` or call `super().create(vals_list)` | In Odoo, `create` receives a list of dicts for batch creation or a dict in test calls. Iterating a dict iterates its keys and crashes! |
@@ -404,6 +463,8 @@ sequenceDiagram
 | `<field name="users" .../>` on `res.groups` | `<field name="user_ids" .../>` | `users` was renamed to `user_ids` on `res.groups` in Odoo 20. Direct usage causes `ValueError: Invalid field 'users' in 'res.groups'`. |
 | `self._cr`, `self._context` | `self.env.cr`, `self.env.context` | Internal attributes are deprecated. |
 | `ir.attachment.create({'datas': b64})` | `ir.attachment.create({'raw': base64.b64decode(b64)})` | `datas` has been removed from `ir.attachment` in Odoo 20 and emits a `UserWarning`. |
+| `assertIn(b'...', attachment.raw)` in tests | `assertIn(b'...', bytes(attachment.raw))` or `assertIn(b'...', attachment.raw.content)` | In Odoo 20, `ir.attachment.raw` returns a lazy filestore wrapper `LocalBinaryFile` (`BinaryValue` / `collections.abc.Buffer`). `LocalBinaryFile` implements `__bytes__` but does NOT implement `__iter__` or `__contains__`. Asserting membership `b'...' in attachment.raw` raises `TypeError: argument of type 'LocalBinaryFile' is not iterable`. Always cast with `bytes(attachment.raw)` or use `.content` in test assertions. |
+| `calendar.event` organizer creation (`partner_id=...`) | Provision user and set `user_id=user.id` | On `calendar.event`, `partner_id` is defined as `related='user_id.partner_id', readonly=True`. Passing `partner_id` in `calendar.event.create({...})` is silently ignored by the ORM; `user_id` falls back to `self.env.user` (in tests, `base.user_root` / OdooBot with email `odoobot@example.com`). To specify an organizer, always create a `res.users` record and pass `'user_id': user.id`. |
 | Dynamic SQL joins without aliases (`JOIN rel_table ON ...`) | `JOIN rel_table AS rel_alias ON ...` | Self-referencing fields throw PostgreSQL `DuplicateAlias: table name specified more than once`. |
 | Redundant `string` on fields (`name = fields.Char(string='Name')`, `table_name = fields.Char(string='Table Name')`, `user_id = fields.Many2one('res.users', string='User')`, `mode = fields.Selection(..., string='Mode')`) | `name = fields.Char()`, `table_name = fields.Char()`, `user_id = fields.Many2one('res.users')`, `mode = fields.Selection(...)` | Fails `pylint-odoo` W8113 (`attribute-string-redundant`). Odoo automatically title-cases regular field names and strips `_id` on relational fields. Omit `string=` unless the label intentionally differs from the auto-generated title. |
 | Function default without lambda (`default=self.foo`) | `default=lambda self: self.foo()` | Fails `pylint-odoo` E8148 (breaks inheritability). |
@@ -496,6 +557,16 @@ sequenceDiagram
 6. **Coverage Target**:
    - Test the happy path, edge cases, error conditions, date validations, and constraints.
    - Ensure statement coverage of `models/`, `wizard/`, and `report/` is **>= 80%**.
+7. **Common Odoo 20 Test Pitfalls & ORM Edge Cases**:
+   - **`ir.attachment.raw` Content Testing (`TypeError: 'LocalBinaryFile' is not iterable`)**:
+     - In Odoo 20, `ir.attachment.raw` returns a `LocalBinaryFile` (lazy filestore proxy) rather than raw Python `bytes`.
+     - `LocalBinaryFile` implements `__bytes__`, but does NOT implement `__iter__` or `__contains__`.
+     - ✗ `self.assertIn(b'BEGIN:VCALENDAR', attachment.raw)` ➔ **Crashes with TypeError!**
+     - ✓ `self.assertIn(b'BEGIN:VCALENDAR', bytes(attachment.raw))` OR `self.assertIn(b'BEGIN:VCALENDAR', attachment.raw.content)`
+   - **Readonly Related Fields in Test Record Creation (`calendar.event.partner_id`)**:
+     - Never attempt to set readonly related fields directly in `create({...})` calls.
+     - On `calendar.event`, `partner_id` is related to `user_id.partner_id` with `readonly=True`. Passing `partner_id=...` in `create()` is silently ignored by the ORM, defaulting `user_id` to `self.env.user` (`base.user_root` / `odoobot@example.com`).
+     - Always provision a `res.users` record and set the source relational field (e.g. `'user_id': cls.organizer_user.id`).
 
 ---
 
@@ -663,7 +734,8 @@ else:
 
 # 5. Check for linter issues (pylint-odoo & ruff / flake8 - Criterion 4.4)
 pylint --load-plugins=pylint_odoo --disable=all --enable=odoolint,attribute-string-redundant \
-       --valid-odoo-versions=20.0 migration/<technical_name>
+       --valid-odoo-versions=20.0 --manifest-required-authors="Cybrosys Techno Solutions" \
+       migration/<technical_name>
 
 # Run ruff check (or flake8 fallback) for 0 errors (F401 unused imports, F841 unused variables)
 ruff check migration/<technical_name> 2>/dev/null || flake8 --max-line-length=120 --per-file-ignores="__init__.py:F401" migration/<technical_name>
@@ -838,14 +910,21 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
 > [!CAUTION]
 > **Zero Junk Rule (6.2 - Blocking):** Running tests compiles bytecode (`__pycache__` and `.pyc`). You MUST run the purge commands immediately after testing. Furthermore, all draft files (`static/description/index1.html`) must be permanently deleted. Even if the user requests to compress the zip manually, the module directory must be left completely purged of `__pycache__`, `.pyc`, and `index1.html`.
 
-1. **Purge Junk and Draft Files (Mandatory across all module files)**:
+1. **Purge Junk, Verify Tree, and Stage Required Files (Mandatory Criterion 1.2, 1.5 & 6.2 Compliance)**:
    ```bash
    cd /home/cybrosys/odoo20/migration/<technical_name>
-   # Purge temporary draft/backup description files (Criteria 1.5 & 6.2)
+
+   # Step 1: Permanently delete temporary draft/backup description files (Criteria 1.5 & 6.2)
    rm -f static/description/index1.html
    git rm -f static/description/index1.html 2>/dev/null || true
 
-   # Purge bytecode and junk
+   # Step 2: Ensure the real index.html is staged in Git (Criterion 1.2)
+   git add static/description/index.html
+
+   # Step 3: Verify Git tree status for static/description/ (Must show index.html, never index1.html)
+   git ls-files static/description/
+
+   # Step 4: Purge bytecode and junk
    find . -type d -name "__pycache__" -exec rm -rf {} +
    find . -type f -name "*.pyc" -delete
    find . -type f -name ".DS_Store" -delete
@@ -889,10 +968,15 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
 - [ ] **Manifest & Security (Section 3.1 & 4.2)**:
   - [ ] Version `20.0.1.0.0`, license `LGPL-3`, author/maintainer `Cybrosys Techno Solutions`.
   - [ ] Summary is a single complete sentence ending with a period.
+  - [ ] **No deprecated `'description'` key** (C8103 `manifest-deprecated-key`): Documentation resides in `README.rst` and `index.html`.
+  - [ ] **No superfluous default keys** (C8116 `manifest-superfluous-key`): Omit `'installable': True`, `'auto_install': False`, and `'application': False`.
   - [ ] `depends` contains only strictly necessary modules (no superfluous `base`).
   - [ ] **`security/ir.model.access.csv` is DELETED** (Criterion 1.5 - Blocking): Deprecated in Odoo 20; 0 occurrences in module folder or git.
   - [ ] **`security/ir.access.csv` is USED (Criterion 4.1)**: Uses 6-column unified format (`id,name,model_id:id,group_id:id,operation,domain`).
   - [ ] **Criterion 4.2 Security XML ID Format (Blocking)**: `model_id:id` strictly references the model's XML ID format (`model_<technical_name_underscored>`, e.g. `model_undo_redo`), NEVER raw dot notation (e.g. `undo.redo`). Header must use `:id` suffix (`model_id:id`, `group_id:id`).
+  - [ ] **No XML `<record model="ir.access">` (Criterion 4.1 & 4.2 - Blocking)**: In Odoo 20, both access rights and record rules MUST reside in `security/ir.access.csv`. Never define `<record model="ir.access">` in XML files. XML files under `security/` are strictly for security groups.
+  - [ ] **Valid Prefix Domain Syntax**: Domains in `security/ir.access.csv` must use standard Odoo prefix notation lists (`['|', ... , (...)]`). Never use Python ternary expressions anywhere in domain strings (neither returning lists nor inside tuples like `(1, '=', 1 if ... else 0)`), method calls like `user.has_group(...)`, or computed field references like `user.is_admin`. Use pure field-operator-value tuples only.
+  - [ ] **Manifest Category Precision**: Modules modifying catalog or user product access must specify `'category': 'Sales'` (or `'Sales/Sales'`).
   - [ ] Manifest `'data'` list loads `'security/ir.access.csv'`, NEVER `'security/ir.model.access.csv'`.
   - [ ] Every model and wizard has an entry in `security/ir.access.csv`.
   - [ ] Least privilege enforced: infrastructure, connector, and credential models restricted to `base.group_system`.
@@ -926,10 +1010,13 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] Test record creation populates all `required=True` fields.
   - [ ] Title assertions in tests match the correct singular/plural report title.
   - [ ] `models/` code coverage is >= 80%.
-  - [ ] `pylint-odoo` returns **0 errors and 0 warnings** (strictly 0 `W8113` redundant string warnings).
+  - [ ] `pylint-odoo` returns **0 errors and 0 warnings** (strictly 0 `W8113` redundant string warnings and strictly 0 `W8161` translation method warnings).
+  - [ ] Zero translation warnings (`W8161`): Always use `self.env._(...)` in model, wizard, and controller methods; never use standalone `_()`.
   - [ ] `ruff` / `flake8` returns **0 errors** (strictly 0 `F401` unused imports and 0 `F841` unused local variables).
   - [ ] Zero unused imports (`F401`): Remove unused imports immediately, especially after refactoring translation calls (e.g. `from odoo import _` when using `self.env._(...)`).
   - [ ] Zero unused local variables (`F841`): Every assigned variable in models and tests must be asserted or used (e.g. `self.assertTrue(invoice)` rather than dangling `invoice = ...`).
+  - [ ] Binary attachment assertions in tests use `bytes(attachment.raw)` or `.content` (never `assertIn(..., attachment.raw)` which triggers `TypeError: 'LocalBinaryFile' is not iterable`).
+  - [ ] Test record creation populates underlying source fields rather than readonly related fields (e.g., `'user_id': user.id` on `calendar.event`, not ignored `'partner_id': partner.id`).
 - [ ] **Documentation Parity & Grammar (Section 6.3)**:
   - [ ] No "allows to + verb" (use "allows users to + verb" or "allows + verb-ing").
   - [ ] Singular vs Plural: Report title and descriptions match single vs multiple records.
@@ -939,7 +1026,9 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] Date synchronization: `index.html` month/year matches `RELEASE_NOTES.md`.
   - [ ] `README.rst` headings and license are properly formatted.
   - [ ] `doc/RELEASE_NOTES.md` has ISO date and "Odoo 20" title.
-- [ ] **Packaging (Section 6.2)**:
-  - [ ] **Purge `index1.html` (Criterion 1.5 & 6.2 - Blocking)**: `static/description/index1.html` permanently deleted (0 occurrences on disk or in git).
+- [ ] **Packaging & Git Tree Verification (Criterion 1.2, 1.5 & 6.2 - Blocking)**:
+  - [ ] **Purge `index1.html` (Criterion 1.5 & 6.2 - Blocking)**: `static/description/index1.html` permanently deleted (`rm -f static/description/index1.html` and `git rm -f static/description/index1.html`).
+  - [ ] **Stage `index.html` in Git (Criterion 1.2 - Blocking)**: `git add static/description/index.html` executed so `index.html` is tracked and committed in Git's tree.
+  - [ ] **Verify Git Tree (`git ls-files static/description/`)**: Output lists `static/description/index.html` and NEVER lists `index1.html`.
   - [ ] Zero `__pycache__`, `.pyc`, `.gitkeep`, or unused asset files.
   - [ ] Zip named `<technical_name>-20.0.1.0.0.zip` with module folder at root.

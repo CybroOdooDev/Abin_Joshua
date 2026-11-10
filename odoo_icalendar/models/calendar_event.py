@@ -9,19 +9,24 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
 import logging
 from datetime import timedelta
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
-from odoo import fields, models, _
+
+from odoo import fields, models
 from odoo.exceptions import UserError
-from odoo.tools import is_html_empty, html2plaintext
+from odoo.tools import html2plaintext, is_html_empty
 
 _logger = logging.getLogger(__name__)
 try:
@@ -46,7 +51,8 @@ class Meeting(models.Model):
         - Proper VALUE=DATE for all-day events with non-inclusive DTEND
         - UTC timestamps for timed events
         - Negative trigger durations for alarms
-        - Formatted ORGANIZER and ATTENDEE entries
+        - Formatted ORGANIZER and ATTENDEE entries (excluding organizer from attendees)
+        - Clean recurrence rules stripping RRULE prefixes
         """
         self.ensure_one()
         now_utc = fields.Datetime.now().replace(tzinfo=ZoneInfo("UTC"))
@@ -54,7 +60,6 @@ class Meeting(models.Model):
             tzinfo=ZoneInfo("UTC"))
         event.add('dtstamp').value = now_utc
 
-        # Google Calendar requires a unique, persistent UID without whitespace
         base_url = self.get_base_url()
         parsed = urlparse(base_url) if base_url else None
         domain = parsed.netloc.split(':')[0] if parsed and parsed.netloc else 'odoo.local'
@@ -65,20 +70,22 @@ class Meeting(models.Model):
         event.add('sequence').value = '0'
 
         if self.allday:
-            # For all-day events, RFC 5545 requires VALUE=DATE (python date object)
-            # and non-inclusive DTEND (day after the event ends)
-            start_date = self.start_date or (self.start.date() if self.start else fields.Date.today())
+            start_date = self.start_date or (self.start.date() if self.start else fields.Date.context_today(self))
             stop_date = self.stop_date or (self.stop.date() if self.stop else start_date)
             event.add('dtstart').value = start_date
             event.add('dtend').value = stop_date + timedelta(days=1)
         else:
             if not self.start or not self.stop:
                 raise UserError(
-                    _("First you have to specify the date of the invitation for %s.", self.name))
+                    self.env._(
+                        "First you have to specify the date of the invitation for %(name)s.",
+                        name=self.name,
+                    ),
+                )
             event.add('dtstart').value = self.start.replace(tzinfo=ZoneInfo("UTC"))
             event.add('dtend').value = self.stop.replace(tzinfo=ZoneInfo("UTC"))
 
-        event.add('summary').value = self.name or _("Meeting")
+        event.add('summary').value = self.name or self.env._("Meeting")
 
         if not is_html_empty(self.description):
             desc_text = html2plaintext(self.description)
@@ -92,8 +99,6 @@ class Meeting(models.Model):
             event.add('url').value = self.videocall_location
 
         if self.recurrency and self.rrule:
-            # meeting.rrule may be a full dateutil string: "DTSTART:...\nRRULE:FREQ=..."
-            # Strip the "RRULE:" prefix if present.
             clean_rrule = self.rrule.splitlines()[-1].replace('RRULE:', '', 1)
             if clean_rrule:
                 event.add('rrule').value = clean_rrule
@@ -115,17 +120,14 @@ class Meeting(models.Model):
                 if delta is not None:
                     trigger = valarm.add('TRIGGER')
                     trigger.params['related'] = ["START"]
-                    # Alarms before event must have negative offset in RFC 5545
                     trigger.value = -delta
 
-        # Organizer
         if self.partner_id and self.partner_id.email:
             organizer = event.add('organizer')
             organizer.value = f"MAILTO:{self.partner_id.email}"
             if self.partner_id.name:
                 organizer.params['CN'] = [self.partner_id.display_name.replace('"', "'")]
 
-        # Attendees (excluding organizer to prevent duplicate events in calendar)
         for partner in self.partner_ids:
             if partner.email and partner != self.partner_id:
                 attendee_add = event.add('attendee')
@@ -156,9 +158,8 @@ class Meeting(models.Model):
         ics_files = self._get_ics_file()
         ics_data = ics_files.get(self.id)
         if not ics_data:
-            raise UserError(_("Could not generate iCalendar file."))
+            raise UserError(self.env._("Could not generate iCalendar file."))
 
-        # In Odoo 20, ir.attachment uses 'raw' for binary contents
         attachment_values = {
             'name': f"{self.name or 'Event'}.ics",
             'type': 'binary',
@@ -171,7 +172,7 @@ class Meeting(models.Model):
         email_template = self.env.ref('odoo_icalendar.event_ics_email_template')
         recipient_emails = [attendee.email for attendee in self.partner_ids if attendee.email]
         if not recipient_emails:
-            raise UserError(_("There are no attendees with valid email addresses."))
+            raise UserError(self.env._("There are no attendees with valid email addresses."))
         email_values = {
             'email_to': ', '.join(recipient_emails),
             'attachment_ids': [(4, attachment.id)],
@@ -179,11 +180,12 @@ class Meeting(models.Model):
         email_template.send_mail(
             self.id, email_values=email_values, force_send=True)
         email_template.attachment_ids = [(5, 0, 0)]
+        return True
 
     def action_send_attendee_ics_file(self):
         """Send an ics file containing all invited events attached to mail of the attendees."""
         if not vobject:
-            return {}
+            return False
         attendee_events = {}
         first_meeting_by_attendee = {}
 
@@ -200,14 +202,13 @@ class Meeting(models.Model):
                 meeting._populate_ics_event(event)
 
         if not attendee_events:
-            raise UserError(_("None of the attendees have valid email addresses."))
+            raise UserError(self.env._("None of the attendees have valid email addresses."))
 
         for attendee_id, cal in attendee_events.items():
             attendee = self.env['res.partner'].browse(attendee_id)
             if not attendee.email:
                 continue
             meeting_obj = first_meeting_by_attendee[attendee_id]
-            # In Odoo 20, ir.attachment uses 'raw' for binary contents
             attachment_values = {
                 'name': 'All_Events.ics',
                 'type': 'binary',
@@ -234,3 +235,4 @@ class Meeting(models.Model):
                 force_send=True,
             )
             email_template.attachment_ids = [(5, 0, 0)]
+        return True

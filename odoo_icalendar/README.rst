@@ -51,10 +51,9 @@ Contacts
 * Website : https://cybrosys.com
 
 Maintainer
-==========
+----------
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
-
 
 This module is maintained by Cybrosys Technologies.
 

@@ -1,8 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Email template for sending attached ics files having respective event details of each attendee -->
     <record id="odoo_icalendar_email_template" model="mail.template">
-        <field name="name">odoo icalendar: Send by email</field>
-        <field name="model_id" ref="odoo_icalendar.model_calendar_event"/>
+        <field name="name">Odoo iCalendar: Send by email</field>
+        <field name="model_id" ref="calendar.model_calendar_event"/>
         <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted or user.email or '') }}</field>
         <field name="subject">Scheduled Meetings</field>
         <field name="body_html" type="html">
@@ -21,10 +22,11 @@
             </div>
         </field>
     </record>
-<!--    Email template for sending ics files to attendees of each event-->
+
+    <!-- Email template for sending ics files to attendees of each event -->
     <record id="event_ics_email_template" model="mail.template">
         <field name="name">Event ICS</field>
-        <field name="model_id" ref="odoo_icalendar.model_calendar_event"/>
+        <field name="model_id" ref="calendar.model_calendar_event"/>
         <field name="email_from">{{ (object.user_id.email_formatted or user.email_formatted or user.email or '') }}</field>
         <field name="subject">{{object.name}}: Event details</field>
         <field name="body_html" type="html">

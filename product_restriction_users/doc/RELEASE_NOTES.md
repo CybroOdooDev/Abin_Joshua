@@ -1,6 +1,7 @@
-## Module <product_restriction_users>
+## Module product_restriction_users
 
-#### 10.09.2026
+#### 2026-10-10
 #### Version 20.0.1.0.0
 #### ADD
-- Initial commit for Product Restriction Users
+
+- Initial release for Odoo 20: Restrict products for users based on products and categories.

@@ -42,8 +42,7 @@ Company
 
 License
 -------
-Lesser General Public License, Version 3 (LGPL v3).
-(http://www.gnu.org/licenses/lgpl-3.0-standalone.html)
+LGPL-3
 
 Contacts
 --------
@@ -51,7 +50,7 @@ Contacts
 * Website : https://cybrosys.com
 
 Maintainer
-==========
+----------
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 

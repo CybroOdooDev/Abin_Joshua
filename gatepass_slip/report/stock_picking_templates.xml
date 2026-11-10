@@ -1,24 +1,18 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <odoo>
-<!--    Template for report-->
+    <!-- Template for report -->
     <template id="report_gatepass_slip">
         <t t-call="web.html_container">
-            <t t-call="gatepass_slip.gate_pass_layout">
-                <!--Looping the data-->
-                <t t-foreach="docs" t-as="o">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="gatepass_slip.gate_pass_layout">
                     <div class="page">
                         <br/>
                         <br/>
-                        <center>
-                            <h2>GATE PASS</h2>
-                        </center>
+                        <h2 class="text-center">GATE PASS</h2>
                         <br/>
-                        <table class="table table-bordered"
-                               style="border: 1px solid black;">
+                        <table class="table table-bordered" style="border: 1px solid black;">
                             <thead style="border: 1px solid black;">
                                 <tr style="border: 1px solid black;">
-
-                                    <!--Making the field visible or hidden respect with the data in the field-->
                                     <t t-if="o.vehicle_no">
                                         <th style="border: 1px solid black;">
                                             <strong>Vehicle Number</strong>
@@ -47,23 +41,18 @@
                                     </th>
                                 </tr>
                             </thead>
-                            <!--Contents-->
                             <tbody style="border: 1px solid black;">
                                 <tr style="border: 1px solid black;">
-                                    <td style="border: 1px solid black;"
-                                        t-if="o.vehicle_no">
+                                    <td style="border: 1px solid black;" t-if="o.vehicle_no">
                                         <span t-field="o.vehicle_no"/>
                                     </td>
-                                    <td style="border: 1px solid black;"
-                                        t-if="o.vehicle_driver_name">
+                                    <td style="border: 1px solid black;" t-if="o.vehicle_driver_name">
                                         <span t-field="o.vehicle_driver_name"/>
                                     </td>
-                                    <td style="border: 1px solid black;"
-                                        t-if="o.driver_contact_number">
+                                    <td style="border: 1px solid black;" t-if="o.driver_contact_number">
                                         <span t-field="o.driver_contact_number"/>
                                     </td>
-                                    <td style="border: 1px solid black;"
-                                        t-if="o.corresponding_company">
+                                    <td style="border: 1px solid black;" t-if="o.corresponding_company">
                                         <span t-field="o.corresponding_company"/>
                                     </td>
                                     <td style="border: 1px solid black;">
@@ -76,11 +65,8 @@
                             </tbody>
                         </table>
                         <t t-if="o.is_enable_order_line">
-                            <center>
-                                <h2>PRODUCT DETAILS</h2>
-                            </center>
-                            <table class="table table-condensed"
-                                   style="border: 0px solid black;">
+                            <h2 class="text-center">PRODUCT DETAILS</h2>
+                            <table class="table table-sm" style="border: 0px solid black;">
                                 <thead>
                                     <tr style="border: 0px solid black;">
                                         <th>
@@ -92,9 +78,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <tr t-foreach="o.move_ids"
-                                        t-as="move_line"
-                                        style="border: 0px solid black;">
+                                    <tr t-foreach="o.move_ids" t-as="move_line" style="border: 0px solid black;">
                                         <td>
                                             <span t-field="move_line.product_id"/>
                                         </td>
@@ -110,7 +94,8 @@
             </t>
         </t>
     </template>
-<!--    Showing the company details and shipping address-->
+
+    <!-- Showing the company details and shipping address -->
     <template id="gate_pass_layout">
         <t t-if="o and 'company_id' in o">
             <t t-set="company" t-value="o.company_id"/>
@@ -119,7 +104,7 @@
             <t t-set="company" t-value="res_company"/>
         </t>
         <div class="header">
-            <div class="pull-left">
+            <div class="float-start">
                 <span t-out="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/>
                 <br/>
                 <span t-out="company.name"/>
@@ -128,16 +113,14 @@
                 <br/>
                 <br/>
             </div>
-            <div class="pull-right">
-                <t t-foreach="docs" t-as="o">
-                    <h4>Shipping Address</h4>
-                    <span t-out="o.partner_id.street"/>
-                    <br/>
-                    <span t-out="o.partner_id.city"/>
-                    <span t-out="o.partner_id.zip"/>
-                    <br/>
-                    <span t-out="o.partner_id.country_id.name"/>
-                </t>
+            <div class="float-end" t-if="o and o.partner_id">
+                <h4>Shipping Address</h4>
+                <span t-out="o.partner_id.street"/>
+                <br t-if="o.partner_id.street"/>
+                <span t-out="o.partner_id.city"/>
+                <span t-out="o.partner_id.zip"/>
+                <br t-if="o.partner_id.city or o.partner_id.zip"/>
+                <span t-out="o.partner_id.country_id.name"/>
             </div>
         </div>
         <div class="article">
