@@ -14,15 +14,23 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
 #############################################################################
 from odoo import fields, models
 
 
 class PackageCategory(models.Model):
-    """model to create package category"""
+    """Model to define package categories for splitting product packages."""
+
     _name = 'package.category'
     _description = 'Package Category'
-    _inherit = 'mail.thread'
+    _inherit = ['mail.thread']
 
-    name = fields.Char(string="Package Category", required=True,
-                       help="Category of the product to pack")
+    name = fields.Char(
+        string="Package Category",
+        required=True,
+        help="Category of the product to pack",
+    )

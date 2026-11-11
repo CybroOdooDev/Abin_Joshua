@@ -9,28 +9,26 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
 {
     'name': 'Bill Digitization',
     'version': '20.0.1.0.0',
     'category': 'Accounting',
-    'summary': """Converting traditional paper-based bills into digital 
-     formats.""",
-    'description': """Reading scanned documents with extension .jpg, .jpeg and 
-    .png using specialized hardware and converting them into
-     vendor bills in odoo. It makes use of the Optical Character 
-     Recognition (OCR) technology to convert scanned images into
-     editable text""",
-    'author': "Cybrosys Techno Solutions",
+    'summary': 'Convert scanned paper bills and PDFs into Odoo vendor bills.',
+    'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
-    'website': "https://www.cybrosys.com",
-    'depends': ['base', 'base_accounting_kit', 'web'],
+    'website': 'https://www.cybrosys.com',
+    'depends': ['account'],
     'data': [
         'security/ir.access.csv',
         'views/res_config_settings_views.xml',
@@ -43,11 +41,8 @@
         ],
     },
     'external_dependencies': {
-        'python': ['pytesseract', 'pdf2image']
+        'python': ['pytesseract', 'pdf2image', 'pillow'],
     },
     'images': ['static/description/banner.jpg'],
-    'license': 'AGPL-3',
-    'installable': True,
-    'auto_install': False,
-    'application': False
+    'license': 'LGPL-3',
 }

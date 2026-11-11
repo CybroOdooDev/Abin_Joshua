@@ -18,10 +18,12 @@ graph TD
 
 ### Stage 1: Automated Checks (Blocking)
 * **Zip and Manifest Valid**: Manifest syntax, valid version (`20.0.1.0.0`), valid license (`LGPL-3`), installable is `True`.
+* **External Python Dependencies Valid (Criterion 5.1–5.2 Blocking)**: Every entry in `'external_dependencies': {'python': [...]}` MUST be an installable **PyPI distribution name** (e.g., `'pillow'`, `'mysql-connector-python'`, `'beautifulsoup4'`), NEVER a Python import module name (e.g., `'PIL'`, `'mysql.connector'`, `'bs4'`). Odoo 20 checks PyPI metadata via `importlib.metadata.version(...)` (`odoo/modules/module.py`), and automated review sandboxes run `pip install` against this list; a single invalid PyPI name (like `'PIL'`) aborts the entire `pip install` and blocks installation (`0/100`).
 * **Clean Dual-Installation (With & Without Demo Data)**: The module must install cleanly and pass all tests in **BOTH** environments:
   1. On a fresh database strictly **WITHOUT** demo data (`--without-demo=all`).
   2. On a fresh database **WITH** demo data.
 * **Unit Tests Pass (Double Weight)**: At least one test file in `tests/`, tagged `@tagged('post_install', '-at_install')`, **0 errors, 0 failures** across both environments.
+* **Hermetic Unit Tests (Blocking)**: Tests must execute cleanly inside a minimal review container containing **only** the Python dependencies declared in `'external_dependencies': {'python': [...]}` — never relying on host-installed OS binaries (`tesseract`, `pdftoppm`, `pdfinfo`, LibreOffice, Chromium), external network endpoints, or external DB servers. All external CLI/service calls must be mocked with `unittest.mock.patch` for both happy paths and failure paths.
 * **100% Public Method & Action Coverage**: Every public model method, compute method, constraint, button action (`action_*`), and wizard print/submit action must have a dedicated test case.
 * **Code Linters & Static Analysis (Blocking)**: `pylint-odoo` reports **0 errors and 0 warnings** (strictly 0 `W8113` redundant string warnings, strictly 0 `W8161` translation method warnings), and `ruff` / `flake8` reports **0 errors** (strictly 0 `F401` unused imports and 0 `F841` unused local variables).
 
@@ -236,7 +238,22 @@ sequenceDiagram
    - **Narrow Dependencies**:
      - Do NOT include `'base'` if other modules (like `'sale'`, `'hr_timesheet'`, etc.) are listed.
      - Only list modules whose models, fields, or XML records are directly used.
-     - Declare third-party Python packages in `'external_dependencies': {'python': [...]}`.
+     - **PyPI Package Names Only in `'external_dependencies': {'python': [...]}` (Criterion 5.1–5.2 Blocking)**:
+       - Declare third-party Python packages using their exact installable **PyPI distribution names**, NEVER their Python import names. In Odoo 20 (`odoo/modules/module.py`, `check_python_external_dependency`), Odoo resolves `importlib.metadata.version(...)`, and clean review sandboxes run `pip install` directly from PyPI against this list.
+       - **Do not rely on local tests alone to catch mismatches**: if a package is pre-installed locally under its true distribution name (e.g., `Pillow`), Odoo 20's fallback (`importlib.import_module('PIL')`) silently succeeds with only a logger warning locally—masking a blocking failure in a clean review sandbox where batch `pip install` aborts on `'PIL'` before installing *any* dependency in the list (`PackageNotFoundError` ➔ `0/100`).
+       - **Common Import Name ✗ ➔ PyPI Distribution Name ✓**:
+         - `'PIL'` ✗ ➔ `'pillow'` ✓ (keep `from PIL import ...` in Python code)
+         - `'bs4'` ✗ ➔ `'beautifulsoup4'` ✓
+         - `'cv2'` ✗ ➔ `'opencv-python'` (or `'opencv-python-headless'`) ✓
+         - `'Crypto'` / `'Cryptodome'` ✗ ➔ `'pycryptodome'` ✓
+         - `'yaml'` ✗ ➔ `'PyYAML'` ✓
+         - `'dateutil'` ✗ ➔ `'python-dateutil'` ✓
+         - `'sklearn'` ✗ ➔ `'scikit-learn'` ✓
+         - `'docx'` ✗ ➔ `'python-docx'` ✓
+         - `'fitz'` ✗ ➔ `'PyMuPDF'` ✓
+         - `'OpenSSL'` ✗ ➔ `'pyOpenSSL'` ✓
+         - `'magic'` ✗ ➔ `'python-magic'` ✓
+         - `'mysql'` / `'mysql.connector'` ✗ ➔ `'mysql-connector-python'` ✓
    - **Load Order in `'data'`**:
      1. Security groups (`security/<name>_groups.xml`)
      2. Access rules (`security/ir.access.csv` — **NEVER** `security/ir.model.access.csv`!)
@@ -567,6 +584,12 @@ sequenceDiagram
      - Never attempt to set readonly related fields directly in `create({...})` calls.
      - On `calendar.event`, `partner_id` is related to `user_id.partner_id` with `readonly=True`. Passing `partner_id=...` in `create()` is silently ignored by the ORM, defaulting `user_id` to `self.env.user` (`base.user_root` / `odoobot@example.com`).
      - Always provision a `res.users` record and set the source relational field (e.g. `'user_id': cls.organizer_user.id`).
+8. **Hermetic Mocking of External OS Binaries, CLI Tools & Remote Services (Blocking)**:
+   - Clean AI review containers install only PyPI packages from `'external_dependencies': {'python': [...]}` and typically **do NOT** install system binaries (`tesseract-ocr`, `poppler-utils`/`pdftoppm`/`pdfinfo`, LibreOffice, Chromium) or allow live connections to external APIs or external DB servers.
+   - **Never rely on host binaries or network in happy-path tests**: Every unit test (happy path AND error path) must mock wrapper functions that shell out to OS tools or call external services via `unittest.mock.patch` (e.g., `pytesseract.image_to_string`, `pdf2image.convert_from_bytes`, `subprocess.run`, `requests.request`, `mysql.connector.connect`).
+   - **Test real preprocessing/business logic in-memory**: Mock only the external tool boundary (`image_to_string`, `convert_from_bytes`), while keeping real Pillow image decoding/scaling, ORM record creation, regex parsing, and attachment updates running unmocked.
+   - **Never add missing test-time system binaries to `'external_dependencies': {'bin': [...]}`** unless guaranteed present in the review container: Odoo verifies `'bin'` via `tools.find_in_path()` on module install (`odoo/modules/module.py`) and will reject installation if absent.
+   - **Never trust a green test run on your workstation alone** if `which tesseract` / `which pdftoppm` / external services exist locally: always run the Phase 6 hermetic test check (`# 2b.`) with those external CLI binaries hidden from `PATH`.
 
 ---
 
@@ -633,6 +656,28 @@ Before packaging, execute the following commands locally:
 /home/cybrosys/odoo20/.venv/bin/python /home/cybrosys/odoo20/odoo-bin -c odoo.conf \
     -d <db_with_demo> -i <technical_name> --test-enable --test-tags <technical_name> --stop-after-init
 
+# 2b. Hermetic Re-Test Without Host CLI Binaries (OCR/PDF/Office/Browser Isolation - Blocking)
+/home/cybrosys/odoo20/.venv/bin/python -c "
+import os, subprocess, sys, tempfile
+
+BLOCKED_CLIS = {
+    'tesseract', 'pdftoppm', 'pdfinfo', 'pdfimages', 'pdftotext',
+    'libreoffice', 'soffice', 'wkhtmltopdf', 'chromium', 'google-chrome', 'ffmpeg', 'gs',
+}
+with tempfile.TemporaryDirectory() as clean_bin:
+    for entry in os.listdir('/usr/bin'):
+        if entry not in BLOCKED_CLIS:
+            os.symlink(os.path.join('/usr/bin', entry), os.path.join(clean_bin, entry))
+    env = os.environ.copy()
+    env['PATH'] = f'/home/cybrosys/odoo20/.venv/bin:{clean_bin}'
+    proc = subprocess.run([
+        '/home/cybrosys/odoo20/.venv/bin/python', '/home/cybrosys/odoo20/odoo-bin',
+        '-c', 'odoo.conf', '-d', '<db_no_demo>',
+        '--test-enable', '--test-tags', '<technical_name>', '--stop-after-init',
+    ], env=env, check=False)
+    sys.exit(proc.returncode)
+"
+
 # 3. Verify No Deprecated ir.model.access.csv Exists or is Referenced (Criterion 1.5 - Blocking)
 python3 -c "
 import os, sys
@@ -668,6 +713,58 @@ if os.path.exists(draft_p):
     print(f'[FAIL CRITERIA 1.5 & 6.2] Draft description file {draft_p} must be deleted before submission!')
     sys.exit(1)
 print('[OK] 0 index1.html draft files found. Passed Criteria 1.5 & 6.2 check.')
+"
+
+# 3c. Verify external_dependencies.python Use Valid PyPI Package Names (Criterion 5.1-5.2 - Blocking)
+/home/cybrosys/odoo20/.venv/bin/python -c "
+import ast, importlib.metadata, os, sys
+from packaging.requirements import InvalidRequirement, Requirement
+
+BAD_IMPORT_ALIASES = {
+    'pil': 'pillow',
+    'bs4': 'beautifulsoup4',
+    'cv2': 'opencv-python',
+    'crypto': 'pycryptodome',
+    'cryptodome': 'pycryptodome',
+    'yaml': 'PyYAML',
+    'dateutil': 'python-dateutil',
+    'sklearn': 'scikit-learn',
+    'docx': 'python-docx',
+    'fitz': 'PyMuPDF',
+    'openssl': 'pyOpenSSL',
+    'magic': 'python-magic',
+    'mysql': 'mysql-connector-python',
+    'mysql.connector': 'mysql-connector-python',
+}
+
+base = 'migration/<technical_name>'
+manifest_p = os.path.join(base, '__manifest__.py')
+with open(manifest_p, 'r', encoding='utf-8') as fh:
+    manifest = ast.literal_eval(fh.read())
+
+pydeps = manifest.get('external_dependencies', {}).get('python', [])
+errors = []
+for pydep in pydeps:
+    try:
+        req = Requirement(pydep)
+    except InvalidRequirement as exc:
+        errors.append(f'{pydep!r} is not a valid PEP 508 dependency specifier: {exc}')
+        continue
+    key = req.name.lower()
+    if key in BAD_IMPORT_ALIASES:
+        errors.append(f'{pydep!r} is a Python import name; use PyPI package {BAD_IMPORT_ALIASES[key]!r}')
+        continue
+    try:
+        importlib.metadata.distribution(req.name)
+    except importlib.metadata.PackageNotFoundError:
+        errors.append(f'{pydep!r} has no PyPI package metadata (PackageNotFoundError); verify exact PyPI distribution name')
+
+if errors:
+    print('[FAIL 5.1-5.2] Invalid external_dependencies.python entries:')
+    for err in errors:
+        print(' ', err)
+    sys.exit(1)
+print(f'[OK] external_dependencies.python validated against PyPI metadata: {pydeps}')
 "
 
 # 4. Verify security/ir.access.csv Header and XML ID Format (Criterion 4.2 - Blocking)
@@ -971,6 +1068,7 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] **No deprecated `'description'` key** (C8103 `manifest-deprecated-key`): Documentation resides in `README.rst` and `index.html`.
   - [ ] **No superfluous default keys** (C8116 `manifest-superfluous-key`): Omit `'installable': True`, `'auto_install': False`, and `'application': False`.
   - [ ] `depends` contains only strictly necessary modules (no superfluous `base`).
+  - [ ] **`external_dependencies['python']` uses PyPI distribution names (Criterion 5.1–5.2 - Blocking)**: Every listed package resolves cleanly via PyPI / `importlib.metadata.distribution(...)` (e.g., `'pillow'`, `'mysql-connector-python'`, `'beautifulsoup4'`, NEVER import names like `'PIL'`, `'mysql.connector'`, `'bs4'`).
   - [ ] **`security/ir.model.access.csv` is DELETED** (Criterion 1.5 - Blocking): Deprecated in Odoo 20; 0 occurrences in module folder or git.
   - [ ] **`security/ir.access.csv` is USED (Criterion 4.1)**: Uses 6-column unified format (`id,name,model_id:id,group_id:id,operation,domain`).
   - [ ] **Criterion 4.2 Security XML ID Format (Blocking)**: `model_id:id` strictly references the model's XML ID format (`model_<technical_name_underscored>`, e.g. `model_undo_redo`), NEVER raw dot notation (e.g. `undo.redo`). Header must use `:id` suffix (`model_id:id`, `group_id:id`).
@@ -1006,6 +1104,7 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
 - [ ] **Tests & Linters (Section 5 & Criterion 4.4 - Blocking)**:
   - [ ] Clean install & unit tests pass on fresh database **WITHOUT demo data** (`--without-demo=all`) with **0 failed, 0 errors**.
   - [ ] Clean install & unit tests pass on fresh database **WITH demo data** with **0 failed, 0 errors**.
+  - [ ] **Hermetic unit tests pass without host CLI binaries or network (Stage 1 / Section 5 - Blocking)**: Calls wrapping external OS binaries (`tesseract`, `pdftoppm`/`pdfinfo`, LibreOffice, Chromium) or remote services are mocked via `unittest.mock.patch` for both happy paths and error paths, verified with `# 2b.` shadow-`PATH` isolation (`0 failed, 0 errors`).
   - [ ] Unit tests cover 100% of public model functions and actions.
   - [ ] Test record creation populates all `required=True` fields.
   - [ ] Title assertions in tests match the correct singular/plural report title.

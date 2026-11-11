@@ -14,19 +14,21 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
 #############################################################################
 {
     'name': 'Categorize & Pack Products',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Sales',
     'summary': 'Split the packages based on package category.',
-    'description': """This module allows users to split products packages
-     based on the package category given inside the product.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
     'website': 'https://www.cybrosys.com',
-    'depends': ['sale_management', 'delivery', 'stock_delivery'],
+    'depends': ['sale', 'stock_delivery'],
     'data': [
         'security/ir.access.csv',
         'views/package_category_views.xml',
@@ -34,8 +36,5 @@
         'views/res_config_settings_views.xml',
     ],
     'images': ['static/description/banner.jpg'],
-    'license': 'AGPL-3',
-    'installable': True,
-    'auto_install': False,
-    'application': False,
+    'license': 'LGPL-3',
 }

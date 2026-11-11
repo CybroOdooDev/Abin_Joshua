@@ -9,35 +9,72 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
 #############################################################################
 import io
-import pytesseract
+import logging
 import re
-from PIL import Image
-from pdf2image import convert_from_path
-from odoo import Command, fields, models, _
+from datetime import datetime
+
+import pytesseract
+from pdf2image import convert_from_bytes
+from pdf2image.exceptions import (
+    PDFInfoNotInstalledError,
+    PDFPageCountError,
+    PDFSyntaxError,
+)
+from PIL import Image, UnidentifiedImageError
+
+from odoo import Command, api, fields, models
 from odoo.exceptions import ValidationError
+
+_logger = logging.getLogger(__name__)
 
 
 class DigitizeBill(models.TransientModel):
+    """Wizard to extract bill text via OCR and generate a draft vendor bill."""
+
     _name = "digitize.bill"
     _description = "Digitize Bill"
 
-    bill = fields.Binary(string="Document", required=True,
-                         help="Choose a scanned document")
-    file_name = fields.Char(string="File Name", help="Name of the file")
+    bill = fields.Binary(
+        string="Document",
+        required=True,
+        help="Choose a scanned document",
+    )
+    file_name = fields.Char(help="Name of the file")
+
+    @api.model
+    def is_digitize_bill_enabled(self):
+        """Return whether bill digitization is enabled in settings."""
+        return bool(
+            self.env['ir.config_parameter'].sudo().get_bool(
+                'bill_digitization.digitize_bill',
+            ),
+        )
+
+    def _try_parse_bounded_float(self, raw_value):
+        """Parse a numeric string if within range, else return None."""
+        try:
+            parsed = float(raw_value)
+        except (ValueError, TypeError):
+            return None
+        return 0.0 if parsed > 999999999 else parsed
 
     def clean_number(self, value):
+        """Normalize OCR numeric strings into a bounded float."""
         if not value:
             return 0.0
 
         original_value = str(value).strip()
-
         if not re.search(r'\d', original_value):
             return 0.0
 
@@ -49,50 +86,54 @@ class DigitizeBill(models.TransientModel):
         if not re.match(r'^[\d\s\.,\$\-\(\)O0oIl]+$', original_value):
             return 0.0
 
-        value = original_value
-        value = value.replace(',', '').replace(' ', '').replace('$', '')
-        value = value.replace('Rs', '').replace('₹', '')
-        value = value.replace(')', '0').replace('(', '')
-        value = value.replace('O', '0').replace('o', '0')
-        value = value.replace('l', '1').replace('I', '1')
-        value = re.sub(r'\.{2,}', '.', value)
+        cleaned = (
+            original_value.replace(',', '')
+            .replace(' ', '')
+            .replace('$', '')
+            .replace('Rs', '')
+            .replace('₹', '')
+            .replace(')', '0')
+            .replace('(', '')
+            .replace('O', '0')
+            .replace('o', '0')
+            .replace('l', '1')
+            .replace('I', '1')
+        )
+        cleaned = re.sub(r'\.{2,}', '.', cleaned)
 
-        if '.' not in value and value.count('-') == 1:
-            parts = value.split('-')
-            if len(parts) == 2 and parts[0].isdigit() and parts[
-                1].isdigit() and len(parts[1]) <= 2:
-                value = parts[0] + '.' + parts[1]
+        if '.' not in cleaned and cleaned.count('-') == 1:
+            parts = cleaned.split('-')
+            if (
+                len(parts) == 2
+                and parts[0].isdigit()
+                and parts[1].isdigit()
+                and len(parts[1]) <= 2
+            ):
+                cleaned = f"{parts[0]}.{parts[1]}"
 
-        value = re.sub(r'[^\d.\-]', '', value)
-        parts = value.split('.')
+        cleaned = re.sub(r'[^\d.\-]', '', cleaned)
+        parts = cleaned.split('.')
         if len(parts) > 2:
-            value = parts[0] + '.' + ''.join(parts[1:])
+            cleaned = f"{parts[0]}.{''.join(parts[1:])}"
 
-        value = value.strip('.-')
-
-        if not value or not re.search(r'\d', value):
+        cleaned = cleaned.strip('.-')
+        if not cleaned or not re.search(r'\d', cleaned):
             return 0.0
 
-        try:
-            result = float(value)
-            if result > 999999999:
-                return 0.0
-            return result
-        except (ValueError, TypeError):
-            numbers = re.findall(r'\d+\.?\d*', value)
-            if numbers:
-                try:
-                    result = float(numbers[0])
-                    if result > 999999999:
-                        return 0.0
-                    return result
-                except:
-                    return 0.0
-            return 0.0
+        direct_float = self._try_parse_bounded_float(cleaned)
+        if direct_float is not None:
+            return direct_float
+
+        numbers = re.findall(r'\d+\.?\d*', cleaned)
+        if numbers:
+            fallback_float = self._try_parse_bounded_float(numbers[0])
+            if fallback_float is not None:
+                return fallback_float
+        return 0.0
 
     def clean_product_name(self, product_name):
+        """Strip bracketed codes, line breaks, and noise from product text."""
         name = product_name.strip()
-
         if '\n' in name:
             name = name.split('\n')[-1].strip()
         if '\r' in name:
@@ -102,71 +143,99 @@ class DigitizeBill(models.TransientModel):
         name = re.sub(r'\[.*?\]', '', name)
         name = re.sub(r'[_\|]', ' ', name)
         name = re.sub(r'\s+', ' ', name)
-        name = name.strip(' ,-')
-
-        return name
+        return name.strip(' ,-')
 
     def is_likely_address(self, product_name):
+        """Return True if the extracted text looks like a postal address."""
         name_lower = product_name.lower().strip()
 
         if product_name.count(',') >= 2:
-            parts = [p.strip() for p in product_name.split(',')]
-            has_short_parts = any(len(part) <= 4 for part in parts if part)
-            has_numbers = any(
-                re.search(r'\d{4,}', part) for part in parts if part)
-
+            parts = [part.strip() for part in product_name.split(',') if part.strip()]
+            has_short_parts = any(len(part) <= 4 for part in parts)
+            has_numbers = any(re.search(r'\d{4,}', part) for part in parts)
             if has_short_parts or has_numbers:
                 return True
 
             is_likely_product = all(
-                len(part) > 3 and (part[0].isupper() if part else False)
-                for part in parts if part
+                len(part) > 3 and part[0].isupper()
+                for part in parts
             )
-
             if not is_likely_product:
                 return True
 
-        address_patterns = [
+        address_patterns = (
             r'\b\d{5}(-\d{4})?\b',
             r'\b[A-Z]{2}\s+\d{5}\b',
-            r'\bstreet\b', r'\bavenue\b', r'\broad\b', r'\bblvd\b',
-            r'\bapt\b', r'\bsuite\b', r'\bunit\b', r'\bfloor\b',
-            r'\bpo box\b', r'\bp\.o\.\s*box\b'
-        ]
-
-        for pattern in address_patterns:
-            if re.search(pattern, name_lower):
-                return True
-
-        return False
+            r'\bstreet\b',
+            r'\bavenue\b',
+            r'\broad\b',
+            r'\bblvd\b',
+            r'\bapt\b',
+            r'\bsuite\b',
+            r'\bunit\b',
+            r'\bfloor\b',
+            r'\bpo box\b',
+            r'\bp\.o\.\s*box\b',
+        )
+        return any(re.search(pattern, name_lower) for pattern in address_patterns)
 
     def is_valid_product_line(self, product_name):
+        """Return True when cleaned text looks like a product line."""
         if not product_name or len(product_name) < 3:
             return False
 
         name_lower = product_name.lower().strip()
-
-        skip_patterns = [
-            r'^\s*invoice\b', r'^\s*bill\b', r'^\s*receipt\b', r'^\s*total\b',
-            r'^\s*subtotal\b', r'^\s*tax\b', r'^\s*amount\b',
+        skip_patterns = (
+            r'^\s*invoice\b',
+            r'^\s*bill\b',
+            r'^\s*receipt\b',
+            r'^\s*total\b',
+            r'^\s*subtotal\b',
+            r'^\s*tax\b',
+            r'^\s*amount\b',
             r'^\s*description\b',
-            r'^\s*qty\b', r'^\s*quantity\b', r'^\s*price\b', r'^\s*unit\b',
-            r'^\s*item\b', r'^\s*product\b', r'^\s*date\b', r'^\s*customer\b',
-            r'^\s*vendor\b', r'^\s*phone\b', r'^\s*mobile\b', r'^\s*email\b',
-            r'^\s*website\b', r'^\s*payment\b', r'^\s*terms\b',
+            r'^\s*qty\b',
+            r'^\s*quantity\b',
+            r'^\s*price\b',
+            r'^\s*unit\b',
+            r'^\s*item\b',
+            r'^\s*product\b',
+            r'^\s*date\b',
+            r'^\s*customer\b',
+            r'^\s*vendor\b',
+            r'^\s*phone\b',
+            r'^\s*mobile\b',
+            r'^\s*email\b',
+            r'^\s*website\b',
+            r'^\s*payment\b',
+            r'^\s*terms\b',
             r'^\s*account\b',
-            r'^\s*bank\b', r'^\s*page\b', r'^\s*signature\b', r'^\s*discount\b',
-            r'^\s*grand\b', r'^\s*comments\b', r'^\s*salesperson\b',
-            r'^\s*reference\b', r'^\s*balance\b', r'^\s*due\b', r'^\s*address\b'
-        ]
+            r'^\s*bank\b',
+            r'^\s*page\b',
+            r'^\s*signature\b',
+            r'^\s*discount\b',
+            r'^\s*grand\b',
+            r'^\s*comments\b',
+            r'^\s*salesperson\b',
+            r'^\s*reference\b',
+            r'^\s*balance\b',
+            r'^\s*due\b',
+            r'^\s*address\b',
+        )
+        if any(re.search(pattern, name_lower) for pattern in skip_patterns):
+            return False
 
-        for pattern in skip_patterns:
-            if re.search(pattern, name_lower):
-                return False
-
-        if any(phrase in name_lower for phrase in
-               ['ship to', 'bill to', 'sold to', 'thank you', 'p.o. number',
-                'due date', 'due after', 'payment reference']):
+        stop_phrases = (
+            'ship to',
+            'bill to',
+            'sold to',
+            'thank you',
+            'p.o. number',
+            'due date',
+            'due after',
+            'payment reference',
+        )
+        if any(phrase in name_lower for phrase in stop_phrases):
             return False
 
         if self.is_likely_address(product_name):
@@ -176,630 +245,484 @@ class DigitizeBill(models.TransientModel):
         if len(words) >= 3 and len(set(words)) / len(words) < 0.6:
             return False
 
-        if len(re.findall(r'[A-Za-z0-9]', product_name)) < len(
-                product_name) * 0.5:
+        if len(re.findall(r'[A-Za-z0-9]', product_name)) < len(product_name) * 0.5:
             return False
 
-        if len(product_name) > 100:
-            return False
+        return len(product_name) <= 100
 
-        return True
+    def _infer_qty_price_from_three(self, numbers):
+        """Disambiguate (qty, price) when qty, price, and subtotal exist."""
+        first, second, third = numbers[0], numbers[1], numbers[2]
+        expected_total = first * second
+        tolerance = max(0.1, expected_total * 0.01)
+
+        if abs(third - expected_total) < tolerance:
+            return first, second
+        if first <= 100 and first % 1 == 0 and second % 1 != 0:
+            return first, second
+        if second <= 100 and second % 1 == 0 and first % 1 != 0:
+            return second, first
+        return first, second
+
+    def _infer_qty_price(self, numbers, prefer_smaller_qty=False):
+        """Infer (quantity, unit_price) from extracted numeric tokens."""
+        if len(numbers) >= 3:
+            return self._infer_qty_price_from_three(numbers)
+
+        if len(numbers) == 2:
+            first_num, second_num = numbers[0], numbers[1]
+            if prefer_smaller_qty:
+                if second_num <= 100 and first_num > second_num:
+                    return second_num, first_num
+                return first_num, second_num
+
+            first_is_price = (first_num % 1 != 0) and (
+                abs((first_num % 1) - 0.99) < 0.01
+                or abs((first_num % 1) - 0.95) < 0.01
+                or abs((first_num % 1) - 0.50) < 0.01
+                or (first_num % 1) < 0.01
+            )
+            if (first_num > 1000 and second_num < 100) or (
+                first_is_price and second_num < 1000
+            ):
+                return second_num, first_num
+            return first_num, second_num
+
+        if len(numbers) == 1 and not prefer_smaller_qty:
+            return 1.0, numbers[0]
+        return None
 
     def normalize_line_data(self, lines_data):
+        """Normalize regex tuples into (product_name, qty_str, price_str)."""
         normalized = []
-
-        for idx, line_tuple in enumerate(lines_data):
+        for line_tuple in lines_data:
             if len(line_tuple) < 2:
                 continue
 
-            elements = list(line_tuple)
             numbers = []
             text_parts = []
-
-            for elem in elements:
+            for elem in line_tuple:
                 elem_str = str(elem).strip()
                 if re.match(r'^[\d\.\,\-]+$', elem_str):
-                    try:
-                        num_val = self.clean_number(elem_str)
-                        if num_val >= 0:
-                            numbers.append(num_val)
-                    except:
-                        text_parts.append(elem_str)
+                    num_val = self.clean_number(elem_str)
+                    if num_val >= 0:
+                        numbers.append(num_val)
                 else:
                     text_parts.append(elem_str)
 
-            if len(text_parts) < 1:
+            if not text_parts:
                 continue
 
-            product_name = ' '.join(text_parts)
-            product_name = self.clean_product_name(product_name)
-
+            product_name = self.clean_product_name(' '.join(text_parts))
             if not self.is_valid_product_line(product_name):
                 continue
 
-            if len(numbers) >= 3:
-                expected_total = numbers[0] * numbers[1]
-                tolerance = max(0.1, expected_total * 0.01)
-
-                if abs(numbers[2] - expected_total) < tolerance:
-                    qty = numbers[0]
-                    price = numbers[1]
-                elif abs(numbers[2] - (numbers[1] * numbers[0])) < tolerance:
-                    qty = numbers[1]
-                    price = numbers[0]
-                else:
-                    if numbers[0] <= 100 and numbers[0] % 1 == 0 and numbers[
-                        1] % 1 != 0:
-                        qty = numbers[0]
-                        price = numbers[1]
-                    elif numbers[1] <= 100 and numbers[1] % 1 == 0 and numbers[
-                        0] % 1 != 0:
-                        qty = numbers[1]
-                        price = numbers[0]
-                    elif numbers[0] <= 100 and numbers[1] > numbers[0] and \
-                            numbers[1] < 100000:
-                        qty = numbers[0]
-                        price = numbers[1]
-                    else:
-                        qty = numbers[0]
-                        price = numbers[1]
-
-            elif len(numbers) == 2:
-                first_num = numbers[0]
-                second_num = numbers[1]
-
-                first_is_price = (first_num % 1 != 0) and (
-                        abs((first_num % 1) - 0.99) < 0.01 or
-                        abs((first_num % 1) - 0.95) < 0.01 or
-                        abs((first_num % 1) - 0.50) < 0.01 or
-                        (first_num % 1) < 0.01
-                )
-
-                if first_num > 1000 and second_num < 100:
-                    qty = second_num
-                    price = first_num
-                elif first_is_price and second_num < 1000:
-                    qty = second_num
-                    price = first_num
-                else:
-                    qty = first_num
-                    price = second_num
-
-            elif len(numbers) == 1:
-                qty = 1.0
-                price = numbers[0]
-            else:
+            qty_price = self._infer_qty_price(numbers)
+            if not qty_price:
                 continue
 
-            if qty > 0 and qty <= 10000 and price >= 0 and price <= 1000000:
+            qty, price = qty_price
+            if 0 < qty <= 10000 and 0 <= price <= 1000000:
                 normalized.append((product_name, str(qty), str(price)))
 
         return normalized
 
-    def record_lines(self, product_lines_newline_name_qty_price_amount,
-                     product_lines_name_qty_amount,
-                     product_lines_qty_name_amount,
-                     product_lines_name_qty_price_amount1,
-                     product_lines_name_price_qty_amount_with_dollar,
-                     product_lines_name_price_qty_amount,
-                     product_lines_name_amount,
-                     product_lines_name_qty_price_amount2,
-                     product_lines_double_line_name,
-                     product_lines_code_name,
-                     product_lines_quantity_part,
-                     product_lines_vendor_bill_pattern,
-                     product_lines_quantity_price_amount_pattern,
-                     product_lines_quantity_price_amount_pattern2,
-                     product_line_name_with_extra_line,
-                     product_lines_simple_name_qty_price,
-                     product_lines_table_brackets,
-                     product_lines_table_simple,
-                     product_lines_table_dollar,
-                     product_lines_fallback):
-        products = []
+    def _get_or_create_product(self, product_name):
+        """Find an existing product by name or create a consumable."""
+        product_model = self.env['product.product']
+        return product_model.search(
+            [('name', '=', product_name)],
+            limit=1,
+        ) or product_model.create({'name': product_name, 'type': 'consu'})
+
+    def _collect_valid_lines(self, raw_lines, extractor):
+        """Filter raw line tuples into validated (name, qty, price) rows."""
+        valid_lines = []
+        for raw_line in raw_lines:
+            extracted = extractor(raw_line)
+            if not extracted:
+                continue
+            name, qty, price_val = extracted
+            if self.is_valid_product_line(name) and qty > 0 and price_val >= 0:
+                valid_lines.append((name, qty, price_val))
+        return valid_lines
+
+    def _unpack_table_brackets(self, line):
+        """Extract (name, qty, price) from a bracketed code table row."""
+        if len(line) < 4:
+            return None
+        name = self.clean_product_name(f"[{line[0].strip()}] {line[1].strip()}")
+        return name, self.clean_number(line[2]), self.clean_number(line[3])
+
+    def _unpack_table_simple(self, line):
+        """Extract (name, qty, price) from an indexed table row."""
+        if len(line) < 4:
+            return None
+        name = self.clean_product_name(line[1].strip())
+        return name, self.clean_number(line[2]), self.clean_number(line[3])
+
+    def _unpack_table_dollar(self, line):
+        """Extract (name, qty, price) from a currency-first table row."""
+        if len(line) < 3:
+            return None
+        name = self.clean_product_name(line[0].strip())
+        return name, self.clean_number(line[2]), self.clean_number(line[1])
+
+    def _unpack_normalized_line(self, line):
+        """Extract (name, qty, price) from an already-normalized tuple."""
+        if len(line) < 3:
+            return None
+        name = self.clean_product_name(str(line[0]).strip())
+        return name, self.clean_number(line[1]), self.clean_number(line[2])
+
+    def _extract_code_name_rows(self, matches):
+        """Extract product and amount lists from Description tables."""
+        extra_lines = matches['name_with_extra_line']
+        name_list_one = [f"{code} {name}" for code, name in extra_lines]
+        names = [
+            item.strip()
+            for item in matches['code_name'][0].split('\n')
+            if item.strip()
+        ]
+        if name_list_one and len(name_list_one) > len(names):
+            names = name_list_one
+
+        qty_block = (
+            matches['quantity_part']
+            or matches['quantity_price_amount_pattern']
+            or matches['quantity_price_amount_pattern2']
+        )
+        order_lines = (
+            [row.strip() for row in qty_block[0].split('\n') if row.strip()]
+            if qty_block
+            else []
+        )
+
+        products = [
+            self._get_or_create_product(self.clean_product_name(name))
+            for name in names
+        ]
         price = []
-        subtotal = []
         quantity = []
-
-        if product_lines_simple_name_qty_price:
-            product_lines_simple_name_qty_price = self.normalize_line_data(
-                product_lines_simple_name_qty_price)
-        if product_lines_name_qty_amount:
-            product_lines_name_qty_amount = self.normalize_line_data(
-                product_lines_name_qty_amount)
-        if product_lines_qty_name_amount:
-            product_lines_qty_name_amount = self.normalize_line_data(
-                product_lines_qty_name_amount)
-        if product_lines_fallback:
-            product_lines_fallback = self.normalize_line_data(
-                product_lines_fallback)
-
-        if product_lines_table_brackets:
-            valid_lines = []
-            for line in product_lines_table_brackets:
-                try:
-                    code = line[0].strip()
-                    name = f"[{code}] {line[1].strip()}"
-                    name = self.clean_product_name(name)
-                    qty = self.clean_number(line[2])
-                    price_val = self.clean_number(line[3])
-
-                    if self.is_valid_product_line(
-                            name) and qty > 0 and price_val >= 0:
-                        valid_lines.append((name, qty, price_val))
-                except Exception:
-                    continue
-
-            if valid_lines:
-                products = [
-                    self.env['product.product'].search([('name', '=', line[0])],
-                                                       limit=1) or
-                    self.env['product.product'].create(
-                        {'name': line[0], 'type': 'consu'})
-                    for line in valid_lines
-                ]
-                quantity = [line[1] for line in valid_lines]
-                price = [line[2] for line in valid_lines]
-                subtotal = [line[1] * line[2] for line in valid_lines]
-
-        elif product_lines_table_simple:
-            valid_lines = []
-            for line in product_lines_table_simple:
-                try:
-                    name = self.clean_product_name(line[1].strip())
-                    qty = self.clean_number(line[2])
-                    price_val = self.clean_number(line[3])
-
-                    if self.is_valid_product_line(
-                            name) and qty > 0 and price_val >= 0:
-                        valid_lines.append((name, qty, price_val))
-                except Exception:
-                    continue
-
-            if valid_lines:
-                products = [
-                    self.env['product.product'].search([('name', '=', line[0])],
-                                                       limit=1) or
-                    self.env['product.product'].create(
-                        {'name': line[0], 'type': 'consu'})
-                    for line in valid_lines
-                ]
-                quantity = [line[1] for line in valid_lines]
-                price = [line[2] for line in valid_lines]
-                subtotal = [line[1] * line[2] for line in valid_lines]
-
-        elif product_lines_table_dollar:
-            valid_lines = []
-            for line in product_lines_table_dollar:
-                try:
-                    name = self.clean_product_name(line[0].strip())
-                    price_val = self.clean_number(line[1])
-                    qty = self.clean_number(line[2])
-
-                    if self.is_valid_product_line(
-                            name) and qty > 0 and price_val >= 0:
-                        valid_lines.append((name, qty, price_val))
-                except Exception:
-                    continue
-
-            if valid_lines:
-                products = [
-                    self.env['product.product'].search([('name', '=', line[0])],
-                                                       limit=1) or
-                    self.env['product.product'].create(
-                        {'name': line[0], 'type': 'consu'})
-                    for line in valid_lines
-                ]
-                quantity = [line[1] for line in valid_lines]
-                price = [line[2] for line in valid_lines]
-                subtotal = [line[1] * line[2] for line in valid_lines]
-
-        elif product_lines_simple_name_qty_price or product_lines_fallback:
-            valid_lines = []
-
-            if product_lines_simple_name_qty_price:
-                for line in product_lines_simple_name_qty_price:
-                    try:
-                        name = self.clean_product_name(line[0].strip())
-                        qty = self.clean_number(line[1])
-                        price_val = self.clean_number(line[2])
-
-                        if self.is_valid_product_line(
-                                name) and qty > 0 and price_val >= 0:
-                            valid_lines.append((name, qty, price_val))
-                    except Exception:
-                        continue
-
-            if len(valid_lines) < 2 and product_lines_fallback:
-                for line in product_lines_fallback:
-                    try:
-                        name = self.clean_product_name(line[0].strip())
-                        qty = self.clean_number(line[1])
-                        price_val = self.clean_number(line[2])
-
-                        if self.is_valid_product_line(
-                                name) and qty > 0 and price_val >= 0:
-                            valid_lines.append((name, qty, price_val))
-                    except Exception:
-                        continue
-
-            if valid_lines:
-                products = [
-                    self.env['product.product'].search([('name', '=', line[0])],
-                                                       limit=1) or
-                    self.env['product.product'].create(
-                        {'name': line[0], 'type': 'consu'})
-                    for line in valid_lines
-                ]
-                quantity = [line[1] for line in valid_lines]
-                price = [line[2] for line in valid_lines]
-                subtotal = [line[1] * line[2] for line in valid_lines]
-
-        elif (product_lines_newline_name_qty_price_amount or
-              product_lines_name_qty_price_amount1 or
-              product_lines_name_qty_price_amount2):
-            if product_lines_name_qty_price_amount1:
-                product_lines_newline_name_qty_price_amount = product_lines_name_qty_price_amount1
-            if product_lines_name_qty_price_amount2:
-                product_lines_newline_name_qty_price_amount = product_lines_name_qty_price_amount2
-
-            products = [
-                self.env['product.product'].search(
-                    [('name', '=', self.clean_product_name(line[0]))],
-                    limit=1) or
-                self.env['product.product'].create(
-                    {'name': self.clean_product_name(line[0])})
-                for line in product_lines_newline_name_qty_price_amount]
-            quantity = [self.clean_number(line[1]) for line in
-                        product_lines_newline_name_qty_price_amount]
-            price = [self.clean_number(line[2]) for line in
-                     product_lines_newline_name_qty_price_amount]
-            subtotal = [self.clean_number(line[3]) for line in
-                        product_lines_newline_name_qty_price_amount]
-
-        elif product_lines_name_qty_amount:
-            products = [
-                self.env['product.product'].search(
-                    [('name', '=', self.clean_product_name(line[0]))],
-                    limit=1) or
-                self.env['product.product'].create(
-                    {'name': self.clean_product_name(line[0])})
-                for line in product_lines_name_qty_amount]
-            quantity = [self.clean_number(line[1]) for line in
-                        product_lines_name_qty_amount]
-            price = [self.clean_number(line[2]) for line in
-                     product_lines_name_qty_amount]
-            subtotal = [quantity[i] * price[i] for i in range(len(quantity))]
-
-        elif product_lines_qty_name_amount:
-            products = [
-                self.env['product.product'].search(
-                    [('name', '=', self.clean_product_name(line[0]))],
-                    limit=1) or
-                self.env['product.product'].create(
-                    {'name': self.clean_product_name(line[0])})
-                for line in product_lines_qty_name_amount]
-            quantity = [self.clean_number(line[1]) for line in
-                        product_lines_qty_name_amount]
-            price = [self.clean_number(line[2]) for line in
-                     product_lines_qty_name_amount]
-            subtotal = [quantity[i] * price[i] for i in range(len(quantity))]
-
-        elif (
-                product_lines_name_price_qty_amount_with_dollar or product_lines_name_price_qty_amount):
-            if product_lines_name_price_qty_amount:
-                product_lines_name_price_qty_amount_with_dollar = product_lines_name_price_qty_amount
-
-            products = [
-                self.env['product.product'].search(
-                    [('name', '=', self.clean_product_name(line[0]))],
-                    limit=1) or
-                self.env['product.product'].create(
-                    {'name': self.clean_product_name(line[0])})
-                for line in product_lines_name_price_qty_amount_with_dollar]
-            price = [self.clean_number(line[1]) for line in
-                     product_lines_name_price_qty_amount_with_dollar]
-            quantity = [self.clean_number(line[2]) for line in
-                        product_lines_name_price_qty_amount_with_dollar]
-            subtotal = [self.clean_number(line[3]) for line in
-                        product_lines_name_price_qty_amount_with_dollar]
-
-        elif product_lines_name_amount:
-            products = [
-                self.env['product.product'].search(
-                    [('name', '=', self.clean_product_name(line[0]))],
-                    limit=1) or
-                self.env['product.product'].create(
-                    {'name': self.clean_product_name(line[0])})
-                for line in product_lines_name_amount]
-            subtotal = [self.clean_number(line[1]) for line in
-                        product_lines_name_amount]
-            quantity = [1.0 for _ in product_lines_name_amount]
-            price = subtotal.copy()
-
-        elif product_lines_code_name:
-            name_list_one = []
-            if product_line_name_with_extra_line:
-                for code, name in product_line_name_with_extra_line:
-                    name_list_one.append(f"{code} {name}")
-            names = [item.strip() for item in
-                     product_lines_code_name[0].split('\n') if item.strip()]
-            if name_list_one and len(name_list_one) > len(names):
-                names = name_list_one
-
-            if product_lines_quantity_part:
-                order_lines = [line.strip() for line in
-                               product_lines_quantity_part[0].split('\n') if
-                               line.strip()]
-            elif product_lines_quantity_price_amount_pattern:
-                order_lines = [line.strip() for line in
-                               product_lines_quantity_price_amount_pattern[
-                                   0].split('\n') if line.strip()]
-            elif product_lines_quantity_price_amount_pattern2:
-                order_lines = [line.strip() for line in
-                               product_lines_quantity_price_amount_pattern2[
-                                   0].split('\n') if line.strip()]
+        for row in order_lines:
+            tokens = row.split()
+            if len(tokens) >= 2:
+                quantity.append(self.clean_number(tokens[0]))
+                price.append(self.clean_number(tokens[1]))
             else:
-                order_lines = []
+                quantity.append(0.0)
+                price.append(0.0)
+        subtotal = [qty * unit for qty, unit in zip(quantity, price)]
+        return products, quantity, price, subtotal
 
+    def _build_rows_from_matches(self, matches):
+        """Select highest-priority matched layout and extract line lists."""
+        simple_rows = self.normalize_line_data(matches['simple_name_qty_price'])
+        name_qty_rows = self.normalize_line_data(matches['name_qty_amount'])
+        qty_name_rows = self.normalize_line_data(matches['qty_name_amount'])
+        fallback_rows = self.normalize_line_data(matches['fallback'])
+
+        for key, extractor in (
+            ('table_brackets', self._unpack_table_brackets),
+            ('table_simple', self._unpack_table_simple),
+            ('table_dollar', self._unpack_table_dollar),
+        ):
+            if matches[key]:
+                valid = self._collect_valid_lines(matches[key], extractor)
+                if valid:
+                    return self._materialize_valid_lines(valid)
+
+        if simple_rows or fallback_rows:
+            valid = self._collect_valid_lines(simple_rows, self._unpack_normalized_line)
+            if len(valid) < 2 and fallback_rows:
+                valid.extend(
+                    self._collect_valid_lines(
+                        fallback_rows,
+                        self._unpack_normalized_line,
+                    ),
+                )
+            if valid:
+                return self._materialize_valid_lines(valid)
+
+        four_col = (
+            matches['name_qty_price_amount2']
+            or matches['name_qty_price_amount1']
+            or matches['newline_name_qty_price_amount']
+        )
+        if four_col:
             products = [
-                self.env['product.product'].search(
-                    [('name', '=', self.clean_product_name(name))], limit=1) or
-                self.env['product.product'].create(
-                    {'name': self.clean_product_name(name)})
-                for name in names]
-            price = [self.clean_number(line.split()[1]) if line else 0 for line
-                     in order_lines]
-            quantity = [self.clean_number(line.split()[0]) if line else 0 for
-                        line in order_lines]
-            subtotal = [quantity[i] * price[i] for i in range(len(quantity))]
+                self._get_or_create_product(self.clean_product_name(row[0]))
+                for row in four_col
+            ]
+            quantity = [self.clean_number(row[1]) for row in four_col]
+            price = [self.clean_number(row[2]) for row in four_col]
+            subtotal = [self.clean_number(row[3]) for row in four_col]
+            return products, quantity, price, subtotal
 
-        elif product_lines_vendor_bill_pattern:
+        three_col = name_qty_rows or qty_name_rows or matches['vendor_bill_pattern']
+        if three_col:
             products = [
-                self.env['product.product'].search(
-                    [('name', '=', self.clean_product_name(item[0]))],
-                    limit=1) or
-                self.env['product.product'].create(
-                    {'name': self.clean_product_name(item[0])})
-                for item in product_lines_vendor_bill_pattern]
-            quantity = [self.clean_number(item[1]) for item in
-                        product_lines_vendor_bill_pattern]
-            price = [self.clean_number(item[2]) for item in
-                     product_lines_vendor_bill_pattern]
-            subtotal = [quantity[i] * price[i] for i in range(len(quantity))]
+                self._get_or_create_product(self.clean_product_name(row[0]))
+                for row in three_col
+            ]
+            quantity = [self.clean_number(row[1]) for row in three_col]
+            price = [self.clean_number(row[2]) for row in three_col]
+            subtotal = [qty * unit for qty, unit in zip(quantity, price)]
+            return products, quantity, price, subtotal
 
-        if product_lines_double_line_name:
-            for line in product_lines_double_line_name:
-                product_name = self.clean_product_name(line[0] + ' ' + line[1])
-                if not self.is_valid_product_line(product_name):
-                    continue
-                product = self.env['product.product'].search(
-                    [('name', '=', product_name)], limit=1)
-                if not product:
-                    product = self.env['product.product'].create(
-                        {'name': product_name})
-                products.append(product)
-                subtotal.append(self.clean_number(line[5]))
-                price.append(self.clean_number(line[4]))
-                quantity.append(self.clean_number(line[3]))
+        price_first = (
+            matches['name_price_qty_amount']
+            or matches['name_price_qty_amount_with_dollar']
+        )
+        if price_first:
+            products = [
+                self._get_or_create_product(self.clean_product_name(row[0]))
+                for row in price_first
+            ]
+            price = [self.clean_number(row[1]) for row in price_first]
+            quantity = [self.clean_number(row[2]) for row in price_first]
+            subtotal = [self.clean_number(row[3]) for row in price_first]
+            return products, quantity, price, subtotal
 
+        if matches['name_amount']:
+            rows = matches['name_amount']
+            products = [
+                self._get_or_create_product(self.clean_product_name(row[0]))
+                for row in rows
+            ]
+            subtotal = [self.clean_number(row[1]) for row in rows]
+            quantity = [1.0 for _ in rows]
+            return products, quantity, subtotal.copy(), subtotal
+
+        if matches['code_name']:
+            return self._extract_code_name_rows(matches)
+
+        return [], [], [], []
+
+    def _materialize_valid_lines(self, valid_lines):
+        """Convert (name, qty, price) rows into product/amount lists."""
+        if not valid_lines:
+            return [], [], [], []
+        products = [self._get_or_create_product(line[0]) for line in valid_lines]
+        quantity = [line[1] for line in valid_lines]
+        price = [line[2] for line in valid_lines]
+        subtotal = [line[1] * line[2] for line in valid_lines]
+        return products, quantity, price, subtotal
+
+    def _build_move_line_commands(self, products, quantity, price, subtotal):
+        """Build Command.create tuples for account.move invoice_line_ids."""
         if products and quantity and price:
-            move_line_vals = [
-                (0, 0, {
+            return [
+                Command.create({
                     'product_id': product.id,
                     'name': product.name,
-                    'price_unit': float(price_amount),
+                    'price_unit': float(unit_price),
                     'price_subtotal': float(total_amount),
                     'quantity': float(qty),
                     'tax_ids': [Command.set([])],
                 })
-                for product, price_amount, total_amount, qty in
-                zip(products, price, subtotal, quantity)
+                for product, unit_price, total_amount, qty in zip(
+                    products,
+                    price,
+                    subtotal,
+                    quantity,
+                )
             ]
-        elif products and price:
-            move_line_vals = [
-                (0, 0, {
+
+        if products and price:
+            return [
+                Command.create({
                     'product_id': product.id,
                     'name': product.name,
-                    'price_unit': float(price_amount),
+                    'price_unit': float(unit_price),
                     'price_subtotal': float(total_amount),
                     'quantity': 1.0,
                     'tax_ids': [Command.set([])],
                 })
-                for product, price_amount, total_amount in
-                zip(products, price, subtotal)
+                for product, unit_price, total_amount in zip(
+                    products,
+                    price,
+                    subtotal,
+                )
             ]
-        elif products and subtotal:
-            move_line_vals = [
-                (0, 0, {
+
+        if products and subtotal:
+            effective_quantities = quantity or [1.0] * len(products)
+            return [
+                Command.create({
                     'product_id': product.id,
                     'name': product.name,
                     'quantity': float(qty) if qty else 1.0,
-                    'price_unit': float(total_amount) / float(
-                        qty) if qty and float(qty) > 0 else float(total_amount),
+                    'price_unit': (
+                        float(total_amount) / float(qty)
+                        if qty and float(qty) > 0
+                        else float(total_amount)
+                    ),
                     'price_subtotal': float(total_amount),
                     'tax_ids': [Command.set([])],
                 })
-                for product, total_amount, qty in zip(products, subtotal,
-                                                      quantity if quantity else [1.0] * len(
-                                                          products))
+                for product, total_amount, qty in zip(
+                    products,
+                    subtotal,
+                    effective_quantities,
+                )
             ]
-        else:
-            move_line_vals = []
 
-        return move_line_vals
+        return []
 
-    def create_record(self, text):
-        newline_name_qty_price_amount = r'\n([A-Za-z ]+) (\d+) (\d+\.\d{2}) (\d+\.\d{2})'
-        name_qty_amount = r'\n([A-Za-z ]+) (\d+) (\d+\.\d{2})'
-        qty_name_amount = r'\n(\d+) ([A-Za-z ]+) (\d+\.\d{2})'
-        name_qty_price_amount1 = r'\s*([A-Za-z() \d]+) (\d+) (\d+) (\d+)'
-        name_price_qty_amount_with_dollar = r'\n(\$?\w+(?: \w+)*) (\$[\d.]+) (\d+) (\$[\d.]+)'
-        name_price_qty_amount = r'\n(\$?\w+(?: \w+)*) (\[\d.]+) (\d+) (\[\d.]+)'
-        name_amount = r'\n(\$?\w+(?: \w+)*) (\d+\.\d{2})'
-        name_qty_price_amount2 = r"([\w\s]+)\s+(\d+)\s+(\d+)\s+\$(\d+)"
-        double_line_name = r'([\w\s]+)\s([\w\s]+)\s*([\w\s]+)\s*(\d+)\s*(\$\d+\.\d{2})\s*(\d+\.\d{2})'
-        code_name = r'Description\n([\s\S]*?)(?=\n\n)'
-        quantity_price_pattern = r'Quantity Unit Price Taxes\n([\s\S]*?)(?=\n\n)'
-        vendor_bill_pattern = r'\[[A-Z0-9-]+\] (.+?) (\d+\.\d+) (\d+\.\d+) (\d+\.\d+%?) \$ (\d+\.\d+)'
-        quantity_price_amount_pattern = r'Quantity Unit Price Taxes Amount\n((?:\d+\.\d+\s+\d+\.\d+\s+\d+\.\d+% \$\s+\d+\.\d+\n)+)'
-        quantity_price_amount_pattern2 = r'Quantity Unit Price Taxes Amount([\s\S]*?)(?:Untaxed Amount|Tax|Total|$)'
-        name_with_extra_line = r'\[([A-Z0-9-]+)\] (.+)'
-        simple_name_qty_price = r'([A-Za-z][A-Za-z\s\.\-&\(\)]+?)\s+([z\d]+)\s+([\d\)\.\-,]+)'
-        table_with_brackets = r'\[([A-Z0-9\-_]+)\]\s+(.+?)\s+(?:Units?|Each|Pcs?|pcs?)?\s*([\d,]+\.?\d*)\s+([\d,]+\.?\d*)\s+([\d,]+\.?\d*)'
-        table_simple = r'^(\d+)\s+(.+?)\s+(?:Units?|Each|Pcs?|pcs?)?\s*([\d,]+\.?\d*)\s+([\d,]+\.?\d*)\s+([\d,]+\.?\d*)'
-        table_with_dollar = r'(.+?)\s+\$?([\d,]+\.\d{2})\s+(\d+\.?\d*)\s+\$?([\d,]+\.\d{2})'
-        date_pattern = r'\d{1,2}/\d{1,2}/\d{2,4}'
-        bill_no_pattern = r'(?:Bill|Invoice|Receipt)\s*(?:No|#)?[:\s]*([A-Z0-9\-]+)'
+    def record_lines(self, matches):
+        """Convert regex matches into account.move line commands."""
+        products, quantity, price, subtotal = self._build_rows_from_matches(matches)
+
+        for line in matches['double_line_name']:
+            product_name = self.clean_product_name(f"{line[0]} {line[1]}")
+            if not self.is_valid_product_line(product_name):
+                continue
+            products.append(self._get_or_create_product(product_name))
+            subtotal.append(self.clean_number(line[5]))
+            price.append(self.clean_number(line[4]))
+            quantity.append(self.clean_number(line[3]))
+
+        return self._build_move_line_commands(products, quantity, price, subtotal)
+
+    def _extract_text_patterns(self, text):
+        """Apply bill line, date, and reference patterns to OCR text."""
+        pattern_specs = {
+            'newline_name_qty_price_amount': (
+                r'\n([A-Za-z ]+) (\d+) (\d+\.\d{2}) (\d+\.\d{2})'
+            ),
+            'name_qty_amount': r'\n([A-Za-z ]+) (\d+) (\d+\.\d{2})',
+            'qty_name_amount': r'\n(\d+) ([A-Za-z ]+) (\d+\.\d{2})',
+            'name_qty_price_amount1': r'\s*([A-Za-z() \d]+) (\d+) (\d+) (\d+)',
+            'name_price_qty_amount_with_dollar': (
+                r'\n(\$?\w+(?: \w+)*) (\$[\d.]+) (\d+) (\$[\d.]+)'
+            ),
+            'name_price_qty_amount': (
+                r'\n(\$?\w+(?: \w+)*) ([\d.]+) (\d+) ([\d.]+)'
+            ),
+            'name_amount': r'\n(\$?\w+(?: \w+)*) (\d+\.\d{2})',
+            'name_qty_price_amount2': r"([\w\s]+)\s+(\d+)\s+(\d+)\s+\$(\d+)",
+            'double_line_name': (
+                r'([\w\s]+)\s([\w\s]+)\s*([\w\s]+)\s*(\d+)\s*'
+                r'(\$\d+\.\d{2})\s*(\d+\.\d{2})'
+            ),
+            'code_name': r'Description\n([\s\S]*?)(?=\n\n)',
+            'quantity_part': r'Quantity Unit Price Taxes\n([\s\S]*?)(?=\n\n)',
+            'vendor_bill_pattern': (
+                r'\[[A-Z0-9-]+\] (.+?) (\d+\.\d+) (\d+\.\d+) '
+                r'(\d+\.\d+%?) \$ (\d+\.\d+)'
+            ),
+            'quantity_price_amount_pattern': (
+                r'Quantity Unit Price Taxes Amount\n'
+                r'((?:\d+\.\d+\s+\d+\.\d+\s+\d+\.\d+% \$\s+\d+\.\d+\n)+)'
+            ),
+            'quantity_price_amount_pattern2': (
+                r'Quantity Unit Price Taxes Amount([\s\S]*?)'
+                r'(?:Untaxed Amount|Tax|Total|$)'
+            ),
+            'name_with_extra_line': r'\[([A-Z0-9-]+)\] (.+)',
+            'simple_name_qty_price': (
+                r'([A-Za-z][A-Za-z\s\.\-&\(\)]+?)\s+([z\d]+)\s+([\d\)\.\-,]+)'
+            ),
+            'table_brackets': (
+                r'\[([A-Z0-9\-_]+)\]\s+(.+?)\s+'
+                r'(?:Units?|Each|Pcs?|pcs?)?\s*'
+                r'([\d,]+\.?\d*)\s+([\d,]+\.?\d*)\s+([\d,]+\.?\d*)'
+            ),
+            'table_simple': (
+                r'^(\d+)\s+(.+?)\s+'
+                r'(?:Units?|Each|Pcs?|pcs?)?\s*'
+                r'([\d,]+\.?\d*)\s+([\d,]+\.?\d*)\s+([\d,]+\.?\d*)'
+            ),
+            'table_dollar': (
+                r'(.+?)\s+\$?([\d,]+\.\d{2})\s+(\d+\.?\d*)\s+\$?([\d,]+\.\d{2})'
+            ),
+        }
+        multiline_keys = {'table_brackets', 'table_simple'}
+        matches = {key: [] for key in pattern_specs}
+        matches.update({'date_match': None, 'bill_no_match': None, 'fallback': []})
 
         try:
-            product_lines_newline_name_qty_price_amount = re.findall(
-                newline_name_qty_price_amount, text)
-            product_lines_name_qty_amount = re.findall(name_qty_amount, text)
-            product_lines_simple_name_qty_price = re.findall(
-                simple_name_qty_price, text)
-            product_lines_qty_name_amount = re.findall(qty_name_amount, text)
-            product_lines_name_qty_price_amount1 = re.findall(
-                name_qty_price_amount1, text)
-            product_lines_name_price_qty_amount_with_dollar = re.findall(
-                name_price_qty_amount_with_dollar, text)
-            product_lines_name_price_qty_amount = re.findall(
-                name_price_qty_amount, text)
-            product_lines_name_amount = re.findall(name_amount, text)
-            product_lines_name_qty_price_amount2 = re.findall(
-                name_qty_price_amount2, text)
-            product_lines_double_line_name = re.findall(double_line_name, text)
-            date_match = re.search(date_pattern, text)
-            bill_no_match = re.search(bill_no_pattern, text, re.IGNORECASE)
-            product_lines_code_name = re.findall(code_name, text)
-            product_lines_quantity_part = re.findall(quantity_price_pattern,
-                                                     text)
-            product_lines_vendor_bill_pattern = re.findall(vendor_bill_pattern,
-                                                           text)
-            product_lines_quantity_price_amount_pattern = re.findall(
-                quantity_price_amount_pattern, text)
-            product_lines_quantity_price_amount_pattern2 = re.findall(
-                quantity_price_amount_pattern2, text)
-            product_line_name_with_extra_line = re.findall(name_with_extra_line,
-                                                           text)
-            product_lines_table_brackets = re.findall(table_with_brackets, text,
-                                                      re.MULTILINE)
-            product_lines_table_simple = re.findall(table_simple, text,
-                                                    re.MULTILINE)
-            product_lines_table_dollar = re.findall(table_with_dollar, text)
-        except Exception:
-            product_lines_newline_name_qty_price_amount = []
-            product_lines_name_qty_amount = []
-            product_lines_simple_name_qty_price = []
-            product_lines_qty_name_amount = []
-            product_lines_name_qty_price_amount1 = []
-            product_lines_name_price_qty_amount_with_dollar = []
-            product_lines_name_price_qty_amount = []
-            product_lines_name_amount = []
-            product_lines_name_qty_price_amount2 = []
-            product_lines_double_line_name = []
-            product_lines_code_name = []
-            product_lines_quantity_part = []
-            product_lines_vendor_bill_pattern = []
-            product_lines_quantity_price_amount_pattern = []
-            product_lines_quantity_price_amount_pattern2 = []
-            product_line_name_with_extra_line = []
-            product_lines_table_brackets = []
-            product_lines_table_simple = []
-            product_lines_table_dollar = []
-            date_match = None
-            bill_no_match = None
+            for key, pattern in pattern_specs.items():
+                flags = re.MULTILINE if key in multiline_keys else 0
+                matches[key] = re.findall(pattern, text, flags)
+            matches['date_match'] = re.search(r'\d{1,2}/\d{1,2}/\d{2,4}', text)
+            matches['bill_no_match'] = re.search(
+                r'(?:Bill|Invoice|Receipt)\s*(?:No|#)?[:\s]*([A-Z0-9\-]+)',
+                text,
+                re.IGNORECASE,
+            )
+        except re.error as err:
+            _logger.warning("Regex matching failed during bill OCR parsing: %s", err)
 
-        product_lines_fallback = []
-        if not any([
-            product_lines_table_brackets,
-            product_lines_table_simple,
-            product_lines_table_dollar,
-            product_lines_simple_name_qty_price,
-            product_lines_newline_name_qty_price_amount,
-            product_lines_name_qty_amount,
-            product_lines_vendor_bill_pattern
-        ]):
-            product_lines_fallback = self.parse_lines_intelligently(text)
+        primary_keys = (
+            'table_brackets',
+            'table_simple',
+            'table_dollar',
+            'simple_name_qty_price',
+            'newline_name_qty_price_amount',
+            'name_qty_amount',
+            'vendor_bill_pattern',
+        )
+        if not any(matches[key] for key in primary_keys):
+            matches['fallback'] = self.parse_lines_intelligently(text)
+        return matches
 
-        date_object = ''
+    def _parse_invoice_date(self, date_match):
+        """Parse extracted date string or fall back to today."""
         if date_match:
             date_value = date_match.group()
-            try:
-                for fmt in ['%d/%m/%Y', '%m/%d/%Y', '%d-%m-%Y', '%m-%d-%Y',
-                            '%Y-%m-%d', '%Y/%m/%d', '%d/%m/%y', '%m/%d/%y']:
-                    try:
-                        date_object = fields.datetime.strptime(date_value, fmt)
-                        break
-                    except:
-                        continue
-            except:
-                pass
-            date = date_object.strftime(
-                '%Y-%m-%d') if date_object else fields.Date.today()
-        else:
-            date = fields.Date.today()
+            for fmt in (
+                '%d/%m/%Y',
+                '%m/%d/%Y',
+                '%d-%m-%Y',
+                '%m-%d-%Y',
+                '%Y-%m-%d',
+                '%Y/%m/%d',
+                '%d/%m/%y',
+                '%m/%d/%y',
+            ):
+                try:
+                    return datetime.strptime(date_value, fmt).date()
+                except ValueError:
+                    continue
+        return fields.Date.context_today(self)
 
+    def create_record(self, text):
+        """Parse extracted OCR text and create a draft vendor bill."""
+        matches = self._extract_text_patterns(text)
+        invoice_date = self._parse_invoice_date(matches['date_match'])
+        bill_no_match = matches['bill_no_match']
         bill_no = bill_no_match.group(1) if bill_no_match else ''
+        move_line_vals = self.record_lines(matches)
 
-        move_line_vals = self.record_lines(
-            product_lines_newline_name_qty_price_amount,
-            product_lines_name_qty_amount,
-            product_lines_qty_name_amount,
-            product_lines_name_qty_price_amount1,
-            product_lines_name_price_qty_amount_with_dollar,
-            product_lines_name_price_qty_amount,
-            product_lines_name_amount,
-            product_lines_name_qty_price_amount2,
-            product_lines_double_line_name,
-            product_lines_code_name,
-            product_lines_quantity_part,
-            product_lines_vendor_bill_pattern,
-            product_lines_quantity_price_amount_pattern,
-            product_lines_quantity_price_amount_pattern2,
-            product_line_name_with_extra_line,
-            product_lines_simple_name_qty_price,
-            product_lines_table_brackets,
-            product_lines_table_simple,
-            product_lines_table_dollar,
-            product_lines_fallback
-        )
-
-        bill_record = self.env['account.move'].create([{
+        return self.env['account.move'].create([{
             'move_type': 'in_invoice',
             'ref': bill_no,
-            'date': date,
-            'invoice_date': date,
+            'date': invoice_date,
+            'invoice_date': invoice_date,
             'invoice_line_ids': move_line_vals,
         }])
 
-        return bill_record
-
     def parse_lines_intelligently(self, text):
-        lines = text.split('\n')
+        """Fallback line-by-line parser for unstructured OCR tables."""
         parsed_lines = []
-
-        for idx, line in enumerate(lines):
-            original_line = line
-            line = line.strip()
-
-            if len(line) < 3:
+        for raw_line in text.split('\n'):
+            cleaned_line = raw_line.strip()
+            if len(cleaned_line) < 3:
                 continue
 
-            line = re.sub(r'^(\d{1,3})\s*[\|\.]\s+', '', line)
-            line = re.sub(r'^\s*[\|]\s*', '', line)
-            line = line.strip()
-
-            if len(line) < 3:
+            cleaned_line = re.sub(r'^(\d{1,3})\s*[\|\.]\s+', '', cleaned_line)
+            cleaned_line = re.sub(r'^\s*[\|]\s*', '', cleaned_line).strip()
+            if len(cleaned_line) < 3:
                 continue
 
-            tokens = line.split()
+            tokens = cleaned_line.split()
             if len(tokens) < 2:
                 continue
 
             numbers = []
             text_parts = []
-
             for token in tokens:
                 num_val = self.clean_number(token)
                 if num_val > 0 and re.search(r'\d', token):
@@ -807,190 +730,154 @@ class DigitizeBill(models.TransientModel):
                 else:
                     text_parts.append(token)
 
-            if len(numbers) < 2 or len(text_parts) < 1:
+            if len(numbers) < 2 or not text_parts:
                 continue
 
-            product_name = ' '.join(text_parts)
-            product_name = self.clean_product_name(product_name)
-
+            product_name = self.clean_product_name(' '.join(text_parts))
             if not self.is_valid_product_line(product_name):
                 continue
 
-            if len(numbers) >= 3:
-                qty = numbers[0]
-                unit_price = numbers[1]
-                total = numbers[2]
-
-                expected_total = qty * unit_price
-                tolerance = max(0.1, expected_total * 0.01)
-
-                if abs(total - expected_total) < tolerance:
-                    price = unit_price
-                else:
-                    qty_alt = numbers[1]
-                    price_alt = numbers[0]
-                    expected_total_alt = qty_alt * price_alt
-
-                    if abs(total - expected_total_alt) < tolerance:
-                        qty = qty_alt
-                        price = price_alt
-                    else:
-                        if numbers[0] <= 100 and numbers[0] % 1 == 0 and \
-                                numbers[1] % 1 != 0:
-                            qty = numbers[0]
-                            price = numbers[1]
-                        elif numbers[1] <= 100 and numbers[1] % 1 == 0 and \
-                                numbers[0] % 1 != 0:
-                            qty = numbers[1]
-                            price = numbers[0]
-                        elif numbers[0] <= 100 and numbers[1] > numbers[0] and \
-                                numbers[1] < 100000:
-                            qty = numbers[0]
-                            price = numbers[1]
-                        else:
-                            qty = numbers[0]
-                            price = numbers[1]
-
-            elif len(numbers) == 2:
-                if numbers[0] <= 100 and numbers[1] > numbers[0]:
-                    qty = numbers[0]
-                    price = numbers[1]
-                elif numbers[1] <= 100 and numbers[0] > numbers[1]:
-                    qty = numbers[1]
-                    price = numbers[0]
-                else:
-                    qty = numbers[0]
-                    price = numbers[1]
-            else:
+            qty_price = self._infer_qty_price(numbers, prefer_smaller_qty=True)
+            if not qty_price:
                 continue
 
-            if qty > 0 and qty <= 10000 and price >= 0 and price <= 1000000:
+            qty, price = qty_price
+            if 0 < qty <= 10000 and 0 <= price <= 1000000:
                 parsed_lines.append((product_name, str(qty), str(price)))
 
         return parsed_lines
 
     def clean_ocr_text(self, text):
+        """Correct common OCR character confusions near numbers."""
         cleaned_lines = []
-        for line in text.split('\n'):
-            line = re.sub(r'(\d+\.)i', r'\g<1>1', line)
-            line = re.sub(r'(\d+\.)l', r'\g<1>1', line)
-            line = re.sub(r'([\$\s])O(\.\d)', r'\g<1>0\g<2>', line)
-            line = re.sub(r'(\d)O(\.\d)', r'\g<1>0\g<2>', line)
-            line = re.sub(r'(\d)O(\d)', r'\g<1>0\g<2>', line)
-            line = re.sub(r'([\s:])l(\d)', r'\g<1>1\g<2>', line)
-            line = re.sub(r'([\s:])I(\d)', r'\g<1>1\g<2>', line)
-            line = re.sub(r'(\d)l(\s|$)', r'\g<1>1\g<2>', line)
-            line = re.sub(r'(\d)I(\s|$)', r'\g<1>1\g<2>', line)
-            line = re.sub(r'(\s)i(\s|$)', r'\g<1>1\g<2>', line)
-            line = re.sub(r'(\s)l(\s|$)', r'\g<1>1\g<2>', line)
-            cleaned_lines.append(line)
+        for raw_line in text.split('\n'):
+            fixed = re.sub(r'(\d+\.)i', r'\g<1>1', raw_line)
+            fixed = re.sub(r'(\d+\.)l', r'\g<1>1', fixed)
+            fixed = re.sub(r'([\$\s])O(\.\d)', r'\g<1>0\g<2>', fixed)
+            fixed = re.sub(r'(\d)O(\.\d)', r'\g<1>0\g<2>', fixed)
+            fixed = re.sub(r'(\d)O(\d)', r'\g<1>0\g<2>', fixed)
+            fixed = re.sub(r'([\s:])l(\d)', r'\g<1>1\g<2>', fixed)
+            fixed = re.sub(r'([\s:])I(\d)', r'\g<1>1\g<2>', fixed)
+            fixed = re.sub(r'(\d)l(\s|$)', r'\g<1>1\g<2>', fixed)
+            fixed = re.sub(r'(\d)I(\s|$)', r'\g<1>1\g<2>', fixed)
+            fixed = re.sub(r'(\s)i(\s|$)', r'\g<1>1\g<2>', fixed)
+            fixed = re.sub(r'(\s)l(\s|$)', r'\g<1>1\g<2>', fixed)
+            cleaned_lines.append(fixed)
         return '\n'.join(cleaned_lines)
 
-    def action_add_document(self):
+    def _preprocess_image_for_ocr(self, img):
+        """Convert image to scaled grayscale suitable for Tesseract OCR."""
+        rgb_img = img.convert('RGB') if img.mode != 'RGB' else img
+        gray_img = rgb_img.convert('L')
+        min_width = 2000
+        if gray_img.width < min_width:
+            scale_factor = min_width / gray_img.width
+            new_size = (
+                int(gray_img.width * scale_factor),
+                int(gray_img.height * scale_factor),
+            )
+            resample_filter = getattr(Image, 'Resampling', Image).LANCZOS
+            gray_img = gray_img.resize(new_size, resample=resample_filter)
+        return gray_img
+
+    def _run_tesseract_ocr(self, img, psm_modes):
+        """Run Tesseract across fallback PSM modes and return text."""
+        processed_img = self._preprocess_image_for_ocr(img)
+        text = ''
+        for psm in psm_modes:
+            try:
+                text = pytesseract.image_to_string(
+                    processed_img,
+                    lang='eng',
+                    config=f'--oem 3 --psm {psm}',
+                )
+            except pytesseract.TesseractNotFoundError as err:
+                msg = self.env._("Tesseract is not installed.")
+                raise ValidationError(msg) from err
+            except pytesseract.TesseractError as err:
+                msg = self.env._("Tesseract OCR Error: %(error)s", error=str(err))
+                raise ValidationError(msg) from err
+
+            if text and len(text.strip()) >= 10:
+                return text
+        return text
+
+    def _extract_text_from_pdf(self, binary_data):
+        """Render PDF bytes to images and extract OCR text from all pages."""
         try:
-            file_attachment = self.env["ir.attachment"].search(
-                ['|', ('res_field', '!=', False), ('res_field', '=', False),
-                 ('res_id', '=', self.id),
-                 ('res_model', '=', 'digitize.bill')],
-                limit=1)
-            file_path = file_attachment._full_path(file_attachment.store_fname)
-            file_extension = self.file_name.lower().split('.')[
-                -1] if self.file_name else ''
+            images = convert_from_bytes(binary_data, dpi=400)
+        except (
+            PDFInfoNotInstalledError,
+            PDFPageCountError,
+            PDFSyntaxError,
+            OSError,
+            ValueError,
+        ) as err:
+            msg = self.env._("Cannot read PDF file: %(error)s", error=str(err))
+            raise ValidationError(msg) from err
 
-            if file_extension == 'pdf':
-                images = convert_from_path(file_path, dpi=400)
-                if not images:
-                    raise ValidationError(_("Cannot read PDF file"))
+        if not images:
+            raise ValidationError(self.env._("Cannot read PDF file."))
 
-                all_text = []
-                for img in images:
-                    if img.mode != 'RGB':
-                        img = img.convert('RGB')
-                    img = img.convert('L')
+        all_text = []
+        for img in images:
+            page_text = self._run_tesseract_ocr(img, (6, 4, 11))
+            if page_text and len(page_text.strip()) >= 5:
+                all_text.append(page_text)
 
-                    min_width = 2000
-                    if img.width < min_width:
-                        scale_factor = min_width / img.width
-                        new_size = (int(img.width * scale_factor),
-                                    int(img.height * scale_factor))
-                        img = img.resize(new_size, resample=Image.LANCZOS)
+        if not all_text:
+            raise ValidationError(self.env._("Unable to extract text from PDF."))
+        return '\n'.join(all_text)
 
-                    try:
-                        custom_config = r'--oem 3 --psm 6'
-                        page_text = pytesseract.image_to_string(img, lang='eng',
-                                                                config=custom_config)
+    def _extract_text_from_image(self, binary_data):
+        """Open image bytes and extract OCR text."""
+        try:
+            with Image.open(io.BytesIO(binary_data)) as img:
+                text = self._run_tesseract_ocr(img, (6, 4, 3, 11))
+        except (UnidentifiedImageError, OSError, ValueError) as err:
+            msg = self.env._(
+                "Cannot identify image data: %(error)s",
+                error=str(err),
+            )
+            raise ValidationError(msg) from err
 
-                        if not page_text or len(page_text.strip()) < 10:
-                            custom_config = r'--oem 3 --psm 4'
-                            page_text = pytesseract.image_to_string(img,
-                                                                    lang='eng',
-                                                                    config=custom_config)
+        if not text or len(text.strip()) < 5:
+            raise ValidationError(
+                self.env._("Unable to extract text from the document."),
+            )
+        return text
 
-                        if not page_text or len(page_text.strip()) < 10:
-                            custom_config = r'--oem 3 --psm 11'
-                            page_text = pytesseract.image_to_string(img,
-                                                                    lang='eng',
-                                                                    config=custom_config)
+    def action_add_document(self):
+        """Extract OCR text, create a draft bill, and open its form."""
+        self.ensure_one()
+        file_attachment = self.env['ir.attachment'].search(
+            [
+                ('res_model', '=', 'digitize.bill'),
+                ('res_id', '=', self.id),
+                ('res_field', '=', 'bill'),
+            ],
+            limit=1,
+        )
+        binary_data = bytes(self.bill) if self.bill else b''
+        if not binary_data and file_attachment:
+            binary_data = (
+                bytes(file_attachment.raw) if file_attachment.raw else b''
+            )
+        if not binary_data:
+            raise ValidationError(self.env._("Please upload a bill document."))
 
-                        if page_text and len(page_text.strip()) >= 5:
-                            all_text.append(page_text)
-                    except:
-                        continue
+        file_extension = (
+            self.file_name.lower().rsplit('.', maxsplit=1)[-1]
+            if self.file_name and '.' in self.file_name
+            else ''
+        )
+        if file_extension == 'pdf':
+            text = self._extract_text_from_pdf(binary_data)
+        else:
+            text = self._extract_text_from_image(binary_data)
 
-                if not all_text:
-                    raise ValidationError(_("Unable to extract text from PDF"))
-
-                text = '\n'.join(all_text)
-            else:
-                with open(file_path, mode='rb') as file:
-                    binary_data = file.read()
-                img = Image.open(io.BytesIO(binary_data))
-
-                if img.mode != 'RGB':
-                    img = img.convert('RGB')
-                img = img.convert('L')
-
-                min_width = 2000
-                if img.width < min_width:
-                    scale_factor = min_width / img.width
-                    new_size = (int(img.width * scale_factor),
-                                int(img.height * scale_factor))
-                    img = img.resize(new_size, resample=Image.LANCZOS)
-
-                try:
-                    custom_config = r'--oem 3 --psm 6'
-                    text = pytesseract.image_to_string(img, lang='eng',
-                                                       config=custom_config)
-
-                    if not text or len(text.strip()) < 10:
-                        custom_config = r'--oem 3 --psm 4'
-                        text = pytesseract.image_to_string(img, lang='eng',
-                                                           config=custom_config)
-
-                    if not text or len(text.strip()) < 10:
-                        custom_config = r'--oem 3 --psm 3'
-                        text = pytesseract.image_to_string(img, lang='eng',
-                                                           config=custom_config)
-
-                    if not text or len(text.strip()) < 10:
-                        custom_config = r'--oem 3 --psm 11'
-                        text = pytesseract.image_to_string(img, lang='eng',
-                                                           config=custom_config)
-
-                    if not text or len(text.strip()) < 5:
-                        raise ValidationError(
-                            _("Unable to extract text from the document."))
-                except pytesseract.TesseractError as te:
-                    raise ValidationError(
-                        _("Tesseract OCR Error: %s") % str(te))
-                except pytesseract.TesseractNotFoundError:
-                    raise ValidationError(_("Tesseract is not installed."))
-
-        except Exception as e:
-            raise ValidationError(_("Cannot identify data: %s") % str(e))
-
-        text = self.clean_ocr_text(text)
-        bill_record = self.create_record(text)
+        cleaned_text = self.clean_ocr_text(text)
+        bill_record = self.create_record(cleaned_text)
 
         if file_attachment and bill_record:
             file_attachment.write({
@@ -1000,9 +887,8 @@ class DigitizeBill(models.TransientModel):
             })
 
         return {
-            'name': "Invoice",
+            'name': self.env._("Vendor Bill"),
             'type': 'ir.actions.act_window',
-            'view_type': 'form',
             'view_mode': 'form',
             'res_model': 'account.move',
             'res_id': bill_record.id,

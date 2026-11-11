@@ -1,6 +1,7 @@
-## Module <package_split>
+## Module package_split
 
-#### 17.09.2026
-#### Version 19.0.1.0.0
-##### ADD
-- Initial Commit for Categorize & Pack Products
+#### 2026-11-11
+#### Version 20.0.1.0.0
+#### ADD
+
+- Initial release for Odoo 20: Migrated Categorize & Pack Products to split delivery packages by product package category in Odoo 20.

@@ -14,21 +14,30 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
 #############################################################################
 from odoo import api, fields, models
 
 
 class ResConfigSettings(models.TransientModel):
-    """ Inhering to Add a field to enable Package split"""
+    """Extend configuration settings to manage the package split feature."""
+
     _inherit = 'res.config.settings'
 
     enable_package_split = fields.Boolean(
         string='Package Split',
         config_parameter='package_split.enable_package_split',
         compute='_compute_enable_package_split',
-        help="Enable package split feature")
+        readonly=False,
+        store=True,
+        help="Enable package split feature",
+    )
 
     @api.depends('group_stock_tracking_lot')
     def _compute_enable_package_split(self):
-        """on enabling packages it enables the field enable_package_split"""
-        self.enable_package_split = self.group_stock_tracking_lot
+        """Automatically enable package split when packages tracking is enabled."""
+        for record in self:
+            record.enable_package_split = record.group_stock_tracking_lot

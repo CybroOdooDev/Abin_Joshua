@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <!-- View definition for Package Category tree view -->
-    <record id="package_category_view_tree" model="ir.ui.view">
-        <field name="name">package.category.view.tree</field>
+    <!-- View definition for Package Category list view -->
+    <record id="package_category_view_list" model="ir.ui.view">
+        <field name="name">package.category.view.list</field>
         <field name="model">package.category</field>
         <field name="arch" type="xml">
             <list editable="bottom">
@@ -16,9 +16,12 @@
         <field name="model">package.category</field>
         <field name="arch" type="xml">
             <form>
-                <group>
-                    <field name="name"/>
-                </group>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+                <chatter/>
             </form>
         </field>
     </record>
@@ -26,8 +29,7 @@
     <record id="package_category_action" model="ir.actions.act_window">
         <field name="name">Package Category</field>
         <field name="res_model">package.category</field>
-        <field name="view_mode">list</field>
-<!--        <field name="view_id" ref="package_category_view_tree"/>-->
+        <field name="view_mode">list,form</field>
     </record>
     <!-- Menu item for Package Category -->
     <menuitem id="package_category_menu"

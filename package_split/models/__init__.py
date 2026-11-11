@@ -14,8 +14,9 @@
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
 #############################################################################
-from . import package_category
-from . import product_template
-from . import res_config_settings
-from . import stock_picking
+from . import package_category, product_template, res_config_settings, stock_move_line

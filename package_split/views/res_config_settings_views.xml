@@ -10,7 +10,7 @@
             <xpath expr="//setting[@id='product_packs_tracking']"
                    position="inside">
                 <div class="row mt-2"
-                     invisible="group_stock_tracking_lot == False">
+                     invisible="not group_stock_tracking_lot">
                     <field name="enable_package_split" class="col-lg-1 mr0"/>
                     <div class="col ps-0">
                         <label for="enable_package_split"/>

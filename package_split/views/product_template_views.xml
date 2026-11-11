@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <field name="type" position="after">
                 <field name="package_split_value" invisible="1"/>
-                <field name="package_category_id" invisible="package_split_value == False"/>
+                <field name="package_category_id" invisible="not package_split_value"/>
             </field>
         </field>
     </record>

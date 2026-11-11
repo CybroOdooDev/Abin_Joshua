@@ -1,11 +1,12 @@
 /** @odoo-module **/
 
-import { AccountMoveListController } from "@account/views/account_move_list/account_move_list_controller";
 import { AccountMoveKanbanController } from "@account/views/account_move_kanban/account_move_kanban_controller";
-import { useService } from "@web/core/utils/hooks";
-import { patch } from "@web/core/utils/patch";
+import { AccountMoveListController } from "@account/views/account_move_list/account_move_list_controller";
 import { onWillStart, proxy } from "@odoo/owl";
 import { _t } from "@web/core/l10n/translation";
+import { user } from "@web/core/user";
+import { useService } from "@web/core/utils/hooks";
+import { patch } from "@web/core/utils/patch";
 
 export function digitizeBillControllerPatch() {
     return {
@@ -23,16 +24,20 @@ export function digitizeBillControllerPatch() {
             }
 
             onWillStart(async () => {
+                const hasInvoiceAccess = await user.hasGroup("account.group_account_invoice");
+                if (!hasInvoiceAccess) {
+                    this.state.button_state = false;
+                    return;
+                }
                 const digitizeBillParam = await this.orm.silent.call(
-                    "ir.config_parameter",
-                    "get_bool",
-                    ["bill_digitization.digitize_bill"]
+                    "digitize.bill",
+                    "is_digitize_bill_enabled",
+                    []
                 );
                 this.state.button_state = Boolean(digitizeBillParam);
             });
         },
 
-        /* Opening a wizard on button click */
         onClickDigitize() {
             this.actionService.doAction({
                 name: _t("Upload Bill"),
