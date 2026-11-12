@@ -27,6 +27,9 @@ patch(ReprintReceiptButton.prototype, {
 
         const order = this.props.order;
         const serverId = order.server_id || order.id || order.backendId;
+        const isOrderPaid = typeof order.is_paid === "function"
+            ? order.is_paid()
+            : ["paid", "done", "invoiced"].includes(order.state);
         const config = this.pos.config;
         const preferredPrinter = (config.qz_printer_id && config.qz_printer_id[1])
             || config.qz_printer_name
@@ -34,8 +37,8 @@ patch(ReprintReceiptButton.prototype, {
             || "";
 
         try {
-            // First attempt: Reprint the exact preserved snapshot from pos.printed.ticket
-            if (serverId && typeof serverId === "number") {
+            // First attempt: Reprint the exact preserved snapshot from pos.printed.ticket (paid orders only)
+            if (isOrderPaid && serverId && typeof serverId === "number") {
                 try {
                     const ticket = await this.orm.call(
                         "pos.order",
@@ -68,15 +71,41 @@ patch(ReprintReceiptButton.prototype, {
                 } catch (_) {}
             }
 
+            if (
+                isOrderPaid &&
+                this.pos.config.l10n_es_edi_verifactu_required &&
+                !order.l10n_es_edi_verifactu_qr_code &&
+                serverId
+            ) {
+                try {
+                    const verifactuRows = typeof order.fetch_l10n_es_edi_verifactu_qr_code === "function"
+                        ? await order.fetch_l10n_es_edi_verifactu_qr_code([serverId])
+                        : await this.orm.read("pos.order", [serverId], ["l10n_es_edi_verifactu_qr_code"]);
+                    if (verifactuRows && verifactuRows[0] && verifactuRows[0].l10n_es_edi_verifactu_qr_code) {
+                        order.l10n_es_edi_verifactu_qr_code = verifactuRows[0].l10n_es_edi_verifactu_qr_code;
+                    }
+                } catch (e) {
+                    console.warn("Could not fetch VeriFactu QR code for reprint:", e);
+                }
+            }
+
             let targetNode = null;
-            const liveReceiptEl = document.querySelector(".pos-receipt");
-            if (liveReceiptEl) {
-                targetNode = liveReceiptEl.cloneNode(true);
-            } else if (this.renderer) {
+            if (this.renderer) {
+                const exportData = {
+                    ...order.export_for_printing(),
+                };
+                if (!isOrderPaid) {
+                    exportData.l10n_es_edi_verifactu_qr_code = false;
+                }
                 targetNode = await this.renderer.toHtml(OrderReceipt, {
-                    data: order.export_for_printing(),
+                    data: exportData,
                     formatCurrency: this.env.utils.formatCurrency,
                 });
+            } else {
+                const liveReceiptEl = document.querySelector(".pos-receipt");
+                if (liveReceiptEl && isOrderPaid) {
+                    targetNode = liveReceiptEl.cloneNode(true);
+                }
             }
 
             if (!targetNode) {

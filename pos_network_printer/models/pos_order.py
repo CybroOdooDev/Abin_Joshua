@@ -99,10 +99,14 @@ class PosOrder(models.Model):
 
     @api.model
     def get_latest_ticket_snapshot(self, order_id):
-        """Returns the most recent valid receipt snapshot for exact reprinting."""
+        """Returns the most recent valid receipt snapshot for exact reprinting of settled orders."""
+        order = self.browse(order_id).exists()
+        if not order or order.state not in ('paid', 'done', 'invoiced'):
+            return False
         ticket = self.env['pos.printed.ticket'].search([
             ('order_id', '=', order_id),
-            ('receipt_snapshot', '!=', False)
+            ('print_type', 'in', ['first_print', 'invoice', 'reprint']),
+            ('receipt_snapshot', '!=', False),
         ], limit=1, order='id desc')
         if ticket:
             return {

@@ -82,14 +82,48 @@ patch(ReceiptScreen.prototype, {
                 }
             }
 
+            const isPaid = Boolean(
+                ["paid", "done", "invoiced"].includes(order.state) ||
+                (typeof order.is_paid === "function" ? order.is_paid() : (order.get_due ? order.get_due() <= 0 : false))
+            );
+            const verifactuOrderId = serverOrderId || order.receipt_protected_order_id;
+
+            // If settled and Veri*Factu QR wasn't yet loaded into JS (e.g. kiosk counter payment), fetch and assign it before printing
+            if (
+                isPaid &&
+                !this.isBill &&
+                this.pos.config.l10n_es_edi_verifactu_required &&
+                !order.l10n_es_edi_verifactu_qr_code &&
+                verifactuOrderId
+            ) {
+                try {
+                    const verifactuRows = typeof order.fetch_l10n_es_edi_verifactu_qr_code === "function"
+                        ? await order.fetch_l10n_es_edi_verifactu_qr_code([verifactuOrderId])
+                        : await this.orm.read("pos.order", [verifactuOrderId], ["l10n_es_edi_verifactu_qr_code"]);
+                    if (verifactuRows && verifactuRows[0] && verifactuRows[0].l10n_es_edi_verifactu_qr_code) {
+                        order.l10n_es_edi_verifactu_qr_code = verifactuRows[0].l10n_es_edi_verifactu_qr_code;
+                    }
+                } catch (e) {
+                    console.warn("Could not fetch VeriFactu QR code:", e);
+                }
+            }
+
             let imageBase64 = null;
             const receiptEl = document.querySelector(".pos-receipt");
+            const domNeedsVerifactuQr = Boolean(
+                isPaid &&
+                !this.isBill &&
+                this.pos.config.l10n_es_edi_verifactu_required &&
+                order.l10n_es_edi_verifactu_qr_code
+            );
 
-            // If isInvoice, only reuse DOM element if it already includes the invoice sequence number
+            // Only reuse live DOM element when it matches bill/invoice/Veri*Factu state
             const domHasInvoiceNumber = Boolean(
                 receiptEl &&
                 receiptEl.isConnected &&
-                (!isInvoice || (order.account_move_name && receiptEl.textContent.includes(order.account_move_name)))
+                !this.isBill &&
+                (!isInvoice || (order.account_move_name && receiptEl.textContent.includes(order.account_move_name))) &&
+                (!domNeedsVerifactuQr || receiptEl.textContent.includes("VERI*FACTU"))
             );
 
             // 1. If .pos-receipt is already rendered and up-to-date in the screen DOM, clone and capture in offscreen thermal wrapper
@@ -100,11 +134,15 @@ patch(ReceiptScreen.prototype, {
 
             // 2. If not already mounted, outdated, or capture failed, render cleanly via renderer
             if (!imageBase64 && this.renderer) {
+                const exportData = {
+                    ...order.export_for_printing(),
+                    isBill: this.isBill,
+                };
+                if (this.isBill || !isPaid) {
+                    exportData.l10n_es_edi_verifactu_qr_code = false;
+                }
                 const generatedEl = await this.renderer.toHtml(OrderReceipt, {
-                    data: {
-                        ...order.export_for_printing(),
-                        isBill: this.isBill,
-                    },
+                    data: exportData,
                     formatCurrency: this.env.utils.formatCurrency,
                 });
 

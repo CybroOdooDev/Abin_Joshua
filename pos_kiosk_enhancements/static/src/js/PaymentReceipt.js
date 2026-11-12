@@ -5,6 +5,197 @@ import {KioskPaymentMethodPopup} from "@agr_kiosk_pay/js/kiosk_payment_popup";
 import {renderToString} from "@web/core/utils/render";
 import {useService} from "@web/core/utils/hooks";
 import {_t} from "@web/core/l10n/translation";
+import {toPng} from "@point_of_sale/app/utils/html-to-image";
+import {loadAllImages} from "@point_of_sale/utils";
+
+const PAID_ORDER_STATES = new Set(["paid", "done", "invoiced"]);
+const MAX_RASTER_BAND_ROWS = 512;
+
+export function resolveKioskVerifactuQrPath({showVerifactuQr, serverOrder}) {
+    if (!showVerifactuQr || !serverOrder) {
+        return "";
+    }
+    if (!PAID_ORDER_STATES.has(serverOrder.state)) {
+        return "";
+    }
+    return serverOrder.l10n_es_edi_verifactu_qr_code || "";
+}
+
+export function resolveKioskPrinterName(posConfig, fallbackName = "USB Printer") {
+    if (!posConfig) {
+        return fallbackName;
+    }
+    return (
+        (posConfig.qz_printer_id && posConfig.qz_printer_id[1]) ||
+        posConfig.qz_printer_name ||
+        posConfig.printer_name ||
+        fallbackName
+    );
+}
+
+export function uint8ToBase64(bytes) {
+    const chunkSize = 0x8000;
+    let binary = "";
+    for (let i = 0; i < bytes.length; i += chunkSize) {
+        binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+    }
+    return btoa(binary);
+}
+
+export function rgbaToEscposBytes(rgbaData, width, height, threshold = 205) {
+    const bytesPerRow = Math.ceil(width / 8);
+    const xL = bytesPerRow & 0xff;
+    const xH = (bytesPerRow >> 8) & 0xff;
+
+    const chunks = [];
+    // ESC @ (Initialize printer)
+    chunks.push(new Uint8Array([0x1b, 0x40]));
+
+    for (let yStart = 0; yStart < height; yStart += MAX_RASTER_BAND_ROWS) {
+        const bandRows = Math.min(MAX_RASTER_BAND_ROWS, height - yStart);
+        const yL = bandRows & 0xff;
+        const yH = (bandRows >> 8) & 0xff;
+
+        // GS v 0 m xL xH yL yH (raster bit image, normal mode)
+        const header = new Uint8Array([0x1d, 0x76, 0x30, 0x00, xL, xH, yL, yH]);
+        const band = new Uint8Array(bytesPerRow * bandRows);
+
+        for (let row = 0; row < bandRows; row++) {
+            const y = yStart + row;
+            const rowOffset = row * bytesPerRow;
+            for (let x = 0; x < width; x++) {
+                const idx = (y * width + x) * 4;
+                const a = rgbaData[idx + 3];
+                if (a > 128) {
+                    const lum =
+                        0.299 * rgbaData[idx] +
+                        0.587 * rgbaData[idx + 1] +
+                        0.114 * rgbaData[idx + 2];
+                    if (lum < threshold) {
+                        band[rowOffset + (x >> 3)] |= 0x80 >> (x & 7);
+                    }
+                }
+            }
+        }
+        chunks.push(header, band);
+    }
+
+    // ESC d 4 (feed 4 lines) + GS V B 0 (feed slightly & partial cut)
+    chunks.push(new Uint8Array([0x1b, 0x64, 0x04, 0x1d, 0x56, 0x42, 0x00]));
+
+    const totalLen = chunks.reduce((sum, arr) => sum + arr.length, 0);
+    const out = new Uint8Array(totalLen);
+    let offset = 0;
+    for (const chunk of chunks) {
+        out.set(chunk, offset);
+        offset += chunk.length;
+    }
+    return out;
+}
+
+async function captureKioskReceiptPng(receiptHtml, pixelRatio = 2) {
+    const container = document.createElement("div");
+    container.className = "kiosk-thermal-capture-root";
+    Object.assign(container.style, {
+        position: "fixed",
+        left: "-9999px",
+        top: "0",
+        width: "288px",
+        background: "#ffffff",
+        color: "#000000",
+        margin: "0",
+        padding: "0",
+        zIndex: "-1",
+    });
+
+    const styleEl = document.createElement("style");
+    styleEl.textContent = `
+        .kiosk-thermal-capture-root .pos-receipt {
+            width: 288px !important;
+            max-width: 288px !important;
+            padding: 8px 6px !important;
+            margin: 0 !important;
+            background: #ffffff !important;
+            color: #000000 !important;
+            font-weight: 700 !important;
+            -webkit-font-smoothing: none !important;
+            font-smooth: never !important;
+            box-sizing: border-box !important;
+        }
+        .kiosk-thermal-capture-root .pos-receipt * {
+            color: #000000 !important;
+            font-weight: 700 !important;
+            text-shadow: none !important;
+        }
+        .kiosk-thermal-capture-root .pos-receipt img {
+            image-rendering: pixelated !important;
+        }
+    `;
+
+    const bodyEl = document.createElement("div");
+    bodyEl.innerHTML = receiptHtml;
+
+    container.appendChild(styleEl);
+    container.appendChild(bodyEl);
+    document.body.appendChild(container);
+
+    try {
+        await loadAllImages(bodyEl);
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        const targetEl = bodyEl.querySelector(".pos-receipt") || bodyEl.firstElementChild || bodyEl;
+        return await toPng(targetEl, {
+            backgroundColor: "#ffffff",
+            pixelRatio,
+            cacheBust: false,
+        });
+    } finally {
+        container.remove();
+    }
+}
+
+async function renderKioskThermalOutputs(dataUrl, paperWidthMm = 80, threshold = 205) {
+    const targetWidth = Number(paperWidthMm) === 58 ? 384 : 576;
+    const img = new Image();
+    img.src = dataUrl;
+    await new Promise((resolve, reject) => {
+        if (img.complete && img.naturalWidth > 0) {
+            resolve();
+            return;
+        }
+        img.onload = resolve;
+        img.onerror = () => reject(new Error("Failed to decode kiosk receipt image"));
+    });
+
+    const targetHeight = Math.max(1, Math.round((img.height * targetWidth) / img.width));
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, targetWidth, targetHeight);
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+    const imageData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+    const rgba = imageData.data;
+    const escposBytes = rgbaToEscposBytes(rgba, targetWidth, targetHeight, threshold);
+
+    // Snap preview canvas pixels to strict monochrome so simulated snapshots match printer output
+    for (let i = 0; i < rgba.length; i += 4) {
+        const lum = 0.299 * rgba[i] + 0.587 * rgba[i + 1] + 0.114 * rgba[i + 2];
+        const v = rgba[i + 3] > 128 && lum < threshold ? 0 : 255;
+        rgba[i] = v;
+        rgba[i + 1] = v;
+        rgba[i + 2] = v;
+        rgba[i + 3] = 255;
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    return {
+        monochromePngBase64: canvas.toDataURL("image/png").split(",")[1],
+        escposBase64: uint8ToBase64(escposBytes),
+    };
+}
 
 function num(value, fallback = 0) {
     const n = Number(value);
@@ -377,40 +568,17 @@ patch(KioskPaymentMethodPopup.prototype, {
         }
 
         let verifactu_qr_base64 = "";
-        if (config.show_verifactu_qr) {
+        if (config.show_verifactu_qr && order.id) {
             try {
-                let verifactuBarcodeUrl = "";
-                if (order.id) {
-                    try {
-                        const [serverOrder] = await this.orm.read(
-                            "pos.order",
-                            [order.id],
-                            ["l10n_es_edi_verifactu_qr_code"]
-                        );
-                        if (serverOrder && serverOrder.l10n_es_edi_verifactu_qr_code) {
-                            verifactuBarcodeUrl = serverOrder.l10n_es_edi_verifactu_qr_code;
-                        }
-                    } catch (e) {
-                        console.warn("Could not read l10n_es_edi_verifactu_qr_code from server", e);
-                    }
-                }
-                if (!verifactuBarcodeUrl) {
-                    const company = this.props.selfOrder.company || {};
-                    const rawVat = company.vat || "";
-                    const vat = rawVat.replace(/^[A-Z]{2}/, "").trim();
-                    const numserie = order.pos_reference || order.name || order.tracking_number || "";
-                    const now = new Date();
-                    const day = String(now.getDate()).padStart(2, "0");
-                    const month = String(now.getMonth() + 1).padStart(2, "0");
-                    const year = now.getFullYear();
-                    const fecha = `${day}-${month}-${year}`;
-                    const importe = Number(correctTotal || 0).toFixed(2);
-                    const endpoint = config.l10n_es_edi_verifactu_test_environment
-                        ? "https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR"
-                        : "https://www2.agenciatributaria.gob.es/wlpl/TIKE-CONT/ValidarQR";
-                    const qrUrl = `${endpoint}?nif=${encodeURIComponent(vat)}&numserie=${encodeURIComponent(numserie)}&fecha=${encodeURIComponent(fecha)}&importe=${encodeURIComponent(importe)}`;
-                    verifactuBarcodeUrl = `/report/barcode/?barcode_type=QR&value=${encodeURIComponent(qrUrl)}&barLevel=M&width=180&height=180`;
-                }
+                const [serverOrder] = await this.orm.read(
+                    "pos.order",
+                    [order.id],
+                    ["state", "l10n_es_edi_verifactu_qr_code"]
+                );
+                const verifactuBarcodeUrl = resolveKioskVerifactuQrPath({
+                    showVerifactuQr: config.show_verifactu_qr,
+                    serverOrder,
+                });
                 if (verifactuBarcodeUrl) {
                     const fullUrl = verifactuBarcodeUrl.startsWith("http")
                         ? verifactuBarcodeUrl
@@ -465,7 +633,7 @@ patch(KioskPaymentMethodPopup.prototype, {
                 takeaway_enabled: config.self_ordering_takeaway,
             },
         };
-        await this._printWithQZ(receiptData);
+        await this._printWithQZ(receiptData, order);
     },
     async _saveComboMetadataToServer(order) {
         const lines = order.lines || [];
@@ -514,56 +682,50 @@ patch(KioskPaymentMethodPopup.prototype, {
             );
         }
     },
-    async _printWithQZ(receiptData) {
+    async _printWithQZ(receiptData, order = null) {
         const pos_config = this.props.selfOrder.config;
 
         try {
             const templateName = "agr_kiosk_pay.PaymentReceipt";
-
             const receiptHtml = renderToString(templateName, {
                 data: receiptData,
             });
 
-            const options = {
-                margin: 0,
-                filename: `Receipt_${receiptData.order.name}.pdf`,
-                image: {
-                    type: "jpeg",
-                    quality: 1,
-                },
-                html2canvas: {
-                    scale: 4,
-                    useCORS: true,
-                    letterRendering: true,
-                },
-                jsPDF: {
-                    unit: "mm",
-                    format: [80, 400],
-                },
-            };
+            const pngDataUrl = await captureKioskReceiptPng(receiptHtml, 2);
+            const paperWidthMm = Number(pos_config && pos_config.printer_paper_width) === 58 ? 58 : 80;
+            const { monochromePngBase64, escposBase64 } = await renderKioskThermalOutputs(pngDataUrl, paperWidthMm);
+            const printerName = resolveKioskPrinterName(pos_config, _t("USB Printer"));
 
-            // Create worker once
-            const worker = html2pdf()
-                .set(options)
-                .from(receiptHtml);
-
-            // Keep automatic download
-            await worker.save();
-
-            // Generate PDF blob from the same content
-            const pdfBlob = await worker.outputPdf("blob");
-
-            // Convert blob to base64 for QZ Tray
-            const pdfBase64 = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-
-                reader.onloadend = () => {
-                    resolve(reader.result.split(",")[1]);
-                };
-
-                reader.onerror = reject;
-                reader.readAsDataURL(pdfBlob);
-            });
+            if (pos_config && pos_config.simulation_mode) {
+                if (typeof window !== "undefined") {
+                    window.__lastSimulatedKioskReceipt = `data:image/png;base64,${monochromePngBase64}`;
+                }
+                const orderRef = (receiptData && receiptData.order && (receiptData.order.reference || receiptData.order.name)) || "";
+                const printType = (receiptData && receiptData.order && receiptData.order.is_pay_at_counter) ? "bill" : "first_print";
+                try {
+                    await this.orm.call(
+                        "pos.order",
+                        "log_printed_ticket",
+                        [
+                            (order && order.id) || 0,
+                            monochromePngBase64,
+                            printType,
+                            printerName,
+                            "success",
+                            false,
+                            orderRef || false,
+                        ]
+                    );
+                } catch (logErr) {
+                    console.warn("[Simulation Mode] Could not archive kiosk receipt in pos.printed.ticket:", logErr);
+                }
+                console.info(`[Simulation Mode] Kiosk receipt for ${orderRef} captured without physical QZ print.`);
+                this.notification.add(
+                    _t("Kiosk receipt saved in history (Simulation Mode: physical print skipped)"),
+                    {type: "info"}
+                );
+                return;
+            }
 
             qz.security.setSignatureAlgorithm("SHA512");
 
@@ -586,16 +748,13 @@ patch(KioskPaymentMethodPopup.prototype, {
                 await qz.websocket.connect();
             }
 
-            const printerName = pos_config.printer_name || _t("USB Printer");
-            const qzConfig = qz.configs.create(printerName, {
-                size: {width: 80},
-                units: "mm",
-            });
+            const qzConfig = qz.configs.create(printerName);
 
             await qz.print(qzConfig, [{
-                type: "pdf",
-                format: "base64",
-                data: pdfBase64,
+                type: "raw",
+                format: "command",
+                flavor: "base64",
+                data: escposBase64,
             }]);
         } catch (err) {
             console.error(err);

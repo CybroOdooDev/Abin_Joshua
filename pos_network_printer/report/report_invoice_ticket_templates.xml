@@ -24,29 +24,85 @@
                 .pos-ticket-wrap table {
                     width: 100% !important;
                     border-collapse: collapse !important;
-                    border: none !important;
-                    border-width: 0 !important;
-                    outline: none !important;
-                    box-shadow: none !important;
                     margin: 0 !important;
                 }
+                .pos-ticket-wrap table,
+                .pos-ticket-wrap table thead,
+                .pos-ticket-wrap table tbody,
+                .pos-ticket-wrap table tfoot,
                 .pos-ticket-wrap table tr,
                 .pos-ticket-wrap table td,
                 .pos-ticket-wrap table th {
-                    border: none !important;
+                    border: 0 none !important;
+                    border-style: none !important;
                     border-width: 0 !important;
                     outline: none !important;
                     box-shadow: none !important;
                     background: transparent !important;
-                    padding: 2px 0 !important;
+                }
+                .pos-ticket-wrap table td,
+                .pos-ticket-wrap table th {
+                    padding: 2px 2px !important;
                     vertical-align: top !important;
+                }
+                .pos-ticket-wrap table tr.tax-header-row th {
+                    border-bottom: 1px dashed #000000 !important;
+                    padding-bottom: 3px !important;
+                }
+                .pos-ticket-wrap table tr.tax-total-row td {
+                    border-top: 1px dashed #000000 !important;
+                    padding-top: 3px !important;
+                }
+                .pos-ticket-wrap .ticket-row {
+                    display: table !important;
+                    width: 100% !important;
+                    border: none !important;
+                }
+                .pos-ticket-wrap .ticket-row-name {
+                    display: table-cell !important;
+                    text-align: left !important;
+                    vertical-align: top !important;
+                    padding-right: 12px !important;
+                    font-size: 13px !important;
+                    font-weight: bold !important;
+                    word-wrap: break-word !important;
+                    overflow-wrap: break-word !important;
+                }
+                .pos-ticket-wrap .ticket-row-price {
+                    display: table-cell !important;
+                    text-align: right !important;
+                    vertical-align: top !important;
+                    white-space: nowrap !important;
+                    width: 1% !important;
+                    font-size: 13px !important;
+                    font-weight: bold !important;
+                }
+                .pos-ticket-wrap .ticket-total-row {
+                    display: table !important;
+                    width: 100% !important;
+                    margin: 4px 0 8px 0 !important;
+                    font-size: 17px !important;
+                    font-weight: 900 !important;
+                    border: none !important;
+                }
+                .pos-ticket-wrap .ticket-total-label {
+                    display: table-cell !important;
+                    text-align: left !important;
+                    vertical-align: middle !important;
+                }
+                .pos-ticket-wrap .ticket-total-amount {
+                    display: table-cell !important;
+                    text-align: right !important;
+                    vertical-align: middle !important;
+                    white-space: nowrap !important;
+                    padding-left: 12px !important;
                 }
                 .pos-ticket-wrap .ticket-line-item {
                     border: none !important;
                     border-width: 0 !important;
                     outline: none !important;
                     box-shadow: none !important;
-                    margin: 5px 0 !important;
+                    margin: 6px 0 !important;
                     padding: 0 !important;
                 }
                 .pos-ticket-wrap .ticket-line-combo {
@@ -62,6 +118,7 @@
                     font-weight: 600 !important;
                     color: #000000 !important;
                     padding-left: 4px !important;
+                    margin-top: 1px !important;
                 }
                 .pos-ticket-wrap .ticket-divider {
                     border-top: 1px dashed #000000 !important;
@@ -118,6 +175,11 @@
             </t>
             <div style="text-align: center; font-size: 11px; margin-bottom: 10px;">
                 <div><strong><t t-esc="o.company_id.name"/></strong></div>
+                <div t-if="o.company_id.street"><span t-field="o.company_id.street"/></div>
+                <div t-if="o.company_id.street2"><span t-field="o.company_id.street2"/></div>
+                <div t-if="o.company_id.zip"><span t-field="o.company_id.zip"/></div>
+                <div t-if="o.company_id.city"><span t-field="o.company_id.city"/></div>
+                <div t-if="o.company_id.state_id">(<span t-esc="o.company_id.state_id.display_name"/>)</div>
                 <div t-if="o.company_id.phone">Tel: <span t-field="o.company_id.phone"/></div>
                 <t t-if="o.company_id.vat">
                     <div>
@@ -161,87 +223,49 @@
             <!-- 3. Orderlines (matches POS OrderReceipt & Orderline) -->
             <div style="margin: 8px 0; border: none !important;">
                 <t t-foreach="o._get_ticket_lines()" t-as="line">
-                    <t t-if="line['is_combo_child']">
-                        <!-- Combo Child Item -->
-                        <div class="ticket-line-combo">
-                            <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
-                                <tr>
-                                    <td style="text-align: left; vertical-align: top; word-break: break-word; font-size: 13px; font-weight: bold;">
-                                        <t t-esc="line['name']"/>
-                                    </td>
-                                    <td style="text-align: right; vertical-align: top; white-space: nowrap; font-size: 13px; font-weight: bold; padding-left: 8px;">
-                                        <span t-esc="line['price_total']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2" class="ticket-line-details">
-                                        <t t-esc="line['qty_str']"/> <t t-esc="line['unit_name']"/>
-                                        <span> x </span>
-                                        <span t-esc="line['price_unit']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                                        <span> / </span>
-                                        <t t-esc="line['unit_name']"/>
-                                        <t t-if="line['discount'] and line['discount'] > 0">
-                                            <span style="margin-left: 4px; font-style: italic;">
-                                                (<t t-esc="line['discount']"/>% dto.)
-                                            </span>
-                                        </t>
-                                    </td>
-                                </tr>
-                            </table>
+                    <div t-att-class="'ticket-line-combo' if line['is_combo_child'] else 'ticket-line-item'">
+                        <div class="ticket-row">
+                            <div class="ticket-row-name">
+                                <t t-esc="line['name']"/>
+                            </div>
+                            <div class="ticket-row-price">
+                                <span t-esc="line['price_total']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                            </div>
                         </div>
-                    </t>
-                    <t t-else="">
-                        <!-- Regular Product Line / Combo Parent Line -->
-                        <div class="ticket-line-item">
-                            <table border="0" cellpadding="0" cellspacing="0" style="width: 100%;">
-                                <tr>
-                                    <td style="text-align: left; vertical-align: top; word-break: break-word; font-size: 13px; font-weight: bold;">
-                                        <t t-esc="line['name']"/>
-                                    </td>
-                                    <td style="text-align: right; vertical-align: top; white-space: nowrap; font-size: 13px; font-weight: bold; padding-left: 8px;">
-                                        <span t-esc="line['price_total']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td colspan="2" class="ticket-line-details">
-                                        <t t-esc="line['qty_str']"/> <t t-esc="line['unit_name']"/>
-                                        <span> x </span>
-                                        <span t-esc="line['price_unit']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                                        <span> / </span>
-                                        <t t-esc="line['unit_name']"/>
-                                        <t t-if="line['discount'] and line['discount'] > 0">
-                                            <span style="margin-left: 4px; font-style: italic;">
-                                                (<t t-esc="line['discount']"/>% dto.)
-                                            </span>
-                                        </t>
-                                    </td>
-                                </tr>
-                            </table>
+                        <div class="ticket-line-details">
+                            <t t-esc="line['qty_str']"/> <t t-esc="line['unit_name']"/>
+                            <span> x </span>
+                            <span t-esc="line['price_unit']" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                            <span> / </span>
+                            <t t-esc="line['unit_name']"/>
+                            <t t-if="line['discount'] and line['discount'] > 0">
+                                <span style="margin-left: 4px; font-style: italic;">
+                                    (<t t-esc="line['discount']"/>% dto.)
+                                </span>
+                            </t>
                         </div>
-                    </t>
+                    </div>
                 </t>
             </div>
 
             <!-- 4. TOTAL -->
             <div class="ticket-divider"></div>
-            <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; margin: 4px 0 8px 0; font-size: 17px; font-weight: 900;">
-                <tr>
-                    <td style="text-align: left;">TOTAL</td>
-                    <td style="text-align: right; white-space: nowrap;">
-                        <span t-field="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
-                    </td>
-                </tr>
-            </table>
+            <div class="ticket-total-row">
+                <div class="ticket-total-label">TOTAL</div>
+                <div class="ticket-total-amount">
+                    <span t-field="o.amount_total" t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                </div>
+            </div>
             <div class="ticket-divider"></div>
 
             <!-- 5. Tax Breakdown (matches POS pos-receipt-taxes 4-column grid) -->
             <table border="0" cellpadding="0" cellspacing="0" style="width: 100%; font-size: 11px; margin: 8px 0;">
                 <thead>
-                    <tr style="font-weight: bold; border-bottom: 1px dashed #000000 !important;">
-                        <th style="text-align: left; width: 25%; padding-bottom: 3px;">Impuesto</th>
-                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Cuota</th>
-                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Base</th>
-                        <th style="text-align: right; width: 25%; padding-bottom: 3px;">Total</th>
+                    <tr class="tax-header-row" style="font-weight: bold;">
+                        <th style="text-align: left; width: 25%;">Impuesto</th>
+                        <th style="text-align: right; width: 25%;">Cuota</th>
+                        <th style="text-align: right; width: 25%;">Base</th>
+                        <th style="text-align: right; width: 25%;">Total</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -267,15 +291,15 @@
                                 </tr>
                             </t>
                         </t>
-                        <tr style="font-weight: bold; border-top: 1px dashed #000000 !important;">
-                            <td style="padding-top: 3px;"></td>
-                            <td style="text-align: right; white-space: nowrap; padding-top: 3px;">
+                        <tr class="tax-total-row" style="font-weight: bold;">
+                            <td></td>
+                            <td style="text-align: right; white-space: nowrap;">
                                 <t t-esc="'%.2f' % o.amount_tax"/>
                             </td>
-                            <td style="text-align: right; white-space: nowrap; padding-top: 3px;">
+                            <td style="text-align: right; white-space: nowrap;">
                                 <t t-esc="'%.2f' % o.amount_untaxed"/>
                             </td>
-                            <td style="text-align: right; white-space: nowrap; padding-top: 3px;">
+                            <td style="text-align: right; white-space: nowrap;">
                                 <t t-esc="'%.2f' % o.amount_total"/>
                             </td>
                         </tr>

@@ -273,6 +273,21 @@ export class PosScanPaymentPopup extends AbstractAwaitablePopup {
             // Rebuild combo tax breakdown for kiosk receipts
             await this._applyComboTaxBreakdown(paidOrder);
 
+            if (this.pos.config.l10n_es_edi_verifactu_required && !paidOrder.l10n_es_edi_verifactu_qr_code) {
+                try {
+                    const [verifactuRow] = await this.orm.read(
+                        "pos.order",
+                        [orderId],
+                        ["l10n_es_edi_verifactu_qr_code"]
+                    );
+                    if (verifactuRow && verifactuRow.l10n_es_edi_verifactu_qr_code) {
+                        paidOrder.l10n_es_edi_verifactu_qr_code = verifactuRow.l10n_es_edi_verifactu_qr_code;
+                    }
+                } catch (qrErr) {
+                    console.warn("Could not fetch VeriFactu QR code for scanned kiosk order:", qrErr);
+                }
+            }
+
             this.props.close();
             this.confirm();
             this.pos.set_order(paidOrder);

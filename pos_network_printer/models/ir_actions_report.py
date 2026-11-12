@@ -27,12 +27,12 @@ class IrActionsReport(models.Model):
                     if lines_count > max_lines:
                         max_lines = lines_count
 
-                # Base ticket overhead: Header (50mm) + Company info (30mm) + Total (20mm) +
-                # Taxes (30mm) + Veri*Factu QR (45mm) + Footer (25mm) = ~200mm.
-                # Each product line with unit calculation = ~10mm.
+                # Base ticket overhead: Header (50mm) + Company info & address (50mm) + Total (20mm) +
+                # Taxes (30mm) + Veri*Factu QR (45mm) + Footer (25mm) = ~220mm.
+                # Each product line with unit calculation (allowing wrapping) = ~11mm.
                 # Generous safety padding = 35mm.
                 # Resulting height is calculated to fit on 1 single continuous sheet.
-                dyn_height = max(220, 200 + (max_lines * 10) + 35)
+                dyn_height = max(240, 220 + (max_lines * 11) + 35)
                 self = self.with_context(ticket_dynamic_page_height=dyn_height)
                 _logger.info("Computed dynamic single-sheet page height for %s: %dmm (%d lines)",
                              report_sudo.report_name, dyn_height, max_lines)

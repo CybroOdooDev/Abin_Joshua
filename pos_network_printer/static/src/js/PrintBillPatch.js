@@ -27,28 +27,13 @@ patch(PrintBillButton.prototype, {
         }
 
         try {
-            // Render pre-payment bill receipt with isBill flag set
+            // Render pre-payment bill receipt without Veri*Factu QR (only valid once settled)
             const receiptData = {
                 ...order.export_for_printing(),
                 isBill: true,
                 pending_payment_label: _t("PENDING PAYMENT"),
+                l10n_es_edi_verifactu_qr_code: false,
             };
-
-            // Ensure Veri*Factu QR code is present just like on payment receipt
-            if (this.pos.config.l10n_es_edi_verifactu_required && !receiptData.l10n_es_edi_verifactu_qr_code) {
-                const vat = (this.pos.company.vat || "").replace(/^[A-Z]{2}/, "");
-                const numserie = typeof order.get_name === "function" ? order.get_name() : order.name;
-                const now = new Date();
-                const day = String(now.getDate()).padStart(2, "0");
-                const month = String(now.getMonth() + 1).padStart(2, "0");
-                const year = now.getFullYear();
-                const fecha = `${day}-${month}-${year}`;
-                const totalWithTax = typeof order.get_total_with_tax === "function" ? order.get_total_with_tax() : (order.total_with_tax || 0);
-                const importe = totalWithTax.toFixed(2);
-                const endpoint = "https://prewww2.aeat.es/wlpl/TIKE-CONT/ValidarQR";
-                const qrUrl = `${endpoint}?nif=${encodeURIComponent(vat)}&numserie=${encodeURIComponent(numserie)}&fecha=${encodeURIComponent(fecha)}&importe=${encodeURIComponent(importe)}`;
-                receiptData.l10n_es_edi_verifactu_qr_code = `/report/barcode/?barcode_type=QR&value=${encodeURIComponent(qrUrl)}&barLevel=M&width=180&height=180`;
-            }
 
             const receiptEl = await this.renderer.toHtml(OrderReceipt, {
                 data: receiptData,

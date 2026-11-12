@@ -8,9 +8,31 @@ patch(PosStore.prototype, {
     async after_load_server_data() {
         const res = await super.after_load_server_data(...arguments);
         if (this.config && this.config.enable_network_printing) {
+            this.loadPrinterPaperWidths();
             this.syncQZPrinters();
         }
         return res;
+    },
+
+    async loadPrinterPaperWidths() {
+        try {
+            const printers = await this.orm.call(
+                "pos.network.printer",
+                "search_read",
+                [[], ["name", "paper_width"]]
+            );
+            if (printers && printers.length) {
+                const widthMap = {};
+                for (const p of printers) {
+                    if (p.name && p.paper_width) {
+                        widthMap[p.name] = p.paper_width;
+                    }
+                }
+                qzPrinterService.configure({ printerPaperWidths: widthMap });
+            }
+        } catch (e) {
+            console.warn("[QZ Tray] Could not load printer paper widths:", e);
+        }
     },
 
     async syncQZPrinters() {
