@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'POS Local Ticket Printing System (QZ Tray)',
-    'version': '17.0.1.1.4',
+    'version': '17.0.1.1.5',
     'category': 'Point Of Sale',
     'summary': 'Direct local thermal ticket printing for POS receipts, bills, and legal invoices via QZ Tray',
     'description': """

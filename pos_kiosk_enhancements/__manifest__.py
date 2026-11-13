@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
@@ -21,7 +21,7 @@
 #############################################################################
 {
     'name': 'POS Kiosk Schedule Control',
-    'version': '17.0.1.19.26',
+    'version': '17.0.1.19.27',
     'category': 'Point Of Sale',
     'summary': 'Configure operating hours for POS Self-Order Kiosk availability',
     'description': """This module adds schedule control for the POS Self-Order (Kiosk).

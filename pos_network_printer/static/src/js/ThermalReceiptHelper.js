@@ -35,13 +35,18 @@ export function applyThermalReceiptStyles(el) {
                 border-color: #000000 !important;
                 box-sizing: border-box !important;
             }
-            .pos-thermal-receipt table,
-            .pos-thermal-receipt table tr,
-            .pos-thermal-receipt table td,
-            .pos-thermal-receipt table th,
+            .pos-thermal-receipt:not(.pos-kitchen-receipt) table,
+            .pos-thermal-receipt:not(.pos-kitchen-receipt) table tr,
+            .pos-thermal-receipt:not(.pos-kitchen-receipt) table td,
+            .pos-thermal-receipt:not(.pos-kitchen-receipt) table th {
+                border: none !important;
+                outline: none !important;
+                box-shadow: none !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
             .pos-thermal-receipt ul,
             .pos-thermal-receipt ol {
-                border: none !important;
                 outline: none !important;
                 box-shadow: none !important;
                 list-style: none !important;
@@ -227,6 +232,9 @@ export async function captureThermalReceipt(elementToCapture) {
         try {
             await loadAllImages(elementToCapture);
         } catch (_) {}
+
+        // Allow layout and typography to settle at 288px width before capture
+        await new Promise((resolve) => setTimeout(resolve, 80));
 
         const dataUrl = await toPng(elementToCapture, {
             skipFonts: true,

@@ -1,4 +1,24 @@
-# -*- coding: utf-8 -*-
+# -- coding: utf-8 --
+#############################################################################
+#
+#    Cybrosys Technologies Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import fields, http
 from odoo.http import request
 
@@ -101,15 +121,17 @@ class KitchenController(http.Controller):
             if lines:
                 table = o.pos_order_id.table_id
                 order_data.append({
-                    "id":         o.id,
-                    "name":       o.name,
-                    "table_name": o.table_name,
-                    "table_id":   o.pos_order_id.table_id.id if o.pos_order_id.table_id else None,
-                    "floor_name": table.floor_id.name if table and table.floor_id else "",
-                    "waiter":     o.user_id.name if o.user_id else "",
-                    "diners":     o.pos_order_id.customer_count or 0,
-                    "order_type": o.order_type,
-                    "lines":      lines,
+                    "id":                     o.id,
+                    "name":                   o.name,
+                    "table_name":             o.table_name,
+                    "transferred_from_table": o.transferred_from_table or False,
+                    "is_transferred":         o.is_transferred or False,
+                    "table_id":               o.pos_order_id.table_id.id if o.pos_order_id.table_id else None,
+                    "floor_name":             table.floor_id.name if table and table.floor_id else "",
+                    "waiter":                 o.user_id.name if o.user_id else "",
+                    "diners":                 o.pos_order_id.customer_count or 0,
+                    "order_type":             o.order_type,
+                    "lines":                  lines,
                 })
         return {
             "stages": stages,

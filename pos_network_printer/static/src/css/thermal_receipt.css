@@ -23,14 +23,20 @@
     box-sizing: border-box !important;
 }
 
-/* Reset any framework borders, shadows, or outlines */
-.pos-thermal-receipt table,
-.pos-thermal-receipt table tr,
-.pos-thermal-receipt table td,
-.pos-thermal-receipt table th,
+/* Reset any framework borders, shadows, or outlines on customer receipts */
+.pos-thermal-receipt:not(.pos-kitchen-receipt) table,
+.pos-thermal-receipt:not(.pos-kitchen-receipt) table tr,
+.pos-thermal-receipt:not(.pos-kitchen-receipt) table td,
+.pos-thermal-receipt:not(.pos-kitchen-receipt) table th {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 .pos-thermal-receipt ul,
 .pos-thermal-receipt ol {
-    border: none !important;
     outline: none !important;
     box-shadow: none !important;
     list-style: none !important;

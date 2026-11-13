@@ -1,5 +1,24 @@
-# -*- coding: utf-8 -*-
-
+# -- coding: utf-8 --
+#############################################################################
+#
+#    Cybrosys Technologies Pvt. Ltd.
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
+#
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
+#############################################################################
 from odoo import api, models
 import logging
 _logger = logging.getLogger(__name__)
@@ -349,3 +368,73 @@ class PosOrder(models.Model):
                     "display_id": display.id
                 }
             )
+
+    def write(self, vals):
+        table_transfers = {}
+        if 'table_id' in vals:
+            for order in self:
+                old_table = order.table_id
+                new_table_id = vals.get('table_id')
+                if old_table and new_table_id and old_table.id != new_table_id:
+                    new_table = self.env['restaurant.table'].browse(new_table_id)
+                    table_transfers[order.id] = (old_table.name, new_table.name)
+        res = super().write(vals)
+        if table_transfers:
+            for order_id, (old_name, new_name) in table_transfers.items():
+                kitchen_orders = self.env['kitchen.order'].search([('pos_order_id', '=', order_id)])
+                if kitchen_orders:
+                    kitchen_orders.write({
+                        'table_name': new_name,
+                        'transferred_from_table': old_name,
+                        'is_transferred': True,
+                    })
+                    for ko in kitchen_orders:
+                        self.env["bus.bus"]._sendone(
+                            f"kitchen_display_{ko.display_id.id}",
+                            "update",
+                            {
+                                "order_id": ko.id,
+                                "display_id": ko.display_id.id,
+                            }
+                        )
+        return res
+
+    @api.model
+    def handle_table_transfer_kds(self, server_order_id, old_table_id, new_table_id, old_table_name, new_table_name, order_json=None):
+        """Called directly when an order is transferred to a new table in POS Restaurant."""
+        order = self.browse(server_order_id).exists() if (server_order_id and isinstance(server_order_id, int) and server_order_id > 0) else False
+        if not order and order_json and order_json.get('name'):
+            order = self.search([('pos_reference', '=', order_json['name'])], limit=1)
+        if not order and order_json and order_json.get('uid'):
+            order = self.search([('tracking_number', '=', str(order_json.get('tracking_number')))], limit=1)
+
+        new_table = self.env['restaurant.table'].browse(new_table_id) if new_table_id else False
+        effective_new_table_name = new_table.name if (new_table and new_table.exists()) else (new_table_name or "")
+        effective_old_table_name = old_table_name or ""
+
+        if order and new_table_id and order.table_id.id != new_table_id:
+            order.write({'table_id': new_table_id})
+
+        if order:
+            domain = [('pos_order_id', '=', order.id)]
+        elif effective_old_table_name:
+            domain = [('table_name', '=', effective_old_table_name), ('line_ids.is_completed', '=', False)]
+        else:
+            domain = []
+        kitchen_orders = self.env['kitchen.order'].search(domain) if domain else self.env['kitchen.order']
+        if kitchen_orders:
+            kitchen_orders.write({
+                'table_name': effective_new_table_name,
+                'transferred_from_table': effective_old_table_name,
+                'is_transferred': True,
+            })
+            for ko in kitchen_orders:
+                self.env["bus.bus"]._sendone(
+                    f"kitchen_display_{ko.display_id.id}",
+                    "update",
+                    {
+                        "order_id": ko.id,
+                        "display_id": ko.display_id.id,
+                    }
+                )
+        return True

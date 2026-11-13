@@ -26,6 +26,11 @@
                 <t t-if="props.order.table_name">
                     <span class="kds-table-tag">🪑
                         <t t-esc="props.order.table_name"/>
+                        <t t-if="props.order.transferred_from_table">
+                            <span class="kds-transfer-badge" style="font-size: 11px; background: #e02424; color: #fff; padding: 1px 5px; border-radius: 4px; margin-left: 4px; font-weight: 700; vertical-align: middle;">
+                                (de <t t-esc="props.order.transferred_from_table"/>)
+                            </span>
+                        </t>
                     </span>
                 </t>
                 <t t-if="props.order.floor_name">
