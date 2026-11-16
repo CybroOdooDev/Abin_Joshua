@@ -37,9 +37,9 @@ class ResConfigSettings(models.TransientModel):
     )
     analysed_period = fields.Selection(
         [('last_month', 'Last Month'),
-         ('last_3', 'Last 3 Month'),
-         ('last_6', 'Last 6 Month'),
-         ('last_12', 'Last 12 Month')],
+         ('last_3', 'Last 3 Months'),
+         ('last_6', 'Last 6 Months'),
+         ('last_12', 'Last 12 Months')],
         help="Define which period should be analysed by default.",
         config_parameter='low_sale_report.analysed_period',
     )

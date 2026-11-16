@@ -9,10 +9,14 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
 from odoo import api, fields, models
@@ -42,8 +46,11 @@ class DashboardTheme(models.Model):
             color_x = rec.color_x or '#4158D0'
             color_y = rec.color_y or '#C850C0'
             color_z = rec.color_z or '#FFCC70'
-            rec.body = f"<div style='width:300px; height:300px;background-image: linear-gradient(50deg, {color_x} 0%, {color_y} 46%, {color_z} 100%);'/>"
-            rec.style = f"background-image: linear-gradient(50deg, {color_x} 0%, {color_y} 46%, {color_z} 100%);"
+            gradient_css = (
+                f"background-image: linear-gradient(50deg, {color_x} 0%, {color_y} 46%, {color_z} 100%);"
+            )
+            rec.style = gradient_css
+            rec.body = f"<div style='width:300px; height:300px;{gradient_css}'/>"
 
     def get_records(self):
         """

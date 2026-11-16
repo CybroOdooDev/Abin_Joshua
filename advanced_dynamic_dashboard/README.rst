@@ -18,7 +18,9 @@
 Advanced Dynamic Dashboard
 ==========================
 
-Advanced Dynamic Dashboard allows you to dynamically build, customize, and arrange dashboard blocks, tiles, and charts to monitor information that is relevant to your business, department, or specific processes.
+Advanced Dynamic Dashboard allows users to dynamically build, customize, and arrange
+dashboard blocks, tiles, and charts to monitor information that is relevant to your business,
+department, or specific processes.
 
 Key Features
 ------------

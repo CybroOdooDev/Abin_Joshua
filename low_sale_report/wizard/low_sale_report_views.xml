@@ -9,7 +9,7 @@
                 <group>
                     <group>
                         <field name="product_type"/>
-                        <label for="analysed_period_start" string="Period under analysis"/>
+                        <label for="analysed_period_start" string="Analysis Period"/>
                         <div class="o_row">
                             <field name="analysed_period_start"/>
                             <field name="analysed_period_end" nolabel="1"/>
@@ -26,7 +26,7 @@
                             string="Show in Odoo" type="object"
                             class="btn-primary o_confirm_yes"/>
                     <button id="excel_view_report" name="action_excel_low_sale_report"
-                            string="Export as xlsx" type="object"
+                            string="Export as XLSX" type="object"
                             class="btn-primary o_confirm_yes"/>
                     <button string="Cancel" class="btn-secondary"
                             special="cancel"/>
@@ -37,7 +37,7 @@
 
     <!-- Low sale report action -->
     <record id="low_sale_report_action" model="ir.actions.act_window">
-        <field name="name">Low Sale Report</field>
+        <field name="name">Low Sales Report</field>
         <field name="type">ir.actions.act_window</field>
         <field name="res_model">low.sale.report</field>
         <field name="view_mode">form</field>
@@ -46,7 +46,7 @@
 
     <!-- Low sale report menu -->
     <menuitem id="low_sale_report_menu"
-              name="Low Sale Report"
+              name="Low Sales Report"
               action="low_sale_report_action"
               parent="sale.sale_menu_root"
               sequence="45"/>

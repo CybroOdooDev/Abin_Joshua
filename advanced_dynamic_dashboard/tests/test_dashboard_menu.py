@@ -9,10 +9,14 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
 from odoo.tests.common import TransactionCase, tagged
@@ -97,3 +101,23 @@ class TestDashboardMenu(TransactionCase):
             'menu_id': self.parent_menu.id,
         })
         self.assertIn(test_group, menu_rec.group_ids)
+
+    def test_uninstall_hook(self):
+        """Test uninstall_hook deletes client actions and menus."""
+        from .. import uninstall_hook
+
+        action = self.env['ir.actions.client'].create({
+            'name': 'Hook Test Dashboard',
+            'tag': 'AdvancedDynamicDashboard',
+        })
+        menu = self.env['ir.ui.menu'].create({
+            'name': 'Hook Test Menu',
+            'parent_id': self.parent_menu.id,
+            'action': f'ir.actions.client,{action.id}',
+        })
+        self.assertTrue(action.exists())
+        self.assertTrue(menu.exists())
+
+        uninstall_hook(self.env)
+        self.assertFalse(action.exists())
+        self.assertFalse(menu.exists())

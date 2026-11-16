@@ -9,10 +9,14 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
+#
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
 from ast import literal_eval
@@ -100,7 +104,11 @@ class DashboardBlock(models.Model):
                 filter_list = []
             filter_list = [
                 filter_item for filter_item in filter_list
-                if not (isinstance(filter_item, (tuple, list)) and len(filter_item) > 0 and filter_item[0] == 'create_date')
+                if not (
+                    isinstance(filter_item, (tuple, list))
+                    and len(filter_item) > 0
+                    and filter_item[0] == 'create_date'
+                )
             ]
             icon_name = (rec.fa_icon or 'fa-bar-chart').strip()
             if not icon_name.startswith('fa '):
@@ -126,13 +134,16 @@ class DashboardBlock(models.Model):
             domain = expression.AND([filter_list]) if filter_list else []
             if rec.model_name:
                 if rec.type == 'graph':
-                    self.env.cr.execute(get_query(self.env[rec.model_name],
-                                               domain,
-                                               rec.operation,
-                                               rec.measured_field_id,
-                                               start_date,
-                                               end_date,
-                                               group_by=rec.group_by_id))
+                    query_sql = get_query(
+                        self.env[rec.model_name],
+                        domain,
+                        rec.operation,
+                        rec.measured_field_id,
+                        start_date,
+                        end_date,
+                        group_by=rec.group_by_id,
+                    )
+                    self.env.cr.execute(query_sql)
                     records = self.env.cr.dictfetchall()
                     x_axis = []
                     for record in records:
@@ -146,12 +157,15 @@ class DashboardBlock(models.Model):
                         y_axis.append(record.get('value'))
                     vals.update({'x_axis': x_axis, 'y_axis': y_axis})
                 else:
-                    self.env.cr.execute(get_query(self.env[rec.model_name],
-                                               domain,
-                                               rec.operation,
-                                               rec.measured_field_id,
-                                               start_date,
-                                               end_date))
+                    query_sql = get_query(
+                        self.env[rec.model_name],
+                        domain,
+                        rec.operation,
+                        rec.measured_field_id,
+                        start_date,
+                        end_date,
+                    )
+                    self.env.cr.execute(query_sql)
                     records = self.env.cr.dictfetchall()
                     magnitude = 0
                     total = (records[0].get('value') or 0) if records else 0

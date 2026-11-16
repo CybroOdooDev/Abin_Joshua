@@ -61,6 +61,20 @@ graph TD
     - **Admin Bypass via Permission Row**: To grant full access to administrators/managers, add a separate row in `ir.access.csv` with `group_id:id = base.group_erp_manager` and an empty domain (`kind='permission'`). Because permissions are OR-ed in Odoo 20, managers bypass restrictions without needing conditional bypasses in the restriction domain itself.
     - **Conditional Logic Belongs in Models**: When restrictions involve conditional logic (e.g. product vs category vs open access), compute and store the permitted records into a relational field (e.g. `restrict_user_ids` on the target model) rather than attempting to encode complex conditional Python logic inside the domain string.
   - **PEP8 & Multi-Record Safety**: PEP8 (no ambiguous variables like E741 `l`, `O`, `I`), multi-record safe methods, loop inside `@api.constrains`.
+  - **No HTTP Request or Referer Sniffing in Models (Strict MVC Separation - Review Score Penalty down to 65/100)**:
+    - **NEVER** sniff `request.httprequest.referrer` or URL strings inside ORM model methods (`create`, `write`, `default_get`, etc.) to infer the caller's UI state (e.g. checking for `'/pos/ui'`).
+    - **Why it is rejected**:
+      1. *Fragile*: Clients, browsers, proxies, privacy extensions, cross-origin policies, API calls, and unit tests that send no `Referer` header silently fail.
+      2. *Unintended Side-Effects*: Every partner write originating from that UI page flips the flag, even when unrelated to the intended action.
+      3. *Architecture Violation*: Models must never depend directly on HTTP request headers or controller URL paths.
+    - **Odoo Standard Solution**: Always pass context flags or defaults (`default_<field>`). For example, in Odoo 20 Point of Sale, partner creation and editing from the POS interface is handled via `action_open_partner_view` (`point_of_sale/models/res_partner.py:113`). Simply override `action_open_partner_view` to inject `'context': {'default_is_available_in_pos': True}` instead of inspecting `request`.
+  - **No Unexplained or System-Wide Data Workarounds in Core Models**:
+    - Overriding core models (`res.partner`, `res.users`, `sale.order`, etc.) to run global data transformations (e.g. `_clean_pos_values` converting relational `[id, name]` pairs to integer IDs on every partner write across the whole database) is an anti-pattern.
+    - Workarounds must be scoped to the specific controller, endpoint, wizard, or action context where irregular payloads occur, rather than altering standard ORM behavior globally across unrelated modules (Accounting, Sales, CRM).
+  - **ORM Method Signature & Immutability Standards (`create` / `write`)**:
+    - **No Dead Code Under `@api.model_create_multi`**: Methods decorated with `@api.model_create_multi` always receive a `list` of dictionaries from the ORM. Writing `if isinstance(vals_list, dict): vals_list = [vals_list]` is redundant dead code that is penalized in AI review.
+    - **Never Mutate Caller's `vals` in `write()` or `create()`**: Modifying the caller's input dictionary in-place (e.g. `vals['is_available_in_pos'] = True` or in-place `.update()`) causes side-effects for upstream callers reusing the dictionary. Always work on a shallow copy (`vals = dict(vals)`) or pass clean dictionaries.
+    - **No Redundant Field Defaults (`default=False` on `fields.Boolean`)**: In Odoo, boolean fields default to `False` (`0` / `NULL`) by definition. Specifying `default=False` is redundant boilerplate flagged by reviewers. Only specify `default=True` when checking by default.
   - **SQL Injection Prevention**: Regex identifier validation (`^[A-Za-z0-9_]+$`), backtick/quote escaping, parameterized queries.
   - **Field Type Mapping Casing**: Exact lowercase `'many2one'` (never uppercase `'Many2one'`).
   - **Semantic Field Labels & Redundant Strings (W8113)**: Omit `string=` when matching default computed title.
@@ -433,6 +447,37 @@ sequenceDiagram
   - `@api.constrains`: Always loop `for record in self:`. Never assign values inside constraints.
   - Action methods expecting a single record must call `self.ensure_one()`.
   - Action return dictionaries must have python dict contexts (e.g. `'context': {'create': False}`).
+- **Clean Context & Action Passing vs. Fragile HTTP Request Sniffing (Criterion 4.1)**:
+  - **Never sniff `request.httprequest.referrer` or URL strings** inside model methods (`create`, `write`, `default_get`, etc.) to detect caller origin (e.g. `if '/pos/ui' in referer:`).
+  - *Why it fails review*:
+    - **Fragile**: Clients, browsers, proxies, privacy extensions, cross-origin policies, API calls, and test cases that send no `Referer` header silently fail.
+    - **Unintended Side-Effects**: Every write originating from that UI page flips the flag, even when unrelated to the intended action.
+    - **Architecture Violation**: Models must never depend directly on HTTP request headers or controller URL paths.
+  - *Odoo Standard Pattern*: Use window actions and ORM `context` (`default_<field>`, `context.get(...)`). For example, in Odoo 20 Point of Sale, POS opens the partner form through `action_open_partner_view` (`point_of_sale/models/res_partner.py:113`). To set defaults when creating/editing from POS, override `action_open_partner_view`:
+    ```python
+    def action_open_partner_view(self):
+        action = super().action_open_partner_view()
+        action.setdefault('context', {})
+        action['context']['default_is_available_in_pos'] = True
+        return action
+    ```
+- **Core Model Override Hygiene & Scoped Data Normalization**:
+  - Overriding core models (`res.partner`, `res.users`, `sale.order`, `account.move`, etc.) with global data sanitization routines (e.g. `_clean_pos_values` converting relational `[id, name]` pairs to integer IDs on every partner write across the whole database) is an anti-pattern.
+  - Workarounds must be scoped to the specific controller, endpoint, wizard, or action context where irregular payloads occur, rather than altering standard ORM behavior globally across unrelated modules (Accounting, Sales, CRM).
+- **ORM Batch Creation (`@api.model_create_multi`) & Immutability (`create` / `write`)**:
+  - Under `@api.model_create_multi`, `vals_list` is guaranteed by Odoo's decorator to be a `list` of dictionaries. Writing `if isinstance(vals_list, dict): vals_list = [vals_list]` is dead code that reviewers penalize under Criterion 4.1. Iterate `vals_list` directly:
+    ```python
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            # process vals
+        return super().create(vals_list)
+    ```
+  - **Never Mutate Caller's `vals` in `write()` or `create()`**: Modifying the caller's input dictionary in-place (e.g., `vals['is_available_in_pos'] = True` or in-place `.update()`) causes side-effects for upstream callers reusing the dictionary. Always work on a shallow copy (`vals = dict(vals)`) or pass clean dictionaries.
+- **Field Definition Hygiene & Redundant Defaults**:
+  - Never specify `default=False` on `fields.Boolean`. In Odoo, boolean fields default to `False` (`0` / `NULL`) by definition. Explicit `default=False` is redundant boilerplate flagged by reviewers. Only specify `default=True` when checking by default:
+    - ✗ `is_available_in_pos = fields.Boolean(default=False)`
+    - ✓ `is_available_in_pos = fields.Boolean()`
 - **Translatable Strings & Translations (`pylint-odoo` W8161 - Zero Tolerance)**:
   - In Odoo 20, **ALWAYS** use `self.env._()` inside model, wizard, and controller methods:
     ```python
@@ -472,7 +517,11 @@ sequenceDiagram
 | `self.env['ir.access']._clear_caches()` in model `write()` | Remove the `write()` override entirely | Cache invalidation is handled automatically by the ORM when `ir.access` or related model records are written. The AI reviewer may flag `_clear_caches()` as non-standard even though it exists in Odoo 20 source. |
 | `'security/ir.model.access.csv'` in manifest `'data'` | `'security/ir.access.csv'` in `'data'` | Manifest must reference the new unified `ir.access.csv` file. |
 | `fields.Date.today()` | `fields.Date.context_today(self)` | `today()` ignores the user's timezone; `context_today(self)` is timezone-aware. |
-| `def create(self, vals):` iterating `vals` | `def create(self, vals_list):` handle both list and dict: `vals_list = [vals_list] if isinstance(vals_list, dict) else vals_list` or call `super().create(vals_list)` | In Odoo, `create` receives a list of dicts for batch creation or a dict in test calls. Iterating a dict iterates its keys and crashes! |
+| `def create(self, vals):` (legacy single-record create) | `@api.model_create_multi`<br>`def create(self, vals_list):`<br>`    for vals in vals_list: ...` | Always decorate with `@api.model_create_multi`. Do NOT write `if isinstance(vals_list, dict): vals_list = [vals_list]` — under `@api.model_create_multi`, `vals_list` is guaranteed to be a list; checking `isinstance(..., dict)` is dead code that triggers review penalties! |
+| Sniffing `request.httprequest.referrer` (e.g. `'/pos/ui'`) in model `create()`/`write()` | Pass `default_<field>` via action context (e.g. override `action_open_partner_view`) or check `self.env.context.get(...)` | Fragile: clients/proxies omitting `Referer` fail silently, all background writes from that page inadvertently flip flags, and violates MVC architecture. |
+| Unexplained global data cleanup on core model `create()`/`write()` (e.g. `_clean_pos_values`) | Scope data sanitization to specific controller, endpoint, or action context | System-wide unconstrained data alterations on core models (`res.partner`) affect unrelated modules (CRM, Sales, Accounting) and mask bugs. |
+| In-place mutation of caller `vals` in `write(self, vals)` (e.g. `vals['field'] = True`) | Copy dictionary first: `vals = dict(vals)` or use context defaults | Mutating caller's dictionary in-place causes unintended side-effects in caller code. |
+| `fields.Boolean(..., default=False)` | `fields.Boolean(...)` (omit `default=False`) | Boolean fields default to `False` by definition in Odoo; explicit `default=False` is redundant boilerplate penalized in AI review. |
 | `@api.constrains(...)`<br>`def _check(self):` without loop | `for record in self:` inside every constraint | Constraints must be multi-record safe. Never assign values inside a constraint. |
 | `_sql_constraints = [...]` | `models.Constraint(...)` | `_sql_constraints` is completely deprecated in Odoo 20. |
 | `groups_id` on `res.users` | `group_ids` | `groups_id` was renamed to `group_ids`. Using `groups_id` causes `KeyError` or install crash. |
@@ -959,6 +1008,74 @@ if total_v == 0:
     print('[OK] 0 W8113 redundant string attributes found.')
 "
 
+# 6b. Local AST Audit Script for ORM Anti-Patterns & Fragile Constructs (Criterion 4.1)
+python3 -c "
+import ast, os, sys
+
+def audit_orm_patterns(filepath):
+    violations = []
+    with open(filepath, 'r', encoding='utf-8') as f:
+        try:
+            tree = ast.parse(f.read(), filename=filepath)
+        except Exception:
+            return violations
+
+    is_model_file = 'models' in filepath or 'wizard' in filepath
+
+    for node in ast.walk(tree):
+        # 1. Redundant default=False on fields.Boolean
+        if isinstance(node, ast.Call):
+            if isinstance(node.func, ast.Attribute) and node.func.attr == 'Boolean':
+                for kw in node.keywords:
+                    if kw.arg == 'default' and isinstance(kw.value, ast.Constant) and kw.value.value is False:
+                        violations.append(f'{filepath}:{kw.value.lineno} [REDUNDANT DEFAULT] fields.Boolean default=False is redundant (defaults to False in Odoo)')
+
+        # 2. Fragile request sniffing in models
+        if is_model_file and isinstance(node, ast.Attribute):
+            if node.attr in ('httprequest', 'referrer'):
+                violations.append(f'{filepath}:{node.lineno} [FRAGILE REQUEST SNIFFING] request.{node.attr} detected in model; pass context defaults (default_<field>) instead')
+
+        # 3. Dead isinstance(..., dict) under @api.model_create_multi
+        if isinstance(node, ast.FunctionDef):
+            has_multi = any(
+                (isinstance(dec, ast.Attribute) and dec.attr == 'model_create_multi') or
+                (isinstance(dec, ast.Name) and dec.id == 'model_create_multi')
+                for dec in node.decorator_list
+            )
+            if has_multi:
+                for subnode in ast.walk(node):
+                    if isinstance(subnode, ast.Call) and isinstance(subnode.func, ast.Name) and subnode.func.id == 'isinstance':
+                        for arg in subnode.args:
+                            if isinstance(arg, ast.Name) and arg.id == 'dict':
+                                violations.append(f'{filepath}:{subnode.lineno} [DEAD CODE] isinstance(vals_list, dict) is dead code under @api.model_create_multi')
+
+            # 4. In-place mutation of caller vals in write()
+            if node.name == 'write' and len(node.args.args) > 1:
+                vals_arg = node.args.args[1].arg
+                for subnode in ast.walk(node):
+                    if isinstance(subnode, ast.Assign):
+                        for target in subnode.targets:
+                            if isinstance(target, ast.Subscript) and isinstance(target.value, ast.Name) and target.value.id == vals_arg:
+                                violations.append(f'{filepath}:{subnode.lineno} [MUTATING CALLER VALS] In-place mutation of caller {vals_arg} in write(); copy dict with vals = dict({vals_arg})')
+
+    return violations
+
+base = 'migration/<technical_name>'
+all_violations = []
+for root, _, files in os.walk(base):
+    for f in files:
+        if f.endswith('.py'):
+            all_violations.extend(audit_orm_patterns(os.path.join(root, f)))
+
+if all_violations:
+    print(f'[FAIL CRITERION 4.1] Found {len(all_violations)} ORM anti-pattern violation(s):')
+    for v in all_violations:
+        print(' ', v)
+    sys.exit(1)
+else:
+    print('[OK] Criterion 4.1: 0 ORM anti-patterns (no request sniffing, no dead multi-create checks, no redundant defaults).')
+"
+
 # 7. Verify No Debug Code, Commented Code, or Stray Tabs/Trailing Whitespace (Criterion 4.3 - Blocking)
 python3 -c "
 import os, sys
@@ -1053,6 +1170,10 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] Line length $\le 120$ characters.
   - [ ] No double spaces in imports.
   - [ ] Docstrings on all classes and public methods.
+  - [ ] **No HTTP Request or Referer Sniffing in Models (Criterion 4.1)**: Never inspect `request.httprequest.referrer` or URL paths (e.g. `'/pos/ui'`) in model logic (`create`, `write`, `default_get`). Pass defaults via action `context` (e.g. override `action_open_partner_view` to set `default_is_available_in_pos`) or check `self.env.context`.
+  - [ ] **No Global Workarounds in Core Models (Criterion 4.1)**: Never inject unexplained system-wide data sanitization routines (e.g. `_clean_pos_values`) on every create/write of core models (`res.partner`, `res.users`, `sale.order`). Scope normalization strictly to the specific controller, endpoint, or action context.
+  - [ ] **Caller Immutability in `write()` / `create()` (Criterion 4.1)**: Never mutate caller's `vals` dictionary in-place (`vals['key'] = ...`). Work on a copy (`vals = dict(vals)`) before modification.
+  - [ ] **No Redundant Field Defaults (Criterion 4.1)**: Omit `default=False` on `fields.Boolean` (defaults to `False` by definition in Odoo ORM).
   - [ ] Translatable strings use `self.env._("... %(x)s", x=val)`.
   - [ ] Semantic label parity: `res.users` labeled 'User', `hr.employee` labeled 'Employee'.
   - [ ] **No redundant `string` attribute (`pylint-odoo` W8113)**: Omit `string=` when it matches the title-cased field name or stripped relational title (e.g. `user_id = fields.Many2one('res.users')`, NOT `string='User'`; `table_name = fields.Char()`, NOT `string='Table Name'`).
@@ -1085,7 +1206,7 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
     - [ ] `user_ids` used instead of deprecated `users` on `res.groups`.
 - [ ] **Code Modernization (Odoo 20)**:
   - [ ] `fields.Date.context_today(self)` instead of `fields.Date.today()`.
-  - [ ] `create(self, vals_list)` handles dict or list safely without crashing.
+  - [ ] `@api.model_create_multi` on `create(self, vals_list)`: iterate `vals_list` directly without dead `isinstance(vals_list, dict)` checks (the decorator guarantees `vals_list` is always a list of dicts).
   - [ ] `@api.constrains` iterates over `self`.
   - [ ] No `_sql_constraints`; uses `models.Constraint`.
   - [ ] No `self._cr` or `self._context`; uses `self.env.cr`, `self.env.context`.

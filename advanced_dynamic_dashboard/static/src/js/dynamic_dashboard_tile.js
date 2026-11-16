@@ -13,7 +13,7 @@ export class DynamicDashboardTile extends Component {
     async getConfiguration(ev){
         ev.stopPropagation();
         ev.preventDefault();
-        var id = this.props.widget.id
+        const id = this.props.widget.id;
         await this.doAction({
               type: 'ir.actions.act_window',
               res_model: 'dashboard.block',
@@ -40,7 +40,7 @@ export class DynamicDashboardTile extends Component {
     }
     // Function for getting records by double click
     async getRecords(){
-        var model_name = this.props.widget.model_name;
+        const model_name = this.props.widget.model_name;
         if (model_name){
             await this.doAction({
               type: 'ir.actions.act_window',
@@ -85,4 +85,4 @@ DynamicDashboardTile.template = xml `
                 </div>
             </div>
         </div>
-    </div>`
+    </div>`;

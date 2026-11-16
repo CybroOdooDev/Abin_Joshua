@@ -24,8 +24,6 @@
     'version': '20.0.1.0.0',
     'category': 'Tools',
     'summary': 'Enables global undo and redo functionality across form views in Odoo.',
-    'description': """Adds global undo and redo support across standard Odoo form views,
-allowing users to quickly revert or restore field changes and record modifications.""",
     'sequence': -333,
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
@@ -46,7 +44,4 @@ allowing users to quickly revert or restore field changes and record modificatio
     'uninstall_hook': 'uninstall_hook',
     'images': ['static/description/banner.jpg'],
     'license': 'LGPL-3',
-    'installable': True,
-    'auto_install': False,
-    'application': False,
 }

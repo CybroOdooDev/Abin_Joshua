@@ -11,29 +11,39 @@ export class DynamicDashboardChart extends Component {
         this.chartRef = signal.ref();
         this.dialog = this.props.dialog;
         onWillStart(async () => {
-            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js")
-            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js")
-            await loadJS("https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js")
-        })
-        onMounted(()=> this.renderChart())
+            if (typeof Chart === "undefined") {
+                await loadJS("/web/static/lib/Chart/Chart.js");
+            }
+            try {
+                if (typeof jsPDF === "undefined") {
+                    await loadJS("https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js");
+                }
+                if (typeof ExcelJS === "undefined") {
+                    await loadJS("https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js");
+                }
+            } catch {
+                // Keep chart rendering resilient in offline sandboxes
+            }
+        });
+        onMounted(() => this.renderChart());
     }
     // Function to export the chart in pdf, image, xlsx and csv format
-    exportItem(ev){
+    exportItem(ev) {
         ev.stopPropagation();
         ev.preventDefault();
-        var type = ev.currentTarget.getAttribute('data-type');
-        var canvas = ev.currentTarget.offsetParent.children[0].lastChild.querySelector("#canvas")
-        var dataTitle = canvas.getAttribute('data-title');
-        var bgCanvas = document.createElement("canvas");
+        const type = ev.currentTarget.getAttribute('data-type');
+        const canvas = ev.currentTarget.offsetParent.children[0].lastChild.querySelector("#canvas");
+        const dataTitle = canvas ? canvas.getAttribute('data-title') || "Chart" : "Chart";
+        const bgCanvas = document.createElement("canvas");
         bgCanvas.width = canvas.width;
         bgCanvas.height = canvas.height;
-        var bgCtx = bgCanvas.getContext("2d");
+        const bgCtx = bgCanvas.getContext("2d");
         bgCtx.fillStyle = "white";
         bgCtx.fillRect(0, 0, canvas.width, canvas.height);
         bgCtx.drawImage(canvas, 0, 0);
-        var imgData = bgCanvas.toDataURL("image/png");
+        const imgData = bgCanvas.toDataURL("image/png");
         if (type === 'png') {
-            var downloadLink = document.createElement('a');
+            const downloadLink = document.createElement('a');
             downloadLink.href = imgData;
             downloadLink.download = `${dataTitle}.png`;
             document.body.appendChild(downloadLink);
@@ -41,49 +51,50 @@ export class DynamicDashboardChart extends Component {
             document.body.removeChild(downloadLink);
         }
         if (type === 'pdf') {
-            var pdf = new jsPDF();
-            pdf.addImage(imgData, 'PNG', 0, 0);
-            pdf.save(`${dataTitle}.pdf`);
+            if (typeof jsPDF !== "undefined") {
+                const pdf = new jsPDF();
+                pdf.addImage(imgData, 'PNG', 0, 0);
+                pdf.save(`${dataTitle}.pdf`);
+            }
         }
-        if (type === 'xlsx'){
-            var rows = [];
-            var items = document.getElementsByClassName('resize-drag')
+        if (type === 'xlsx') {
+            const rows = [];
+            const items = document.getElementsByClassName('resize-drag');
             for (let i = 0; i < items.length; i++) {
                 if (items[i].getAttribute('data-id') === ev.currentTarget.getAttribute('data-id')) {
                     rows.push(this.props.widget.x_axis);
                     rows.push(this.props.widget.y_axis);
                 }
             }
-            // Prepare the workbook
-            const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('My Sheet');
-            for(let i = 0; i < rows.length; i++){
-                worksheet.addRow(rows[i]);
+            if (typeof ExcelJS !== "undefined") {
+                const workbook = new ExcelJS.Workbook();
+                const worksheet = workbook.addWorksheet('My Sheet');
+                for (let i = 0; i < rows.length; i++) {
+                    worksheet.addRow(rows[i]);
+                }
+                const image = workbook.addImage({
+                    base64: imgData,
+                    extension: 'png',
+                });
+                worksheet.addImage(image, {
+                    tl: { col: 0, row: 4 },
+                    ext: { width: canvas.width, height: canvas.height }
+                });
+                workbook.xlsx.writeBuffer()
+                .then((buffer) => {
+                    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                    const link = document.createElement('a');
+                    link.href = window.URL.createObjectURL(blob);
+                    link.setAttribute("download", `${dataTitle}.xlsx`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
             }
-            const image = workbook.addImage({
-              base64: imgData,
-              extension: 'png',
-            });
-            worksheet.addImage(image, {
-              tl: { col: 0, row: 4 },
-              ext: { width: canvas.width, height: canvas.height }
-            });
-            // Save workbook to a file
-            workbook.xlsx.writeBuffer()
-            .then((buffer) => {
-                // Create a Blob object from the buffer
-                let blob = new Blob([buffer], {type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
-                let link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.setAttribute("download", `${dataTitle}.xlsx`);
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            })
         }
         if (type === 'csv') {
-            var rows = [];
-            var items = document.getElementsByClassName('resize-drag')
+            const rows = [];
+            const items = document.getElementsByClassName('resize-drag');
             for (let i = 0; i < items.length; i++) {
                 if (items[i].getAttribute('data-id') === ev.currentTarget.getAttribute('data-id')) {
                     rows.push(this.props.widget.x_axis);
@@ -91,11 +102,11 @@ export class DynamicDashboardChart extends Component {
                 }
             }
             let csvContent = "data:text/csv;charset=utf-8,";
-            rows.forEach(function (rowArray) {
-                let row = rowArray.join(",");
+            rows.forEach((rowArray) => {
+                const row = rowArray.join(",");
                 csvContent += row + "\r\n";
             });
-            var link = document.createElement("a");
+            const link = document.createElement("a");
             link.setAttribute("href", encodeURI(csvContent));
             link.setAttribute("download", `${dataTitle}.csv`);
             document.body.appendChild(link);
@@ -104,10 +115,10 @@ export class DynamicDashboardChart extends Component {
         }
     }
     // Function to get the configuration of the chart
-    async getConfiguration(ev){
+    async getConfiguration(ev) {
         ev.stopPropagation();
         ev.preventDefault();
-        var id = this.props.widget.id
+        const id = this.props.widget.id;
         await this.doAction({
             type: 'ir.actions.act_window',
             res_model: 'dashboard.block',

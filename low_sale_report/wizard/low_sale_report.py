@@ -35,7 +35,7 @@ class LowSaleReport(models.TransientModel):
     """Wizard to configure and generate low sales reports in pivot and Excel formats."""
 
     _name = 'low.sale.report'
-    _description = 'Low Sale Report'
+    _description = 'Low Sales Report'
 
     product_type = fields.Selection(
         [('variant', 'By product variant'),
@@ -54,18 +54,18 @@ class LowSaleReport(models.TransientModel):
         default=lambda self: fields.Date.context_today(self),
     )
     absolute_qty = fields.Float(
-        string="Critical Level(Absolute Quantity)",
+        string="Critical Level (Absolute Quantity)",
         help="Which sale level is considered to be low (in default unit of measure).",
         required=True,
     )
     category = fields.Many2one(
         'product.category',
-        string="Product Categories",
+        string="Product Category",
         help="If not chosen, all product categories will be analysed.",
     )
     sale_team = fields.Many2one(
         'crm.team',
-        string="Sales Teams",
+        string="Sales Team",
         help="If not chosen, all sales teams will be analysed.",
     )
 
@@ -109,7 +109,7 @@ class LowSaleReport(models.TransientModel):
 
         pivot_data_records = self.env['low.sale.pivot.view.report'].create(vals_list)
         return {
-            'name': 'Low Sale Pivot View Report',
+            'name': 'Low Sales Pivot View Report',
             'type': 'ir.actions.act_window',
             'res_model': 'low.sale.pivot.view.report',
             'view_mode': 'pivot',
@@ -145,7 +145,7 @@ class LowSaleReport(models.TransientModel):
                 'model': 'low.sale.report',
                 'options': json.dumps(data, default=json_default),
                 'output_format': 'xlsx',
-                'report_name': 'Low Sale Report',
+                'report_name': 'Low Sales Report',
             },
             'report_type': 'low_sale_xlsx_download',
         }

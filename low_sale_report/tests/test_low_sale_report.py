@@ -23,6 +23,7 @@ import io
 import json
 from unittest.mock import Mock, patch
 from dateutil.relativedelta import relativedelta
+from werkzeug.exceptions import Forbidden
 from werkzeug.wrappers import Response
 from odoo import fields
 from odoo.exceptions import ValidationError
@@ -130,6 +131,7 @@ class TestLowSaleReport(TransactionCase):
             'sale_team': self.team.id,
         })
         action = wizard.action_pivot_low_sale_report()
+        self.assertEqual(action.get('name'), 'Low Sales Pivot View Report')
         self.assertEqual(action.get('type'), 'ir.actions.act_window')
         self.assertEqual(action.get('res_model'), 'low.sale.pivot.view.report')
         self.assertEqual(action.get('view_mode'), 'pivot')
@@ -147,6 +149,7 @@ class TestLowSaleReport(TransactionCase):
             'sale_team': self.team.id,
         })
         action = wizard.action_pivot_low_sale_report()
+        self.assertEqual(action.get('name'), 'Low Sales Pivot View Report')
         self.assertEqual(action.get('type'), 'ir.actions.act_window')
         self.assertEqual(action.get('res_model'), 'low.sale.pivot.view.report')
 
@@ -174,6 +177,7 @@ class TestLowSaleReport(TransactionCase):
         action = wizard.action_excel_low_sale_report()
         self.assertEqual(action.get('type'), 'ir.actions.report')
         self.assertEqual(action.get('report_type'), 'low_sale_xlsx_download')
+        self.assertEqual(action.get('data', {}).get('report_name'), 'Low Sales Report')
         self.assertIn('options', action.get('data', {}))
 
     def test_get_low_sale_xlsx_report(self):
@@ -260,6 +264,21 @@ class TestLowSaleReport(TransactionCase):
             cookie_header = response.headers.get('Set-Cookie', '')
             self.assertIn('fileToken=dummy-because-api-expects-one', cookie_header)
             self.assertTrue(len(response.stream.getvalue()) > 0)
+
+    def test_controller_unauthorized_model_access(self):
+        """Test that get_report_xlsx blocks arbitrary model execution."""
+        controller = XLSXReportController()
+        mock_req = Mock()
+        mock_req.session.uid = self.env.uid
+        mock_req.env = self.env
+        with patch('odoo.addons.low_sale_report.controllers.low_sale_report.request', mock_req):
+            with self.assertRaises(Forbidden):
+                controller.get_report_xlsx(
+                    model='res.users',
+                    options='{}',
+                    output_format='xlsx',
+                    report_name='Low_Sales_Report',
+                )
 
     def test_res_config_settings_storage(self):
         """Test setting and retrieving configuration settings."""

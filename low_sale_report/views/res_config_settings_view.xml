@@ -12,10 +12,10 @@
                               Should analysis be made for product templates in general or for product variants?">
                         <field name="product_type"/>
                     </setting>
-                    <setting string="Default critical level (absolute quantity)" help="Define the default critical level for sales (default unit of measure),under which products are considered poorly performing">
+                    <setting string="Default Critical Level (Absolute Quantity)" help="Define the default critical level for sales (default unit of measure), under which products are considered poorly performing.">
                         <field name="absolute_qty"/>
                     </setting>
-                    <setting string="Default analyzed period" help="Define which period should be analyzed by default">
+                    <setting string="Default Analyzed Period" help="Define which period should be analyzed by default.">
                         <field name="analysed_period"/>
                     </setting>
                 </block>

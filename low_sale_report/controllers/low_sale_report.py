@@ -21,12 +21,15 @@
 #############################################################################
 import json
 import logging
+from werkzeug.exceptions import Forbidden
 from odoo import http
 from odoo.http import request
 from odoo.http.stream import content_disposition
 from odoo.tools import html_escape
 
 _logger = logging.getLogger(__name__)
+
+ALLOWED_MODELS = {'low.sale.report'}
 
 
 class XLSXReportController(http.Controller):
@@ -41,8 +44,11 @@ class XLSXReportController(http.Controller):
     )
     def get_report_xlsx(self, model, options, output_format, report_name):
         """Generate and serve an XLSX report file."""
+        if model not in ALLOWED_MODELS or model not in request.env:
+            raise Forbidden("Unauthorized model access.")
         uid = request.session.uid
         report_obj = request.env[model].with_user(uid)
+        report_obj.check_access('read')
         options_data = json.loads(options)
         token = 'dummy-because-api-expects-one'
         try:

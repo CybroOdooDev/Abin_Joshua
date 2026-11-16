@@ -4,7 +4,6 @@ import { DynamicDashboardTile } from './dynamic_dashboard_tile';
 import { DynamicDashboardChart } from './dynamic_dashboard_chart';
 import { useService } from "@web/core/utils/hooks";
 import { Component, signal, mount, onWillStart, onMounted, useState } from "@odoo/owl";
-import { rpc } from "@web/core/network/rpc";
 
 
 export class AdvancedDynamicDashboard extends Component {
@@ -14,6 +13,7 @@ export class AdvancedDynamicDashboard extends Component {
         this.action = useService("action");
         this.orm = useService("orm");
         this.dialog = useService("dialog");
+        this.rpc = useService("rpc");
         this.actionId = this.props.actionId;
         this.state = useState({
             isDarkMode: false,
@@ -21,9 +21,19 @@ export class AdvancedDynamicDashboard extends Component {
             showModeText: false,
         });
         onWillStart(async () => {
-            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js");
-            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
-            await loadJS("https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js");
+            try {
+                if (typeof jsPDF === "undefined") {
+                    await loadJS("https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js");
+                }
+                if (typeof html2canvas === "undefined") {
+                    await loadJS("https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js");
+                }
+                if (typeof html2pdf === "undefined") {
+                    await loadJS("https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js");
+                }
+            } catch {
+                // Fallback gracefully in offline / sandboxed environments
+            }
         });
         onMounted(() => {
             this.renderDashboard();
@@ -42,15 +52,15 @@ export class AdvancedDynamicDashboard extends Component {
                 edges: { left: true, right: true, bottom: true, top: true },
                 listeners: {
                     move(event) {
-                        var target = event.target
-                        var x = (parseFloat(target.getAttribute('data-x')) || 0)
-                        var y = (parseFloat(target.getAttribute('data-y')) || 0)
+                        const target = event.target;
+                        let x = (parseFloat(target.getAttribute('data-x')) || 0);
+                        let y = (parseFloat(target.getAttribute('data-y')) || 0);
                         // update the element's style
-                        target.style.width = event.rect.width + 'px'
-                        target.style.height = event.rect.height + 'px'
+                        target.style.width = event.rect.width + 'px';
+                        target.style.height = event.rect.height + 'px';
                         // translate when resizing from top or left edges
-                        x += event.deltaRect.left
-                        y += event.deltaRect.top
+                        x += event.deltaRect.left;
+                        y += event.deltaRect.top;
                     }
                 },
                 modifiers: [
@@ -73,20 +83,20 @@ export class AdvancedDynamicDashboard extends Component {
                         endOnly: true
                     })
                 ]
-            })
+            });
 
             function dragMoveListener(event) {
-                var target = event.target
+                const target = event.target;
                 // keep the dragged position in the data-x/data-y attributes
-                var x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx
-                var y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy
+                const x = (parseFloat(target.getAttribute('data-x')) || 0) + event.dx;
+                const y = (parseFloat(target.getAttribute('data-y')) || 0) + event.dy;
                 // translate the element
-                target.style.transform = 'translate(' + x + 'px, ' + y + 'px)'
+                target.style.transform = 'translate(' + x + 'px, ' + y + 'px)';
                 // update the position attributes
-                target.setAttribute('data-x', x)
-                target.setAttribute('data-y', y)
+                target.setAttribute('data-x', x);
+                target.setAttribute('data-y', y);
             }
-            window.dragMoveListener = dragMoveListener
+            window.dragMoveListener = dragMoveListener;
         });
     }
 
@@ -139,7 +149,7 @@ export class AdvancedDynamicDashboard extends Component {
         ev.stopPropagation();
         ev.preventDefault();
         this.state.isEditingLayout = false;
-        var data_list = [];
+        const data_list = [];
         document.querySelectorAll('.resize-drag').forEach((element) => {
             interact(element).draggable(false);
             interact(element).resizable(false);
@@ -173,12 +183,13 @@ export class AdvancedDynamicDashboard extends Component {
         /* Function for adding tiles and charts */
         event.stopPropagation();
         event.preventDefault();
-        var type = event.target.getAttribute('data-type');
+        const type = event.target.getAttribute('data-type');
+        let chart_type = null;
         if (type == 'graph') {
-            var chart_type = event.target.getAttribute('data-chart_type');
+            chart_type = event.target.getAttribute('data-chart_type');
         }
         if (type == 'tile') {
-            var randomColor = '#' + ('000000' + Math.floor(Math.random() * 16777216).toString(16)).slice(-6);
+            const randomColor = '#' + ('000000' + Math.floor(Math.random() * 16777216).toString(16)).slice(-6);
             this.action.doAction({
                 type: 'ir.actions.act_window',
                 res_model: 'dashboard.block',
@@ -206,7 +217,7 @@ export class AdvancedDynamicDashboard extends Component {
                 views: [[false, 'form']],
                 context: {
                     'form_view_initial_mode': 'edit',
-                    'default_name': 'New ' + chart_type,
+                    'default_name': 'New ' + (chart_type || 'Chart'),
                     'default_type': type,
                     'default_height': '565px',
                     'default_width': '588px',
@@ -220,8 +231,8 @@ export class AdvancedDynamicDashboard extends Component {
 
     dateFilter() {
         /* Function for filtering the data based on the creation date */
-        var start_date = document.getElementById("start-date")?.value || "null";
-        var end_date = document.getElementById("end-date")?.value || "null";
+        const start_date = document.getElementById("start-date")?.value || "null";
+        const end_date = document.getElementById("end-date")?.value || "null";
         this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId, start_date, end_date]).then((response) => {
             const container = document.querySelector('.items');
             if (!container) return;
@@ -246,17 +257,17 @@ export class AdvancedDynamicDashboard extends Component {
     }
 
     input_change() {
-        var input = document.getElementById("search-input-chart").value;
+        const input = document.getElementById("search-input-chart").value;
         input === '' && this.clearSearch()
     }
 
     async clickSearch() {
         /* Function for searching the blocks with their names */
-        var input = document.getElementById("search-input-chart").value;
-        rpc('/custom_dashboard/search_input_chart', { 'search_input': input }).then((response) => {
-            var blocks = document.querySelectorAll(".items .resize-drag");
+        const input = document.getElementById("search-input-chart").value;
+        this.rpc('/custom_dashboard/search_input_chart', { 'search_input': input }).then((response) => {
+            const blocks = document.querySelectorAll(".items .resize-drag");
             blocks.forEach((element) => {
-                var dataId = JSON.parse(element.getAttribute('data-id'));
+                const dataId = JSON.parse(element.getAttribute('data-id'));
                 if (response.includes(dataId)) {
                     element.style.visibility = "visible";
                 }
@@ -279,63 +290,68 @@ export class AdvancedDynamicDashboard extends Component {
     clearSearch() {
         /* Function for clearing the search input */
         document.getElementById("search-input-chart").value = '';
-        var blocks = document.querySelectorAll(".items .resize-drag");
+        const blocks = document.querySelectorAll(".items .resize-drag");
         blocks.forEach((element) => {
             element.style.visibility = "visible";
-        })
+        });
     }
 
     async printPdf() {
         /* Function for printing whole dashboard in pdf format */
-        var elements = document.querySelectorAll('.items,.resize-drag')
-        var newElement = document.createElement('div');
+        const elements = document.querySelectorAll('.items,.resize-drag');
+        const newElement = document.createElement('div');
         newElement.className = 'pdf';
         elements.forEach((elem) => {
             newElement.appendChild(elem);
         });
-        for (var x = 0; x < newElement.children.length; x++) {
-            newElement.children[x].style.transform = ""
+        for (let x = 0; x < newElement.children.length; x++) {
+            newElement.children[x].style.transform = "";
         }
-        var opt = {
+        const opt = {
             margin: 0.3,
             filename: 'Dashboard.pdf',
             image: { type: 'jpeg', quality: 1 },
             html2canvas: { scale: 1 },
             jsPDF: { unit: 'mm', format: 'a3', orientation: 'portrait' }
         };
-        html2pdf().set(opt).from(newElement).save().then(() => {
-            window.location.reload()
-        })
+        if (typeof html2pdf !== "undefined") {
+            html2pdf().set(opt).from(newElement).save().then(() => {
+                window.location.reload();
+            });
+        }
     }
 
     async createPDF() {
         /* Function for getting pdf data in string format */
-        var elements = document.querySelectorAll('.items,.resize-drag')
-        var newElement = document.createElement('div');
+        const elements = document.querySelectorAll('.items,.resize-drag');
+        const newElement = document.createElement('div');
         newElement.className = 'pdf';
         elements.forEach((elem) => {
             newElement.appendChild(elem);
         });
-        for (var x = 0; x < newElement.children.length; x++) {
-            newElement.children[x].style.transform = ""
+        for (let x = 0; x < newElement.children.length; x++) {
+            newElement.children[x].style.transform = "";
         }
-        var opt = {
+        const opt = {
             margin: 0.3,
             filename: 'Dashboard.pdf',
             image: { type: 'jpeg', quality: 1 },
             html2canvas: { scale: 1 },
             jsPDF: { unit: 'mm', format: 'a3', orientation: 'portrait' }
         };
-        var pdf = html2pdf().set(opt).from(newElement).toPdf()
-        var pdfOutput = await pdf.output('datauristring');
-        return pdfOutput
+        if (typeof html2pdf !== "undefined") {
+            const pdf = html2pdf().set(opt).from(newElement).toPdf();
+            const pdfOutput = await pdf.output('datauristring');
+            return pdfOutput;
+        }
+        return '';
     }
 
     async sendMail() {
         /* Function for creating pdf and sending mail to the selected users */
         /* This function calls the createPDF() function and returns the pdf datas */
-        var created_pdf = await this.createPDF();
-        var base64code = created_pdf.split(',')[1];
+        const created_pdf = await this.createPDF();
+        const base64code = created_pdf ? created_pdf.split(',')[1] : '';
         this.action.doAction({
             type: 'ir.actions.act_window',
             name: 'SEND MAIL',
@@ -346,8 +362,9 @@ export class AdvancedDynamicDashboard extends Component {
             context: {
                 'default_base64code': base64code,
             }
-        })
+        });
     }
 }
-AdvancedDynamicDashboard.template = "owl.AdvancedDynamicDashboard"
-registry.category("actions").add("AdvancedDynamicDashboard", AdvancedDynamicDashboard)
+AdvancedDynamicDashboard.template = "owl.AdvancedDynamicDashboard";
+registry.category("actions").add("AdvancedDynamicDashboard", AdvancedDynamicDashboard);
+

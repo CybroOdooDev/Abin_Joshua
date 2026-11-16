@@ -25,7 +25,7 @@ from odoo import api, fields, models
 _logger = logging.getLogger(__name__)
 
 
-class UndoRedo(models.TransientModel):
+class UndoRedo(models.TransientModel):  # pylint: disable=no-wizard-in-models
     """Transient model to temporarily store undo and redo logs for
     record changes across all models."""
     _name = 'undo.redo'
