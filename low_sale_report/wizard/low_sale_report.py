@@ -9,18 +9,22 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
 #############################################################################
 import io
 import json
-from odoo import api, fields, models, _
+from dateutil.relativedelta import relativedelta
+from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 from odoo.tools import json_default
-from dateutil.relativedelta import relativedelta
 try:
     from odoo.tools.misc import xlsxwriter
 except ImportError:
@@ -28,63 +32,74 @@ except ImportError:
 
 
 class LowSaleReport(models.TransientModel):
-    """Its define as the sale low performance product details in pivot view and
-     the Excel report."""
+    """Wizard to configure and generate low sales reports in pivot and Excel formats."""
+
     _name = 'low.sale.report'
     _description = 'Low Sale Report'
 
     product_type = fields.Selection(
         [('variant', 'By product variant'),
-         ('template', 'By product templates')], string="Report Type",
-        help='Which sale to take into account: Product templates in general'
-             ' or variants?', required=True)
-    analysed_period_start = fields.Date(string='Period under analysis',
-                                        help='If not chosen, all product sale'
-                                             ' will be analysed')
-    analysed_period_end = fields.Date(string='Period under analysis',
-                                      help='If not chosen, all product sale'
-                                           ' will be analysed',
-                                      default=fields.Date.today())
-    absolute_qty = fields.Float(string='Critical Level(Absolute Quantity)',
-                                help='Which sale level are considered to be'
-                                     ' low(in default unit of measurement) ',
-                                required=True)
-    category = fields.Many2one('product.category',
-                               string='Product Categories',
-                               help='If not chosen, all product categories '
-                                    'wil be analysed')
-    sale_team = fields.Many2one('crm.team',
-                                help='If not chosen, all the sale team will'
-                                     ' be analysed', string='Sales Teams')
+         ('template', 'By product templates')],
+        string="Report Type",
+        help="Which sale to take into account: Product templates in general or variants?",
+        required=True,
+    )
+    analysed_period_start = fields.Date(
+        string="Analysis Period Start",
+        help="If not chosen, all product sales will be analysed.",
+    )
+    analysed_period_end = fields.Date(
+        string="Analysis Period End",
+        help="If not chosen, all product sales will be analysed.",
+        default=lambda self: fields.Date.context_today(self),
+    )
+    absolute_qty = fields.Float(
+        string="Critical Level(Absolute Quantity)",
+        help="Which sale level is considered to be low (in default unit of measure).",
+        required=True,
+    )
+    category = fields.Many2one(
+        'product.category',
+        string="Product Categories",
+        help="If not chosen, all product categories will be analysed.",
+    )
+    sale_team = fields.Many2one(
+        'crm.team',
+        string="Sales Teams",
+        help="If not chosen, all sales teams will be analysed.",
+    )
 
     def action_pivot_low_sale_report(self):
-        """Exporting the low sale report as the pivot view format in odoo"""
+        """Export the low sale report into Odoo pivot view."""
+        self.ensure_one()
         low_sale_report = {
             'product_type': self.product_type,
             'analysed_period_start': self.analysed_period_start,
             'analysed_period_end': self.analysed_period_end,
             'absolute_qty': self.absolute_qty,
             'category': self.category,
-            'sale_team': self.sale_team
+            'sale_team': self.sale_team,
         }
-        pivot_data = self.env['low.sale.pivot.view.report'].get_data(
-            low_sale_report)
+        pivot_data = self.env['low.sale.pivot.view.report'].get_data(low_sale_report)
         if not pivot_data:
             raise ValidationError(
-                _("No data was found for the specified criteria"))
+                self.env._("No data was found for the specified criteria.")
+            )
 
         if self.product_type == 'variant':
             view_id = self.env.ref(
-                'low_sale_report.low_sale_pivot_view_report_view_pivot_variant').id
+                'low_sale_report.low_sale_pivot_view_report_view_pivot_variant'
+            ).id
         else:
             view_id = self.env.ref(
-                'low_sale_report.low_sale_pivot_view_report_view_pivot_template').id
+                'low_sale_report.low_sale_pivot_view_report_view_pivot_template'
+            ).id
 
         vals_list = []
         for data in pivot_data:
             values = {
                 'price_total': data[2],
-                'product_uom_qty': data[1]
+                'product_uom_qty': data[1],
             }
             if self.product_type == 'variant':
                 values['product_id'] = data[0]
@@ -104,33 +119,41 @@ class LowSaleReport(models.TransientModel):
 
     @api.constrains('analysed_period_start', 'analysed_period_end')
     def _check_analysed_period_dates(self):
+        """Ensure that the starting analysis date is earlier than or equal to the end date."""
         for rec in self:
             if (rec.analysed_period_start and rec.analysed_period_end and
                     rec.analysed_period_start > rec.analysed_period_end):
-                raise ValidationError("The start date must be earlier than or equal to the end date.")
+                raise ValidationError(
+                    self.env._("The start date must be earlier than or equal to the end date.")
+                )
 
     def action_excel_low_sale_report(self):
-        """Exporting the low sale report as the Excel view format in odoo"""
+        """Export the low sale report as an Excel download action."""
         self.ensure_one()
-        data = {'ids': self.env.context.get('active_ids', []),
-                'model': self.env.context.get('active_model', 'ir.ui.menu'),
-                'form': self.read(
-                    ['product_type', 'analysed_period_start',
-                     'analysed_period_end', 'absolute_qty',
-                     'category', 'sale_team'])[0]}
+        data = {
+            'ids': self.env.context.get('active_ids', []),
+            'model': self.env.context.get('active_model', 'ir.ui.menu'),
+            'form': self.read(
+                ['product_type', 'analysed_period_start',
+                 'analysed_period_end', 'absolute_qty',
+                 'category', 'sale_team']
+            )[0],
+        }
         return {
             'type': 'ir.actions.report',
-            'data': {'model': 'low.sale.report',
-                     'options': json.dumps(data, default=json_default),
-                     'output_format': 'xlsx',
-                     'report_name': 'Low Sale Report',
-                     },
-            'report_type': 'low_sale_xlsx_download'
+            'data': {
+                'model': 'low.sale.report',
+                'options': json.dumps(data, default=json_default),
+                'output_format': 'xlsx',
+                'report_name': 'Low Sale Report',
+            },
+            'report_type': 'low_sale_xlsx_download',
         }
 
     def get_low_sale_xlsx_report(self, options, response):
-        """Generate the Excel report based on the provided options and write it
-         to the response."""
+        """Generate the Excel report based on the provided options
+        and write it to the response stream.
+        """
         output = io.BytesIO()
         workbook = xlsxwriter.Workbook(output, {'in_memory': True})
         data = {'form': options['form'], 'model': 'ir.ui.menu', 'ids': []}
@@ -148,17 +171,21 @@ class LowSaleReport(models.TransientModel):
         form_data = data['form']
         fetch_datas = self.env['low.sale.pivot.view.report'].get_data(form_data)
         if not fetch_datas:
-            raise ValidationError("No data was found for the specified criteria.")
+            raise ValidationError(
+                self.env._("No data was found for the specified criteria.")
+            )
         worksheet = workbook.add_worksheet()
-        name_formate = workbook.add_format(
+        name_format = workbook.add_format(
             {'bold': True, 'align': 'center', 'valign': 'vcenter', 'border': 1,
-             'bg_color': '#D3D3D3', 'font_size': 16})
+             'bg_color': '#D3D3D3', 'font_size': 16}
+        )
         format2 = workbook.add_format(
-            {'font_size': 12, 'bold': True, 'bg_color': '#D3D3D3'})
+            {'font_size': 12, 'bold': True, 'bg_color': '#D3D3D3'}
+        )
         rows = 0
         cols = 0
         worksheet.merge_range(rows, cols, rows + 1, cols + 3,
-                              'Low Sale Report', name_formate)
+                              'Low Sale Report', name_format)
         worksheet.set_column('B:B', 35)
         worksheet.set_column('C:C', 15)
         worksheet.set_column('D:D', 15)
@@ -166,7 +193,7 @@ class LowSaleReport(models.TransientModel):
         worksheet.write('B4', "Product", format2)
         worksheet.write('C4', "Sold Quantity", format2)
         worksheet.write('D4', "Revenue", format2)
-        # Write data to the worksheet
+
         row_num = 5
         cols_num = 0
         for rec in fetch_datas:
@@ -175,28 +202,28 @@ class LowSaleReport(models.TransientModel):
             worksheet.write(row_num, cols_num + 2, rec[1])
             worksheet.write(row_num, cols_num + 3, rec[2])
             row_num += 1
-        # Close the workbook
+
         workbook.close()
-        # Seek to the beginning of the BytesIO buffer
         output.seek(0)
-        # Stream the Excel file to the response
         response.stream.write(output.read())
         output.close()
 
     @api.model
-    def default_get(self, fields):
-        """Prefilling the wizard data into the settings field values"""
-        res = super().default_get(fields)
-        # Fetch configuration parameters from ResConfigSettings
+    def default_get(self, fields_list):
+        """Prefill wizard default values from res.config.settings parameters."""
+        res = super().default_get(fields_list)
         config_params = self.env['ir.config_parameter'].sudo()
-        # Prefill the values based on the configuration parameters
         res['product_type'] = config_params.get_str(
-            'low_sale_report.product_type', 'variant')
+            'low_sale_report.product_type', 'variant'
+        ) or 'variant'
         res['absolute_qty'] = config_params.get_float(
-            'low_sale_report.absolute_qty', 0.0)
-        end_date = res.get('analysed_period_end')
-        if end_date:
-            analysed_period = config_params.get_str('low_sale_report.analysed_period')
+            'low_sale_report.absolute_qty', 0.0
+        )
+        end_date = res.get('analysed_period_end') or fields.Date.context_today(self)
+        if 'analysed_period_start' in fields_list:
+            analysed_period = config_params.get_str(
+                'low_sale_report.analysed_period', 'last_month'
+            )
             if analysed_period == 'last_month':
                 start_date = end_date - relativedelta(days=30)
             elif analysed_period == 'last_3':
@@ -206,7 +233,6 @@ class LowSaleReport(models.TransientModel):
             elif analysed_period == 'last_12':
                 start_date = end_date - relativedelta(months=12)
             else:
-                # Default to last_month if no valid option is selected
                 start_date = end_date - relativedelta(months=12)
             res['analysed_period_start'] = start_date
         return res

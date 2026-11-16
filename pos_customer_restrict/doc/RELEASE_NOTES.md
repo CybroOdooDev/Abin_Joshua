@@ -1,7 +1,7 @@
 ## Module <pos_customer_restrict>
 
-#### 17.17.2026
+#### 2026-11-13
 #### Version 20.0.1.0.0
 #### ADD
 
-- Initial commit for Restrict Customers In POS
+- Initial release for Odoo 20: Restrict customer visibility in Point of Sale sessions.

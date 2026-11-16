@@ -32,13 +32,19 @@ Installation
 ------------
 Requires python package vobject (pip install vobject).
 
+Usage
+-----
+* Open any event in the Calendar application.
+* Click the **Send ICS** button in the form view to email an .ics event invitation to attendees.
+* In the Calendar list view, select multiple meetings and click **Send ICS File** from the Action dropdown menu to dispatch consolidated .ics files to each attendee.
+
 Configuration
 -------------
 No additional configuration is required.
 
-Company
+Credits
 -------
-* `Cybrosys Techno Solutions <https://cybrosys.com/>`__
+* Cybrosys Techno Solutions <https://cybrosys.com/>
 
 License
 -------

@@ -102,16 +102,25 @@ To prevent errors and ensure thorough quality control, follow this sequential ex
    - Set `<title>` to `{Module Display Name} for Odoo 20`.
 2. **Edition & Deployment Capability Rail**:
    > [!IMPORTANT]
-   > **Odoo Online Support Standard**:
-   > **Do NOT mark Odoo Online as unsupported.** Legacy `index1.html` files from older Odoo versions frequently contained outdated boilerplate with `close.png` for Odoo Online. For all Odoo 20 modules, render **Odoo Online as fully Supported** by default alongside Community, Enterprise, Odoo.sh, and On-Premise unless explicitly instructed otherwise by the developer.
+   > **Odoo Online Support Standard & Source Parity**:
+   > **Strictly mirror the source `index1.html` availability matrix for Odoo Online.**
+   > Custom third-party modules **cannot** be installed on standard Odoo Online (odoo.com SaaS), which only supports standard Odoo apps and Studio. Therefore, legacy `index1.html` files accurately display `close.png` for Odoo Online.
+   > - If `index1.html` marks Odoo Online with `close.png` (or unsupported), **render Odoo Online as unsupported** using the authoritative master reference structure (`assets/icons/ic-588e724f-7c848f.png`, dashed border, struck label, and `Not supported` tag).
+   > - Never arbitrarily change an unsupported Odoo Online target to supported.
    - **Editions**: Render both **Community** and **Enterprise** as supported (`assets/icons/ic-6db19ab6-b12126.png`).
-   - **Deployment Targets**: Render **Odoo.sh**, **On-Premise**, and **Odoo Online** as supported targets with the solid border and checkmark icon (`assets/icons/ic-6db19ab6-b12126.png`):
-     ```html
-     <span style="display: inline-block; background-color: #fdf3f4; border: 1px solid #f3e0e2; color: #0f172a; border-radius: 20px; padding: 6px 14px; margin-right: 7px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;">
-         <img src="./assets/icons/ic-6db19ab6-b12126.png" alt="" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
-         <span style="vertical-align: middle;">Odoo Online</span>
-     </span>
-     ```
+   - **Deployment Targets**:
+     - **Odoo.sh** and **On-Premise**: Render as supported targets with the solid border and checkmark icon (`assets/icons/ic-6db19ab6-b12126.png`).
+     - **Odoo Online**: When unsupported (indicated by `close.png` in `index1.html`), render using the canonical unsupported chip:
+       ```html
+       <span
+           style="display: inline-block; background-color: #f4f5f7; border: 1px dashed #c9d0d8; color: #7c848f; border-radius: 20px; padding: 6px 12px 6px 14px; margin-right: 7px; font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 12px; font-weight: 700;">
+           <img src="./assets/icons/ic-588e724f-7c848f.png" alt="" style="width: 12px; height: 12px; display: inline-block; vertical-align: middle; margin-right: 6px;" />
+           <span style="vertical-align: middle; text-decoration: line-through;">Online</span>
+           <span
+               style="vertical-align: middle; margin-left: 7px; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: #ffffff; background-color: #9aa2ad; border-radius: 10px; padding: 2px 7px;">Not&nbsp;supported</span>
+       </span>
+       ```
+       *(If `index1.html` explicitly supports Odoo Online with `tick.png`, render it with the solid border and checkmark icon `assets/icons/ic-6db19ab6-b12126.png`)*.
 3. **Hero Headline & Subtitle**:
    - `<h1>`: Display full module name with the last phrase highlighted in red: `<span style="color: #b12126;">for Odoo 20</span>`.
    - Subtitle `<p>`: Clear 2-sentence summary detailing business value, primary interface locations, and core automation.
@@ -159,7 +168,7 @@ The Feature Matrix consists of a `3 rows × 2 columns` table grid featuring numb
 - [ ] Card 03: Action Menus / Direct Navigation
 - [ ] Card 04: Filtered Views / Search / Drilldown Capabilities
 - [ ] Card 05: Integration with Parent Module (e.g. MRP, Project, Inventory)
-- [ ] Card 06: Odoo 20 Technical & Architecture Compatibility
+- [ ] Card 06: Odoo 20 Technical & Architecture Compatibility (ensure listed platforms strictly match `index1.html`, omitting Odoo Online when unsupported)
 
 ---
 
@@ -170,7 +179,7 @@ Replace all generic accounting Q&As with 3 tailored, accurate module FAQs:
   - Divider: `1px solid #f6eaea`.
   - `A` Box: 36×36px `#fdf2f2` light tint box with red text. Answer text in `#64748b`.
 * **Standard Question Breakdown**:
-  1. **Q1 (Compatibility)**: Confirmation of support for all 5 platforms: Odoo 20 Community Edition, Odoo 20 Enterprise, Odoo.sh, On-Premise, and Odoo Online.
+  1. **Q1 (Compatibility)**: Confirmation of supported editions and platforms (Odoo 20 Community Edition, Odoo 20 Enterprise, Odoo.sh, On-Premise) based on `index1.html`. If Odoo Online is unsupported, explicitly clarify that custom third-party modules cannot be installed on Odoo Online SaaS.
   2. **Q2 (Navigation/Location)**: Exact menu path where the user accesses the feature after installation (e.g. `Manufacturing -> Products Kanban`).
   3. **Q3 (Core Mechanism)**: Specific explanation of how key operations work (e.g. drilling down from counter badges, permissions, or calculations).
 
@@ -193,8 +202,15 @@ The related modules section displays 3 cards linking to official Cybrosys Odoo A
 > **Strict Domain Relevance Rule**:
 > Do NOT use generic modules (like Accounting Kit or Backup) if the current module belongs to a specific functional category. All 3 suggested apps must share keywords, workflows, or target domains (e.g., for an MRP/Kanban module, select apps containing `MRP` or `Kanban` in their title).
 
+> [!WARNING]
+> **Live App Store Link Verification (Strict No-404 Rule)**:
+> Never blindly hardcode `20.0` into related module URLs. Many companion modules are still being migrated and are not yet published for Odoo 20 on `apps.odoo.com`, which results in a `404 Page Not Found` error when users or reviewers click the card.
+> - Check every related module URL before publishing (`curl -s -I <url> | head -n 1`).
+> - If `20.0` is not yet published on `apps.odoo.com` (returns `404`), link to the latest published series on the Odoo App Store (e.g. `19.0`: `https://apps.odoo.com/apps/modules/19.0/{technical_name}`), or use the canonical unversioned URL (`https://apps.odoo.com/apps/modules/{technical_name}`) which automatically serves the latest live version.
+> - Every related module URL MUST return HTTP `200 OK`.
+
 **Card Structure**:
-* **URL**: Valid Odoo Apps Store link (`https://apps.odoo.com/apps/modules/{version}/{technical_name}`).
+* **URL**: Valid, live Odoo Apps Store link (`https://apps.odoo.com/apps/modules/{version}/{technical_name}` or unversioned, verified HTTP 200).
 * **Icon**: Standard Cybrosys app icon (`assets/icons/ic-c9b30746-ffffff.png`).
 * **Title**: Exact name of the related module.
 * **Summary**: 2-line summary explaining the companion tool.
@@ -252,9 +268,9 @@ Before declaring the `index.html` update complete, perform the following automat
 | **Git Tree Required Files (1.2)** | `git ls-files static/description/` | `static/description/index.html` is tracked; `index1.html` is completely absent. |
 | **No Stale Boilerplate** | `grep -E "Accounting Kit|chart of accounts|PDC" index.html` | 0 unexpected hits (unless module is accounting). |
 | **Title Accuracy** | `grep "<title>" index.html` | Must match current module display name and Odoo 20. |
-| **Deployment Coverage** | Inspect `index.html` Capability Rail & FAQ Q1 | All 5 targets (Community, Enterprise, Odoo.sh, On-Premise, and Odoo Online) rendered as fully supported with solid checkmark badges unless explicitly exempted. |
+| **Deployment Coverage** | Inspect `index.html` Capability Rail & FAQ Q1 | Platform availability strictly mirrors `index1.html`. If Odoo Online has `close.png` in `index1.html`, it is rendered as unsupported (dashed border, `ic-588e724f-7c848f.png`, line-through, and `Not supported` tag). |
 | **All Images Exist** | Inspect every `src` path in `assets/screenshots/` and `assets/icons/` | All referenced image files exist and have non-zero file size. |
-| **Link Parity** | Verify all `href` attributes in Related Modules | Valid `https://apps.odoo.com/apps/modules/...` URLs. |
+| **Link Parity (No 404s)** | `curl -s -I <url>` on all Related Module links | All links return HTTP 200 OK. If `20.0` is not yet live on `apps.odoo.com`, links point to the latest live version (e.g. `19.0`) or canonical unversioned URL. |
 | **Grammar Standards** | Scan for phrases like "allows to [verb]" or broken pluralization | Clean active voice (*"Allows users to view..."* or *"Enables direct access..."*). |
 | **Table Tags Closed** | `grep -c "<table>" index.html` vs `grep -c "</table>" index.html` | Opening and closing tag counts match exactly. |
 | **Release Note Date** | Inspect release tile in `cak-pane-4` | Reflects current release month and year (e.g. `November 2026`), never outdated past dates. |

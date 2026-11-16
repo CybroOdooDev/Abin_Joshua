@@ -9,31 +9,41 @@
 #    You can modify it under the terms of the GNU LESSER
 #    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
-#    This program is distributed in the hope that it will be useful,
+#    This program is distributed in the hope it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
+#
 #############################################################################
 import json
+import logging
 from odoo import http
 from odoo.http import request
 from odoo.http.stream import content_disposition
 from odoo.tools import html_escape
 
+_logger = logging.getLogger(__name__)
+
 
 class XLSXReportController(http.Controller):
-    """This controller defines a route for generating and serving XLSX reports.
-    The route '/sale_low_xlsx_reports' accepts POST requests and returns an
-    XLSX report based on the provided model, options, output format, and report
-    name."""
-    @http.route('/sale_low_xlsx_reports', type='http',
-                auth='user', methods=['POST'], csrf=False)
+    """Controller route for generating and serving low sale XLSX reports."""
+
+    @http.route(
+        '/sale_low_xlsx_reports',
+        type='http',
+        auth='user',
+        methods=['POST'],
+        csrf=False,
+    )
     def get_report_xlsx(self, model, options, output_format, report_name):
-        """Generate and serve an XLSX report."""
+        """Generate and serve an XLSX report file."""
         uid = request.session.uid
         report_obj = request.env[model].with_user(uid)
-        options = json.loads(options)
+        options_data = json.loads(options)
         token = 'dummy-because-api-expects-one'
         try:
             if output_format == 'xlsx':
@@ -41,18 +51,17 @@ class XLSXReportController(http.Controller):
                     None,
                     headers=[
                         ('Content-Type', 'application/vnd.ms-excel'),
-                        ('Content-Disposition',
-                         content_disposition(report_name + '.xlsx'))
-                    ]
+                        ('Content-Disposition', content_disposition(f"{report_name}.xlsx")),
+                    ],
                 )
-                report_obj.get_low_sale_xlsx_report(options, response)
+                report_obj.get_low_sale_xlsx_report(options_data, response)
             response.set_cookie('fileToken', token)
             return response
         except Exception as e:
+            _logger.exception("Error while generating XLSX low sale report: %s", e)
             error = {
                 'code': 200,
                 'message': 'Odoo Server Error',
-                'data': str(e)
+                'data': str(e),
             }
             return request.make_response(html_escape(json.dumps(error)))
-
