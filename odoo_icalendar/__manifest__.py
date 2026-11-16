@@ -23,7 +23,7 @@
     'name': 'Odoo iCalendar',
     'version': '20.0.1.0.0',
     'category': 'Productivity',
-    'summary': 'Generate iCalendar files and send event invitations with .ics attachments to attendees.',
+    'summary': 'Generate iCalendar files and send event invitations with ICS attachments to attendees.',
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
