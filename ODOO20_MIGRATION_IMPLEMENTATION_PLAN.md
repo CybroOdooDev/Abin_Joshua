@@ -32,7 +32,14 @@ graph TD
   - Every module MUST contain `static/description/index.html` tracked and committed in the Git repository tree.
   - The module description `static/description/index.html`, module icon `static/description/icon.png`, and release notes `doc/RELEASE_NOTES.md` are standard required files.
   - **Git Tree Rename Pitfall**: Never use `git mv static/description/index.html static/description/index1.html`. Renaming stages `index.html` as deleted in Git. If a new `index.html` is generated on disk but not staged with `git add`, the committed tree contains `index1.html` while `index.html` is missing, triggering a blocking failure under Criterion 1.2 (*"Missing required static/description/index.html is NOT in the tree (index1.html is present, but manifest references index.html)"*). Always copy (`cp`), stage the new `index.html`, and verify with `git ls-files static/description/`.
-* **Criterion 1.5: No Missing, Unused or Duplicate Files (Blocking - Score Penalty down to 40/100 or 60/100)**:
+* **Criterion 1.5: No Missing, Unused or Duplicate Files (Blocking - Score Penalty down to 15/100, 40/100 or 60/100)**:
+  - **Mandatory Elimination of 0-Byte Empty Placeholder Files (Score Penalty down to 15/100)**:
+    - The AI Reviewer awards a catastrophic failing score down to **15/100** on Criterion 1.5 (*"static/description/assets/icons holds about 40 empty 0-byte files (.png, .gif) and leftovers such as 'test-1 - Copy.png', temp.jpg, ajmaljk.png and screenshot.png. Most of these are not used by index.html"*) if 0-byte empty files exist anywhere in the module tree.
+    - **Zero 0-Byte Tolerance**: `find . -size 0` must strictly return 0 files. Never leave empty placeholder icons, dummy GIFs, or 0-byte test files. Every 0-byte file must be permanently removed.
+  - **Mandatory Description Asset Reconciliation & Purge of Unused Assets (Score Penalty down to 15/100)**:
+    - Legacy modules and master templates often ship with legacy asset packs containing 50–100 icons, banners, mockups, or SVGs (e.g., `banner-2.svg`, `banner-promo.svg`, `banner-pattern.svg`, `scrn1.png`, `hero.gif`, etc.).
+    - **Strict Reference Rule**: Every single file inside `static/description/assets/` (and subdirectories `icons/`, `screenshots/`, etc.) **MUST** be actively referenced in `index.html` via `src="..."` or CSS `url(...)`, or declared in `__manifest__.py` (like `banner.jpg`, `icon.png`).
+    - Any asset file on disk that is NOT actively referenced in `index.html` or the manifest is considered an unused/orphaned file. All unreferenced assets must be deleted before submission.
   - **Mandatory Deprecation of `security/ir.model.access.csv` in Odoo 20**:
     In Odoo 20, the legacy access control file `security/ir.model.access.csv` is completely deprecated and replaced by `security/ir.access.csv`.
     - If `security/ir.model.access.csv` is present in the repository or still referenced in `__manifest__.py`, the reviewer awards a failing **40/100** score on Criterion 1.5 (*"security/ir.model.access.csv is used instead of security/ir.access.csv, which is deprecated in Odoo 20"*).
@@ -94,6 +101,22 @@ graph TD
       - `domain`: Valid Odoo prefix-notation domain string
   - **Complete Model Coverage**: Every single model (`models.Model`) and transient model / wizard (`models.TransientModel`) MUST have an access row in `security/ir.access.csv`.
   - **Strict Least Privilege**: Infrastructure, database connector, and credential models must be restricted to `base.group_system`, not `base.group_user`. Sensitive password/secret fields must specify `groups="base.group_system"`. Audit log and synchronization models must have complete views and menus.
+  - **Controller Model Validation & Whitelisting (Critical Blocking Security Rule - Score Penalty down to 60/100)**:
+    - **Arbitrary Model Execution Vulnerability**: Controllers exposing HTTP endpoints (e.g. download routes, RPC endpoints, report export handlers) that accept a model name parameter (`model`, `res_model`, etc.) from the client MUST NEVER dynamically load or execute code on that model via `request.env[model]` without explicit validation. Doing so triggers an automatic blocking **60/100** score on Criterion 4.2 (*"Controller executes code on any model provided by the client without validation, allowing potential security issues"*).
+    - **Mandatory Whitelist**: Define an explicit set or tuple of permitted models at module or class scope (e.g., `ALLOWED_MODELS = {'low.sale.report'}`).
+    - **Enforcement Pattern**: In every controller method receiving a `model` parameter from the request:
+      ```python
+      from werkzeug.exceptions import Forbidden
+
+      ALLOWED_MODELS = {'my.target.model'}
+
+      if model not in ALLOWED_MODELS or model not in request.env:
+          raise Forbidden("Unauthorized model access.")
+      record = request.env[model].with_user(request.session.uid)
+      record.check_access('read')
+      ```
+    - **Access Control Enforcement**: Always call `record.check_access('read')` (or `'write'`) on the recordset with the current user's UID to enforce Odoo 20 security rules (`check_access` replaces deprecated `check_access_rights`).
+    - **Mandatory Test**: Unit tests MUST include a test asserting that passing an unauthorized model (e.g. `'res.users'`) to the controller raises `Forbidden`.
 * **Criterion 4.3: No Debug or Deprecated Code (Blocking - Score Penalty down to 40/100)**:
   - **Zero Debug Artifacts**:
     - Absolute prohibition against `print()` statements in Python and `console.log()` / `debugger;` in JavaScript.
@@ -123,11 +146,45 @@ graph TD
     - Never assign expressions or method returns to local variables that are never read or asserted (e.g. `invoice = self.order._create_invoices()` where `invoice` is never referenced again).
     - In unit tests and model logic, either assert the created record (e.g. `self.assertTrue(invoice)`) or call the method without assigning an unused return value (`self.order._create_invoices()`).
 * **Deprecated APIs**: Zero Odoo 16/17/18/19 deprecated code (including legacy `security/ir.model.access.csv`).
-* **Doc-to-Code Parity & Grammar (6.3)**: `index.html`, `README.rst`, and `RELEASE_NOTES.md` match actual code. No false claims in FAQs, no template boilerplate leftovers (e.g. `#cybrosys-acc-kit`), proper English grammar (no "allows to + verb"), singular/plural consistency, and synchronized release dates.
-* **Criterion 6.2: No Junk in the Submission (Blocking - Score Penalty down to 70/100)**:
-  - Zero `__pycache__`, `.pyc`, backup files (`*~`, `*.bak`), temporary draft files (`index1.html`), or unused assets in the module directory or archive.
+* **Criterion 6.3: Grammar and Content (User-Facing Strings & Description Audit - Score Penalty down to 70/100)**:
+  - An AI Reviewer LLM awards a failing **70/100** score on Criterion 6.3 (*"Grammar errors persist in user-facing strings and index.html (e.g., 'block to setting', 'Click the menu its open')"*) if grammatical errors, broken phrasing, pidgin English, or typographic defects persist in user-facing UI strings or `static/description/index.html`.
+  - **Strictly Prohibited Grammatical Anti-Patterns**:
+    1. **Run-on / Pidgin English Clauses**:
+       - ✗ *"Click the menu its open the wizard then choose..."*
+       - ✗ *"Click the menu it open the report..."*
+       - ✓ *"Open the wizard by clicking the menu, select your desired criteria, and..."* OR *"Upon clicking the menu, the wizard opens to configure..."*
+    2. **Malformed Prepositions & Broken Noun Phrases**:
+       - ✗ *"block to setting"*, *"session to the sale settings"*, *"go to setting"*
+       - ✓ *"Navigate to Sales -> Configuration -> Settings to configure..."* OR *"Configuration Settings block"*
+    3. **Pluralization Inaccuracies in UI Labels & Selection Options**:
+       - ✗ Selection options with missing pluralization: `('last_3', 'Last 3 Month')`, `('last_6', 'Last 6 Month')`
+       - ✓ Correct plural forms: `('last_3', 'Last 3 Months')`, `('last_6', 'Last 6 Months')`
+       - ✗ Plural labels on Many2one fields: `category = fields.Many2one(..., string="Product Categories")`, `sale_team = fields.Many2one(..., string="Sales Teams")`
+       - ✓ Singular labels on Many2one fields: `string="Product Category"`, `string="Sales Team"`
+    4. **Parenthesis Spacing & Punctuation**:
+       - ✗ Missing space before opening parenthesis: `string="Critical Level(Absolute Quantity)"`
+       - ✓ Clean spacing: `string="Critical Level (Absolute Quantity)"`
+       - ✗ Incomplete help tooltips lacking terminating punctuation: `help="Define which period should be analyzed by default"`
+       - ✓ All help tooltips and summaries must be complete, punctuated sentences ending with a period.
+    5. **Acronym Casing in UI Buttons**:
+       - ✗ `string="Export as xlsx"` or `string="Export as csv"`
+       - ✓ `string="Export as XLSX"` or `string="Export as CSV"`
+    6. **Prohibited "allows to + verb" Pattern**:
+       - ✗ *"allows to filter"*, *"allows to print"*
+       - ✓ *"allows users to filter"*, *"enables filtering"*, *"allows printing"*
+    7. **Terminology & Module Title Consistency**:
+       - Maintain exact noun consistency across all views, menus, actions, and reports: avoid mixing singular and plural forms (e.g., using "Low Sale Report" in one view and "Low Sales Report" in the menu/action). Use consistent, natural English (e.g., "Low Sales Report" throughout).
+    8. **Doc-to-Code Parity**: `index.html`, `README.rst`, and `RELEASE_NOTES.md` match actual code. No false claims in FAQs, no template boilerplate leftovers (e.g. `#cybrosys-acc-kit`), and synchronized release dates.
+* **Criterion 6.2: No Junk in the Submission (Blocking - Score Penalty down to 25/100 or 70/100)**:
+  - Zero `__pycache__`, `.pyc`, backup files (`*~`, `*.bak`, `*.tmp`), temporary draft files (`index1.html`), or unused assets in the module directory or archive.
+  - **Strict Prohibition of Copy, Temp, Backup, and Leftover Artifacts (Blocking - Score Penalty down to 25/100)**:
+    - The AI Reviewer triggers a blocking **25/100** score on Criterion 6.2 (*"the tree has many empty placeholder images, a 'Copy' file with a space in its name, temp.jpg and oversized unused SVGs"*) if any of the following junk is present:
+      1. Files with `'Copy'` or spaces in filenames (e.g. `test-1 - Copy.png`).
+      2. Temporary or staging images (e.g. `temp.jpg`, `test-1.png`, `test-2.png`, `temp.*`).
+      3. Empty 0-byte placeholder files (e.g. `ajmaljk.png`, `hero.gif`, `check.png`).
+      4. Heavy or oversized unused SVGs/PNGs (e.g. `banner-2.svg`, `banner-promo.svg`, `banner-pattern.svg`, `scrn1.png`).
+    - Note the **Dual-Criterion Blocking Penalty**: leaving empty placeholder files, unreferenced description assets, or leftover files penalizes **both** Criterion 1.5 (unused files - 15/100) and Criterion 6.2 (junk in submission - 25/100). Both criteria must pass with 100/100.
   - If `static/description/index1.html` or draft files remain in the module tree, the reviewer awards a failing **70/100** score on Criterion 6.2 (*"The file 'static/description/index1.html' is present in the submission but serves no purpose, indicating junk/unwanted files"*).
-  - Note the **Dual-Criterion Blocking Penalty**: leaving `index1.html` penalizes **both** Criterion 1.5 (unused unreferenced file - 60/100) and Criterion 6.2 (junk in submission - 70/100). Both criteria must pass with 100/100.
 
 ---
 
@@ -546,6 +603,8 @@ sequenceDiagram
 | Ambiguous variable name `l`, `O`, `I` (`for k, l in ...`) | Descriptive names: `for key, label in ...` | Violates PEP 8 / Flake8 / Ruff rule E741 (ambiguous variable name). |
 | Monkey-patching `BaseModel` | Modular extension / inheritance | Fails coding standard review 4.1. |
 | `type(x) == dict` | `isinstance(x, dict)` | Violates Python / Odoo coding conventions. |
+| Controller executing client-provided model without validation (`request.env[model]`) | Define `ALLOWED_MODELS = {'...'}`; check `if model not in ALLOWED_MODELS or model not in request.env: raise Forbidden(...)`; call `record.check_access('read')` | Arbitrary client model execution vulnerability. Allows unauthorized model inspection or method calls (triggers blocking 60/100 failure under Criterion 4.2). |
+| Pidgin English / grammar errors in views or descriptions (`"its open"`, `"block to setting"`, `"Last 3 Month"`, `string="Field(Details)"`) | Clean phrasing: `"Open the wizard..."`, `"Navigate to Sales -> Configuration -> Settings"`, `"Last 3 Months"`, `string="Field (Details)"` | Grammar errors persist in user-facing strings or `index.html` (triggers 70/100 penalty under Criterion 6.3). |
 
 ---
 
@@ -587,6 +646,12 @@ sequenceDiagram
    - No direct DOM manipulation: Use OWL refs (`useRef`) and reactive state instead of `document.getElementById` or jQuery `$`.
 
 4. **Static Assets & HTML Description (`static/description/`)**:
+   - **Mandatory Description Asset Reconciliation (Criteria 1.5 & 6.2 - Blocking)**:
+     - When modernizing `index.html`, legacy asset directories (e.g. `static/description/assets/icons/`, `screenshots/`) often retain dozens of obsolete icons, empty 0-byte placeholders, temporary images (`temp.jpg`), copy files (`test-1 - Copy.png`), and heavy unused SVGs from older templates.
+     - **Reconciliation Protocol**:
+       1. Extract all referenced asset paths from `index.html` (via `src="..."` and CSS `url(...)`).
+       2. Retain **only** `index.html`, `icon.png`, `banner.jpg` (if in manifest), and the exact referenced assets.
+       3. Permanently delete all unreferenced assets, 0-byte files, and leftover copies.
    - **Mandatory Purge of `index1.html` and Draft Files (Criteria 1.5 & 6.2 - Blocking)**:
      - While `index1.html` is used during migration as a temporary reference to extract legacy features and platform support (Odoo Online, Odoo.sh, On-Premise), it **must be permanently deleted** (`rm -f static/description/index1.html` and `git rm -f static/description/index1.html` if tracked) before concluding migration.
      - Leaving `index1.html` in the module triggers failing scores under both Criterion 1.5 (60/100 unused file penalty) and Criterion 6.2 (70/100 junk submission penalty).
@@ -651,11 +716,25 @@ sequenceDiagram
    - **Never write "allows to [verb]"**:
      - ✗ *"This module allows to print the timesheet of selected employee"*
      - ✓ *"This module allows users to print the timesheet of the selected employee."* OR *"This module allows printing the timesheet of the selected employee."*
+   - **No Run-on or Pidgin English Phrasing**:
+     - ✗ *"Click the menu its open the wizard..."*
+     - ✗ *"Click the button it open report..."*
+     - ✓ *"Open the wizard by clicking the menu..."* OR *"Upon clicking the button, the report is generated..."*
+   - **No Malformed Prepositions or Broken Noun Phrases**:
+     - ✗ *"block to setting"*, *"session to the sale settings"*
+     - ✓ *"Navigate to Sales -> Configuration -> Settings to configure..."* OR *"Configuration settings block"*
    - **Singular vs Plural Precision**:
      - If the module filters/prints for **one** employee:
        - Report Title: `'Timesheet Report by Employee'` (singular), NOT `'Timesheet Report by Employees'`.
        - Text: `'timesheet of the selected employee'`, NOT `'timesheet of selected employees'`.
        - Wizard labels/help: `'Starting Date'`, NOT `'Starting Dates'`.
+     - Selection options: `'Last 3 Months'` (plural), NOT `'Last 3 Month'`.
+     - Many2one relational field labels: `'Product Category'` (singular), NOT `'Product Categories'`.
+   - **Parenthesis Spacing & Punctuation**:
+     - Always place a space before opening parentheses: `'Critical Level (Absolute Quantity)'`, NOT `'Critical Level(Absolute Quantity)'`.
+     - Ensure all `help="..."` tooltips end with a terminating period (`.`).
+   - **Acronym Casing in UI Buttons**:
+     - Always capitalize file format acronyms on buttons: `'Export as XLSX'` or `'Export as CSV'`, NOT `'Export as xlsx'`.
 
 2. **Elimination of Template Boilerplate Leftovers**:
    - Search `index.html` and `README.rst` for copy-paste artifacts from other Cybrosys apps:
@@ -816,6 +895,97 @@ if errors:
 print(f'[OK] external_dependencies.python validated against PyPI metadata: {pydeps}')
 "
 
+# 3d. Verify No 0-Byte Empty Placeholder Files Exist (Criterion 1.5 & 6.2 - Blocking)
+python3 -c "
+import os, sys
+
+base = 'migration/<technical_name>'
+zero_byte_files = []
+for root, _, files in os.walk(base):
+    for f in files:
+        p = os.path.join(root, f)
+        if os.path.getsize(p) == 0:
+            zero_byte_files.append(p)
+
+if zero_byte_files:
+    print(f'[FAIL CRITERIA 1.5 & 6.2] Found {len(zero_byte_files)} empty 0-byte file(s):')
+    for z in zero_byte_files:
+        print(' ', z)
+    sys.exit(1)
+print('[OK] 0 empty 0-byte placeholder files found. Passed Criteria 1.5 & 6.2 check.')
+"
+
+# 3e. Verify No Copy, Temp, or Backup Leftover Files in Tree (Criterion 1.5 & 6.2 - Blocking)
+python3 -c "
+import os, re, sys
+
+base = 'migration/<technical_name>'
+SUSPICIOUS_PATTERNS = [
+    re.compile(r'copy', re.IGNORECASE),
+    re.compile(r'temp', re.IGNORECASE),
+    re.compile(r'\.bak$', re.IGNORECASE),
+    re.compile(r'\.tmp$', re.IGNORECASE),
+    re.compile(r'~$'),
+    re.compile(r'\s+-\s+'),
+]
+
+bad_files = []
+for root, _, files in os.walk(base):
+    for f in files:
+        if any(pat.search(f) for pat in SUSPICIOUS_PATTERNS):
+            bad_files.append(os.path.join(root, f))
+
+if bad_files:
+    print(f'[FAIL CRITERIA 1.5 & 6.2] Found {len(bad_files)} leftover copy/temp/backup file(s):')
+    for b in bad_files:
+        print(' ', b)
+    sys.exit(1)
+print('[OK] 0 leftover copy/temp/backup files found. Passed Criteria 1.5 & 6.2 check.')
+"
+
+# 3f. Description Asset Reconciliation & Usage Audit (Criterion 1.5 & 6.2 - Blocking)
+python3 -c "
+import os, re, sys
+
+base = 'migration/<technical_name>'
+desc_dir = os.path.join(base, 'static', 'description')
+if not os.path.isdir(desc_dir):
+    print(f'[OK] No static/description directory found.')
+    sys.exit(0)
+
+index_p = os.path.join(desc_dir, 'index.html')
+referenced = set()
+if os.path.isfile(index_p):
+    with open(index_p, 'r', encoding='utf-8', errors='ignore') as f:
+        content = f.read()
+    srcs = re.findall(r'src=[\"\']([^\"\']+)[\"\']', content)
+    urls = re.findall(r'url\([\'\"]?([^\'\")]+)[\'\"]?\)', content)
+    for r in srcs + urls:
+        if not r.startswith(('http', '#', 'mailto:', 'data:')):
+            referenced.add(os.path.normpath(r))
+
+# Required root description assets
+allowed_root = {'index.html', 'icon.png', 'banner.jpg'}
+
+unreferenced = []
+for root, _, files in os.walk(desc_dir):
+    for f in files:
+        full = os.path.join(root, f)
+        rel = os.path.normpath(os.path.relpath(full, desc_dir))
+        if rel in allowed_root:
+            continue
+        if rel not in referenced:
+            size = os.path.getsize(full)
+            unreferenced.append((rel, size))
+
+if unreferenced:
+    print(f'[FAIL CRITERIA 1.5 & 6.2] Found {len(unreferenced)} unreferenced description asset(s) not used in index.html:')
+    for u, sz in unreferenced:
+        print(f'   {u} ({sz} bytes)')
+    sys.exit(1)
+print(f'[OK] All description assets ({len(referenced)} referenced) are actively used in index.html.')
+"
+
 # 4. Verify security/ir.access.csv Header and XML ID Format (Criterion 4.2 - Blocking)
 python3 -c "
 import csv, os, sys
@@ -876,6 +1046,54 @@ if violations:
     sys.exit(1)
 else:
     print('[OK] res.groups definitions adhere to Odoo 20 privilege and user_ids schema.')
+"
+
+# 4c. Verify Controller Model Validation & Whitelisting (Criterion 4.2 - Blocking)
+python3 -c "
+import ast, os, sys
+
+base = 'migration/<technical_name>'
+controllers_dir = os.path.join(base, 'controllers')
+violations = []
+
+if os.path.isdir(controllers_dir):
+    for root, _, files in os.walk(controllers_dir):
+        for f in files:
+            if f.endswith('.py') and not f.startswith('__'):
+                p = os.path.join(root, f)
+                with open(p, 'r', encoding='utf-8') as fh:
+                    code = fh.read()
+                try:
+                    tree = ast.parse(code, filename=p)
+                except Exception:
+                    continue
+
+                has_allowed_models = any(
+                    isinstance(stmt, ast.Assign) and any(
+                        isinstance(t, ast.Name) and t.id == 'ALLOWED_MODELS' for t in stmt.targets
+                    )
+                    for stmt in tree.body
+                )
+
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.Subscript):
+                        val = node.value
+                        if isinstance(val, ast.Attribute) and val.attr == 'env' and isinstance(val.value, ast.Name) and val.value.id == 'request':
+                            slice_node = node.slice
+                            if isinstance(slice_node, ast.Name) and slice_node.id in ('model', 'res_model', 'active_model'):
+                                if not has_allowed_models or 'ALLOWED_MODELS' not in code:
+                                    violations.append(
+                                        f'{p}:{node.lineno} [CRITERION 4.2 BLOCKING] request.env[{slice_node.id}] '
+                                        f'executes dynamic client model without ALLOWED_MODELS whitelist validation!'
+                                    )
+
+if violations:
+    print(f'[FAIL CRITERION 4.2] Found {len(violations)} controller arbitrary model execution vulnerability(ies):')
+    for v in violations:
+        print(' ', v)
+    sys.exit(1)
+else:
+    print('[OK] Criterion 4.2: Controller model validation & whitelisting verified.')
 "
 
 # 5. Check for linter issues (pylint-odoo & ruff / flake8 - Criterion 4.4)
@@ -1113,6 +1331,45 @@ if violations > 0:
 print('[OK] Passed Criterion 4.3: Zero debug statements, commented code, or formatting flaws found.')
 "
 
+# 7b. Verify User-Facing String & Description Grammar Quality (Criterion 6.3)
+python3 -c "
+import os, re, sys
+
+base = 'migration/<technical_name>'
+violations = []
+
+GRAMMAR_PATTERNS = [
+    (re.compile(r'\bits\s+open\b', re.IGNORECASE), 'Pidgin English \"its open\" detected; use \"opens\" or \"to open\"'),
+    (re.compile(r'\bit\s+open\b', re.IGNORECASE), 'Pidgin English \"it open\" detected; use \"opens\" or \"to open\"'),
+    (re.compile(r'\bblock\s+to\s+setting\b', re.IGNORECASE), 'Malformed phrase \"block to setting\" detected'),
+    (re.compile(r'\bto\s+setting\b', re.IGNORECASE), 'Malformed phrase \"to setting\" detected; use \"to Settings\"'),
+    (re.compile(r'\b\d+\s+Month\b'), 'Pluralization error: use \"Months\" instead of \"Month\" after a plural number'),
+    (re.compile(r'string=[\"\'][A-Za-z0-9]+(?<!\s)\([A-Za-z0-9]'), 'Missing space before opening parenthesis in string attribute'),
+    (re.compile(r'string=[\"\']Export as (?:xlsx|csv|pdf)[\"\']'), 'Uncapitalized file format acronym in button string (use XLSX, CSV, PDF)'),
+    (re.compile(r'\ballows\s+to\s+[a-z]+', re.IGNORECASE), 'Prohibited \"allows to + verb\" pattern detected'),
+]
+
+for root, _, files in os.walk(base):
+    if '__pycache__' in root:
+        continue
+    for f in files:
+        if f.endswith(('.xml', '.py', '.html', '.rst', '.md')):
+            p = os.path.join(root, f)
+            with open(p, 'r', encoding='utf-8', errors='ignore') as fh:
+                for line_no, line in enumerate(fh, 1):
+                    for regex, msg in GRAMMAR_PATTERNS:
+                        if regex.search(line):
+                            violations.append(f'{p}:{line_no} [CRITERION 6.3] {msg}: {line.strip()[:80]}')
+
+if violations:
+    print(f'[FAIL CRITERION 6.3] Found {len(violations)} grammar or phrasing violation(s):')
+    for v in violations:
+        print(' ', v)
+    sys.exit(1)
+else:
+    print('[OK] Criterion 6.3: 0 grammar, pidgin phrasing, or string quality violations found.')
+"
+
 # 8. Check README rendering
 python -m docutils migration/<technical_name>/README.rst > /dev/null
 ```
@@ -1138,12 +1395,40 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
    # Step 3: Verify Git tree status for static/description/ (Must show index.html, never index1.html)
    git ls-files static/description/
 
-   # Step 4: Purge bytecode and junk
-   find . -type d -name "__pycache__" -exec rm -rf {} +
-   find . -type f -name "*.pyc" -delete
-   find . -type f -name ".DS_Store" -delete
+   # Step 4: Purge 0-byte empty placeholder files (Criterion 1.5 & 6.2 - Blocking 15/100 Penalty)
+   find . -size 0 -delete
+
+   # Step 5: Purge copy, temp, and backup files (Criterion 1.5 & 6.2 - Blocking 25/100 Penalty)
+   find . -iname "*copy*" -delete
+   find . -iname "*temp*" -delete
    find . -type f -name "*~" -delete
    find . -type f -name "*.bak" -delete
+   find . -type f -name "*.tmp" -delete
+   find . -type f -name ".DS_Store" -delete
+
+   # Step 6: Reconcile description assets (delete any file in static/description/ not referenced in index.html or manifest)
+   python3 -c "
+   import os, re
+   desc_dir = 'static/description'
+   index_p = os.path.join(desc_dir, 'index.html')
+   if os.path.isfile(index_p):
+       with open(index_p, 'r', encoding='utf-8', errors='ignore') as f:
+           content = f.read()
+       srcs = re.findall(r'src=[\"\']([^\"\']+)[\"\']', content)
+       urls = re.findall(r'url\([\'\"]?([^\'\")]+)[\'\"]?\)', content)
+       referenced = {os.path.normpath(r) for r in srcs + urls if not r.startswith(('http', '#', 'mailto:', 'data:'))}
+       allowed = referenced | {'index.html', 'icon.png', 'banner.jpg'}
+       for root, _, files in os.walk(desc_dir):
+           for f in files:
+               full = os.path.join(root, f)
+               rel = os.path.normpath(os.path.relpath(full, desc_dir))
+               if rel not in allowed:
+                   os.remove(full)
+   "
+
+   # Step 7: Purge bytecode and junk
+   find . -type d -name "__pycache__" -exec rm -rf {} +
+   find . -type f -name "*.pyc" -delete
    ```
 
 2. **Build Clean Archive (If building zip)**:
@@ -1204,6 +1489,7 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
     - [ ] `category_id` removed from `res.groups` and declared on intermediate `res.groups.privilege`.
     - [ ] `res.groups` uses `privilege_id` referencing `res.groups.privilege`.
     - [ ] `user_ids` used instead of deprecated `users` on `res.groups`.
+  - [ ] **Controller Model Whitelisting (Criterion 4.2 - Blocking)**: Every controller route accepting client-supplied model parameters validates against an explicit `ALLOWED_MODELS` whitelist and raises `Forbidden` for unlisted models; calls `record.check_access('read')` to enforce user permissions. Unit tests verify `Forbidden` is raised on unauthorized models.
 - [ ] **Code Modernization (Odoo 20)**:
   - [ ] `fields.Date.context_today(self)` instead of `fields.Date.today()`.
   - [ ] `@api.model_create_multi` on `create(self, vals_list)`: iterate `vals_list` directly without dead `isinstance(vals_list, dict)` checks (the decorator guarantees `vals_list` is always a list of dicts).
@@ -1239,6 +1525,13 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] Test record creation populates underlying source fields rather than readonly related fields (e.g., `'user_id': user.id` on `calendar.event`, not ignored `'partner_id': partner.id`).
 - [ ] **Documentation Parity & Grammar (Section 6.3)**:
   - [ ] No "allows to + verb" (use "allows users to + verb" or "allows + verb-ing").
+  - [ ] No run-on / pidgin English ("its open", "it open", "click the menu its open").
+  - [ ] No malformed prepositions ("block to setting", "session to the sale settings").
+  - [ ] Selection options and labels properly pluralized ("Last 3 Months", not "Last 3 Month").
+  - [ ] Many2one field labels use singular nouns ("Product Category", not "Product Categories").
+  - [ ] Space precedes opening parentheses in labels ("Critical Level (Absolute Quantity)").
+  - [ ] Acronyms capitalized in buttons ("Export as XLSX", not "Export as xlsx").
+  - [ ] Consistent module naming across views, actions, menus, and descriptions.
   - [ ] Singular vs Plural: Report title and descriptions match single vs multiple records.
   - [ ] No boilerplate leftovers (e.g. accounting text in timesheets/HR modules).
   - [ ] FAQs accurately reflect actual module features only.
@@ -1250,5 +1543,8 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] **Purge `index1.html` (Criterion 1.5 & 6.2 - Blocking)**: `static/description/index1.html` permanently deleted (`rm -f static/description/index1.html` and `git rm -f static/description/index1.html`).
   - [ ] **Stage `index.html` in Git (Criterion 1.2 - Blocking)**: `git add static/description/index.html` executed so `index.html` is tracked and committed in Git's tree.
   - [ ] **Verify Git Tree (`git ls-files static/description/`)**: Output lists `static/description/index.html` and NEVER lists `index1.html`.
+  - [ ] **Purge 0-Byte Placeholder Files (Criterion 1.5 & 6.2 - Blocking 15/100 Penalty)**: `find . -size 0` returns 0 files. Zero empty placeholder images or icons.
+  - [ ] **Purge Copy, Temp, and Backup Files (Criterion 1.5 & 6.2 - Blocking 25/100 Penalty)**: Zero files with `Copy`, `temp`, `.bak`, `.tmp`, or `~` in their names.
+  - [ ] **Description Asset Reconciliation (Criterion 1.5 & 6.2 - Blocking)**: Every image, icon, and SVG in `static/description/assets/` is actively referenced in `index.html`. Zero orphaned or unreferenced legacy asset files.
   - [ ] Zero `__pycache__`, `.pyc`, `.gitkeep`, or unused asset files.
   - [ ] Zip named `<technical_name>-20.0.1.0.0.zip` with module folder at root.

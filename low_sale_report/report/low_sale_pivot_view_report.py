@@ -26,7 +26,7 @@ class LowSalePivotViewReport(models.Model):
     """Temporary model storing low sales report records for pivot visualization."""
 
     _name = 'low.sale.pivot.view.report'
-    _description = 'Low Sale Pivot View Report'
+    _description = 'Low Sales Pivot View Report'
 
     categ_id = fields.Many2one(
         comodel_name='product.category',

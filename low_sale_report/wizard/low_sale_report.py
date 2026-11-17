@@ -185,7 +185,7 @@ class LowSaleReport(models.TransientModel):
         rows = 0
         cols = 0
         worksheet.merge_range(rows, cols, rows + 1, cols + 3,
-                              'Low Sale Report', name_format)
+                              'Low Sales Report', name_format)
         worksheet.set_column('B:B', 35)
         worksheet.set_column('C:C', 15)
         worksheet.set_column('D:D', 15)
