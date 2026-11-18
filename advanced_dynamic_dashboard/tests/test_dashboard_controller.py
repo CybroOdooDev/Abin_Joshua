@@ -26,13 +26,24 @@ from odoo.tests.common import HttpCase, tagged
 @tagged('post_install', '-at_install')
 class TestDashboardController(HttpCase):
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        group_user = cls.env.ref('base.group_user')
+        cls.test_user = cls.env['res.users'].create({
+            'name': 'Dashboard Test User',
+            'login': 'dashboard_test_user',
+            'email': 'dashboard_test_user@example.com',
+            'group_ids': [(4, group_user.id)],
+        })
+
     def test_search_input_chart_endpoint(self):
         """Test /custom_dashboard/search_input_chart search functionality."""
         block = self.env['dashboard.block'].create({
             'name': 'Controller Test Block',
             'operation': 'count',
         })
-        self.authenticate('admin', 'admin')
+        self.authenticate(self.test_user.login, self.test_user.login)
         res = self.url_open(
             '/custom_dashboard/search_input_chart',
             data=json.dumps({
