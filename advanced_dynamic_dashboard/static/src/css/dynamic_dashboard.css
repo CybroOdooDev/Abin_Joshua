@@ -28,9 +28,9 @@
     cursor: pointer;
 }
 .o_advanced_dynamic_dashboard .card, .block.card {
-    background-color: transparent !important;
+    background-color: transparent;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 5px !important;
+    border-radius: 5px;
     cursor: pointer;
     transition: transform 0.2s;
 }
@@ -61,17 +61,17 @@
 }
 
 .resize-drag {
-    position: relative !important;
+    position: relative;
     font-size: 100%;
     overflow:hidden;
 }
 
 .o_advanced_dynamic_dashboard h2, .o_advanced_dynamic_dashboard h3 {
-    font-size: 150% !important;
+    font-size: 150%;
 }
 
 .o_advanced_dynamic_dashboard.container, .o_advanced_dynamic_dashboard .container {
-    max-width: 100% !important;
+    max-width: 100%;
 }
 
 .tile {
@@ -87,7 +87,7 @@
 
 .o_advanced_dynamic_dashboard div.card-header, .block.card div.card-header {
     color: #383838;
-    background-color: #70659647 !important;
+    background-color: #70659647;
 }
 
 .layout-switch {
@@ -165,7 +165,7 @@
 }
 
 .search-clear {
-    margin: 0 !important;
+    margin: 0;
     font-size: 13px;
 }
 
@@ -318,11 +318,11 @@ input:checked + .slider:before {
 }
 
 .o_advanced_dynamic_dashboard .o_kanban_record {
-    background-color: #e8e8e8 !important;
+    background-color: #e8e8e8;
 }
 
 .o_advanced_dynamic_dashboard .oe_module_name {
-    background-color: #ffffff !important;
+    background-color: #ffffff;
 }
 
 .bootbox .modal-footer .btn-danger:hover {
@@ -357,9 +357,9 @@ input:checked + .slider:before {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    padding: 0.75rem 1.25rem !important;
-    background-color: #ffffff !important;
-    border-bottom: 1px solid #e9ecef !important;
+    padding: 0.75rem 1.25rem;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e9ecef;
     border-radius: 0.5em;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     margin-top: 0.5rem;
@@ -420,7 +420,7 @@ input:checked + .slider:before {
 
 @media (max-width: 767.98px) {
     .navbar.navbar-style {
-        padding: 0.6rem 0.75rem !important;
+        padding: 0.6rem 0.75rem;
         gap: 10px;
     }
 
@@ -458,38 +458,38 @@ input:checked + .slider:before {
 
 /* Dark Mode Styling */
 .o_advanced_dynamic_dashboard.o_dark_mode {
-    background-color: #383E45 !important;
+    background-color: #383E45;
 }
 
 .o_advanced_dynamic_dashboard.o_dark_mode #search-input-chart {
-    background-color: white !important;
+    background-color: white;
 }
 
 .o_advanced_dynamic_dashboard.o_dark_mode #dropdownMenuButton {
-    background-color: #03DAC5 !important;
-    margin-top: -4px !important;
+    background-color: #03DAC5;
+    margin-top: -4px;
 }
 
 .o_advanced_dynamic_dashboard.o_dark_mode #text_add {
-    color: black !important;
+    color: black;
 }
 
 .o_advanced_dynamic_dashboard.o_dark_mode .date-label {
-    color: black !important;
-    font-family: monospace !important;
+    color: black;
+    font-family: monospace;
 }
 
 .o_advanced_dynamic_dashboard.o_dark_mode .block_setting {
-    color: white !important;
+    color: white;
 }
 
 .o_advanced_dynamic_dashboard.o_dark_mode .block_delete {
-    color: #ffffff !important;
+    color: #ffffff;
 }
 
 .o_advanced_dynamic_dashboard.o_dark_mode .block_image,
 .o_advanced_dynamic_dashboard.o_dark_mode .block_pdf,
 .o_advanced_dynamic_dashboard.o_dark_mode .block_csv,
 .o_advanced_dynamic_dashboard.o_dark_mode .block_xlsx {
-    color: #03DAC5 !important;
+    color: #03DAC5;
 }

@@ -41,18 +41,14 @@ Configuration
 -------------
 No additional configuration is required.
 
-Company
+Credits
 -------
-* `Cybrosys Techno Solutions <https://cybrosys.com/>`__
+* Cybrosys Techno Solutions <https://cybrosys.com>
 
 License
 -------
 GNU Lesser General Public License, Version 3 (LGPL v3).
 (https://www.gnu.org/licenses/lgpl-3.0-standalone.html)
-
-Credits
--------
-* Cybrosys Techno Solutions <https://cybrosys.com>
 
 Contacts
 --------

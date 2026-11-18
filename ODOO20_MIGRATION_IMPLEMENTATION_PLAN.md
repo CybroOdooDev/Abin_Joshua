@@ -50,11 +50,22 @@ graph TD
     - **Resolution**: Once data extraction and visual comparison are verified against the new `index.html`, immediately delete `static/description/index1.html` (`rm -f static/description/index1.html` and `git rm -f static/description/index1.html` if tracked).
   - No orphaned XML, JS, or image files that are not referenced in the manifest or code.
 * **Mandatory File Header**: **EVERY** Python file must contain the exact Cybrosys LGPL-3 header.
+* **Criterion 3.1: Manifest and Assets (Blocking)**:
+  - **Manifest Description Key**: The `'description'` key MUST be retained in `__manifest__.py`. Dropping it triggers a penalty under Criterion 3.1 (*"The 'description' key was dropped"*).
+  - **Strict Prohibition of External CDN URLs**: Review Criterion 3.1 strictly blocks any frontend assets loaded from external CDNs (e.g. `https://cdnjs.cloudflare.com/...`, `https://cdn.jsdelivr.net/...`). All third-party libraries (e.g. jsPDF, html2canvas, html2pdf, ExcelJS, interactjs, font-awesome, bootstrap-icons) MUST be vendored locally under `static/lib/` and declared in `__manifest__.py` under `web.assets_backend`.
+  - **Chart.js in Odoo 20**: In Odoo 20, Chart.js is bundled as `'web.chartjs_lib'`. Always load it via `await loadBundle("web.chartjs_lib")` from `@web/core/assets` inside `onWillStart`. NEVER use hardcoded paths like `/web/static/lib/Chart/Chart.js` or external CDN scripts.
 * **Criterion 4.1: Coding Standards & Modernization (Blocking - Score Penalty down to 40/100)**:
   - **Required Unified Access Control File (`security/ir.access.csv`)**:
     - In Odoo 20, using `security/ir.model.access.csv` instead of `security/ir.access.csv` is considered an outdated coding pattern and triggers a blocking **40/100** score under Criterion 4.1 (*"ir.model.access.csv is used instead of ir.access.csv which is required in Odoo 20"*).
     - Note the **Dual-Criterion Blocking Penalty**: retaining `ir.model.access.csv` penalizes **both** Criterion 1.5 (obsolete file) and Criterion 4.1 (outdated coding standard).
-    - The module must strictly use the unified 6-column format in `security/ir.access.csv`: `id,name,model_id:id,group_id:id,operation,domain`.
+    - **Odoo 20 CSV Header Standard**: The module must strictly use the unified 6-column format in `security/ir.access.csv`: `id,name,model_id,group_id/id,operation,domain`.
+    - **CRITICAL**: The header column names are `model_id` (raw dot-notation technical model name, e.g. `dashboard.block`, `res.partner`) and `group_id/id` (group XML ID with `/id` suffix). Legacy column names `model_id:id` and `group_id:id` trigger review penalties under Criterion 4.1 and 4.2.
+  - **OWL Component Lifecycle & Clean Unmounting**:
+    - **Strict Prohibition of `container.innerHTML = ''`**: Never clear DOM containers with `innerHTML = ''` when OWL components are mounted inside them. Doing so destroys DOM nodes while leaving component instances running in memory, breaking component unmounting lifecycles (`onWillUnmount`).
+    - **Declarative Child Components**: Child components must be declared via `static components = { ChildComponent }` and rendered declaratively using OWL template directives (`<t t-foreach="state.items" t-as="item" t-key="item.id"><ChildComponent widget="item"/></t>`) backed by reactive state (`useState`). OWL automatically manages the component lifecycle, mounting, and unmounting cleanly. Imperative `mount()` inside action handlers is strictly prohibited.
+  - **CSS & SCSS Specificity and Cleanliness**:
+    - **Eliminate `!important`**: Never use `!important` in custom CSS/SCSS or inline component styles. Overriding styles with `!important` damages Odoo's design system and theme cascading.
+    - **Purge Dead / Unused CSS Blocks**: Unused SCSS/CSS blocks (e.g. unreferenced `.dark-theme` blocks) must be removed.
   - **Strict Prohibition of XML `<record model="ir.access">` for Record Rules**:
     - In Odoo 20, both access rights and row-level record rules (restrictions with domains) are unified in `ir.access` and **MUST** be defined in `security/ir.access.csv`.
     - **NEVER** define `<record model="ir.access">` inside XML files for record rules or access control. Doing so triggers a severe AI Review failure (40/100 on Criterion 4.1: *"The module uses the model 'ir.access' for record rules... This is a critical code error"* and 30/100 on Criterion 4.2).
@@ -65,7 +76,7 @@ graph TD
     - **No Method Calls in Domains**: Never call methods like `user.has_group(...)` in domain strings; this triggers `Unsafe function access` security warnings.
     - **No Computed Field References**: Never reference `@api.depends` computed fields (like `user.is_admin`) in security domains. The AI reviewer rejects computed field evaluation in domain contexts.
     - **Standard Odoo Domain Pattern**: Use ONLY simple field conditions matching core Odoo conventions: `[('field', 'operator', user.attribute)]` or `[('field', 'operator', literal)]`. Core examples: `[('user_id', '=', user.id)]`, `['|', ('restrict_user_ids', '=', False), ('restrict_user_ids', 'in', [user.id])]`.
-    - **Admin Bypass via Permission Row**: To grant full access to administrators/managers, add a separate row in `ir.access.csv` with `group_id:id = base.group_erp_manager` and an empty domain (`kind='permission'`). Because permissions are OR-ed in Odoo 20, managers bypass restrictions without needing conditional bypasses in the restriction domain itself.
+    - **Admin Bypass via Permission Row**: To grant full access to administrators/managers, add a separate row in `ir.access.csv` with `group_id/id = base.group_erp_manager` and an empty domain (`kind='permission'`). Because permissions are OR-ed in Odoo 20, managers bypass restrictions without needing conditional bypasses in the restriction domain itself.
     - **Conditional Logic Belongs in Models**: When restrictions involve conditional logic (e.g. product vs category vs open access), compute and store the permitted records into a relational field (e.g. `restrict_user_ids` on the target model) rather than attempting to encode complex conditional Python logic inside the domain string.
   - **PEP8 & Multi-Record Safety**: PEP8 (no ambiguous variables like E741 `l`, `O`, `I`), multi-record safe methods, loop inside `@api.constrains`.
   - **No HTTP Request or Referer Sniffing in Models (Strict MVC Separation - Review Score Penalty down to 65/100)**:
@@ -82,23 +93,37 @@ graph TD
     - **No Dead Code Under `@api.model_create_multi`**: Methods decorated with `@api.model_create_multi` always receive a `list` of dictionaries from the ORM. Writing `if isinstance(vals_list, dict): vals_list = [vals_list]` is redundant dead code that is penalized in AI review.
     - **Never Mutate Caller's `vals` in `write()` or `create()`**: Modifying the caller's input dictionary in-place (e.g. `vals['is_available_in_pos'] = True` or in-place `.update()`) causes side-effects for upstream callers reusing the dictionary. Always work on a shallow copy (`vals = dict(vals)`) or pass clean dictionaries.
     - **No Redundant Field Defaults (`default=False` on `fields.Boolean`)**: In Odoo, boolean fields default to `False` (`0` / `NULL`) by definition. Specifying `default=False` is redundant boilerplate flagged by reviewers. Only specify `default=True` when checking by default.
-  - **SQL Injection Prevention**: Regex identifier validation (`^[A-Za-z0-9_]+$`), backtick/quote escaping, parameterized queries.
+  - **SQL Injection Prevention & Typed Query Parameters**:
+    - Regex identifier validation (`^[A-Za-z0-9_]+$`), backtick/quote escaping, parameterized queries via `SQL(...)`.
+    - **Mandatory Typed Date Parsing**: When user-controlled date strings are passed to dynamic query builders, always parse and validate them using `fields.Datetime.to_datetime(...)` before injecting into `query.add_where(...)`. Never pass raw string dates.
   - **Field Type Mapping Casing**: Exact lowercase `'many2one'` (never uppercase `'Many2one'`).
   - **Semantic Field Labels & Redundant Strings (W8113)**: Omit `string=` when matching default computed title.
   - **Views & QWeb**: Bootstrap 5 classes (`table-sm`), no obsolete HTML attributes (`align`), `<tree>` converted to `<list>`.
 * **Criterion 4.2: Models, Views, Security and Data (Blocking - Score Penalty down to 40/100)**:
-  - **Mandatory XML ID Format for `model_id:id` (Blocking Rule)**:
-    - In `security/ir.access.csv`, the model reference column header **MUST** be `model_id:id` (with `:id` suffix) and its value **MUST** strictly reference the model's XML ID: `model_<technical_name_underscored>` (e.g. `model_undo_redo`).
-    - **NEVER** use raw technical dot-notation model names (e.g. `undo.redo`) in `ir.access.csv`. Referencing raw dot-notation triggers an automatic blocking **40/100** score under Criterion 4.2 (*"security/ir.access.csv references model_id as '<model_name>' instead of the proper XML ID format"*).
-  - **Security Groups Header**: Group references column header **MUST** be `group_id:id` (e.g. `undo_redo.group_undo_redo_user`, `base.group_user`).
+  - **Standard Odoo 20 `ir.access.csv` Model and Group Convention (Blocking Rule)**:
+    - In `security/ir.access.csv`, the column header MUST be `model_id` (raw dot-notation technical model name, e.g. `dashboard.block`, `product.template`), NOT `model_id:id` and NEVER with `model_` prefix.
+    - The group column header MUST be `group_id/id` (e.g. `base.group_user`, `base.group_system`).
+  - **Prohibition of Unwarranted `.sudo()` in Model CRUD**:
+    - Model methods (`create`, `write`, `unlink`) must not call `.sudo()` indiscriminately (e.g. `self.env['ir.actions.client'].sudo().create(...)` or `self.env['ir.ui.menu'].sudo().create(...)`). Calling `sudo()` allows non-admin users to bypass access checks and create unauthorized system records.
   - **Row-Level Record Rules (Restrictions) in `security/ir.access.csv`**:
     - To define a row-level record rule (global restriction) in Odoo 20, add an entry to `security/ir.access.csv` with:
       - `id`: Unique XML ID (e.g. `<module>_rule_<name>`)
       - `name`: Descriptive rule name
-      - `model_id:id`: Target model XML ID (e.g. `product.model_product_template`)
-      - `group_id:id`: **Leave blank** for global restrictions, or specify a group for group-specific permissions
+      - `model_id`: Target model technical name (e.g. `product.template`)
+      - `group_id/id`: **Leave blank** for global restrictions, or specify a group for group-specific permissions
       - `operation`: Operations covered (`crud`, `r`, `cu`, etc.)
       - `domain`: Valid Odoo prefix-notation domain string
+  - **Complete Model Coverage**: Every single model (`models.Model`) and transient model / wizard (`models.TransientModel`) MUST have an access row in `security/ir.access.csv`.
+  - **Strict Least Privilege**: Infrastructure, database connector, and credential models must be restricted to `base.group_system`, not `base.group_user`. Sensitive password/secret fields must specify `groups="base.group_system"`. Audit log and synchronization models must have complete views and menus.
+  - **Controller Model Validation & Whitelisting (Critical Blocking Security Rule - Score Penalty down to 60/100)**:
+    - **Arbitrary Model Execution Vulnerability**: Controllers exposing HTTP endpoints (e.g. download routes, RPC endpoints, report export handlers) that accept a model name parameter (`model`, `res_model`, etc.) from the client MUST NEVER dynamically load or execute code on that model via `request.env[model]` without explicit validation. Doing so triggers an automatic blocking **60/100** score on Criterion 4.2 (*"Controller executes code on any model provided by the client without validation, allowing potential security issues"*).
+* **Criterion 4.3: No Debug or Deprecated Code**:
+  - **No Global Scope Pollution**: Never assign listeners or handlers to the global `window` object (e.g. `window.dragMoveListener = dragMoveListener`). Keep functions scoped within ES modules or component methods.
+  - **Clean XML Templates**: Remove obsolete comments describing old code or legacy frameworks (e.g. `<!-- DASHBOARD VIEW WITH INTERACTJS TEMPLATE -->`).
+* **Criterion 6.3: Grammar, Translatable Strings and UI Content**:
+  - **Translatable String Hygiene**: Never include HTML markup (`<br/>`, `<b>`, `<p>`) inside `self.env._(...)` or `_t(...)`. Translators should translate pure sentences; construct HTML formatting outside translation calls via f-strings or templates.
+  - **Window Action Title Capitalization**: Action titles in JS action definitions must use Title Case (`name: _t('Send Mail')`), NEVER ALL-CAPS (`'SEND MAIL'`).
+  - **Documentation & Description Accuracy**: Avoid duplicating sections in `README.rst` (e.g. "Company" duplicated under "Credits"). Use realistic, verified phrasing in `index.html` (e.g. "fully compatible" instead of "fully certified").
   - **Complete Model Coverage**: Every single model (`models.Model`) and transient model / wizard (`models.TransientModel`) MUST have an access row in `security/ir.access.csv`.
   - **Strict Least Privilege**: Infrastructure, database connector, and credential models must be restricted to `base.group_system`, not `base.group_user`. Sensitive password/secret fields must specify `groups="base.group_system"`. Audit log and synchronization models must have complete views and menus.
   - **Controller Model Validation & Whitelisting (Critical Blocking Security Rule - Score Penalty down to 60/100)**:
@@ -348,8 +373,8 @@ sequenceDiagram
        ```
      - **Odoo 20 Standard (`ir.access.csv`) — 6 columns**:
        ```csv
-       id,name,model_id:id,group_id:id,operation,domain
-       access_undo_redo,access.undo.redo,model_undo_redo,base.group_user,crud,
+       id,name,model_id,group_id/id,operation,domain
+       access_undo_redo,access.undo.redo,undo.redo,base.group_user,crud,
        ```
 
    - **Column Conversion Mapping Table**:
@@ -357,8 +382,8 @@ sequenceDiagram
      |---|---|---|
      | `id` | `id` | Unique XML ID (e.g. `access_my_model`) |
      | `name` | `name` | Descriptive name (e.g. `access.my.model`) |
-     | `model_id:id` | `model_id:id` | **Strict XML ID format** (`model_<technical_name_underscored>`, e.g. `model_undo_redo`). **CRITICAL (Criterion 4.2)**: Do NOT strip `model_` or use raw dot notation (`undo.redo`). Raw dot notation triggers a blocking 40/100 failure under Criterion 4.2! |
-     | `group_id:id` | `group_id:id` | External group XML ID (e.g. `base.group_user`, `<module>.<group_name>`, or leave blank for global) |
+     | `model_id:id` | `model_id` | **Raw dot-notation technical model name** (e.g. `undo.redo`, `dashboard.block`, `res.partner`). **CRITICAL (Criterion 4.1 & 4.2)**: In Odoo 20, the header column is `model_id` (NOT `model_id:id`), and values MUST be technical dot-notation model names. NEVER prefix with `model_` or use XML IDs (`model_undo_redo`). Doing so triggers review penalties under Criterion 4.1 & 4.2! |
+     | `group_id:id` | `group_id/id` | External group XML ID with `/id` header convention (e.g. `base.group_user`, `<module>.<group_name>`, or leave blank for global restrictions). Legacy `group_id:id` is flagged under Criterion 4.1. |
      | `perm_read,perm_write,perm_create,perm_unlink` | `operation` | Combination of active permission characters: `c` (create), `r` (read), `u` (update/write), `d` (delete/unlink). Full CRUD `1,1,1,1` = `crud`; Read-only `1,0,0,0` = `r`; Read/Write `1,1,0,0` = `ru`. |
      | *(new column)* | `domain` | Optional domain rule string (e.g. `[('company_id', 'in', company_ids)]`) or leave empty for unrestricted model access. |
 
@@ -374,13 +399,12 @@ sequenceDiagram
          with open(old_p, 'r', encoding='utf-8') as f_in, open(new_p, 'w', encoding='utf-8', newline='') as f_out:
              reader = csv.DictReader(f_in)
              writer = csv.writer(f_out)
-             writer.writerow(['id', 'name', 'model_id:id', 'group_id:id', 'operation', 'domain'])
+             writer.writerow(['id', 'name', 'model_id', 'group_id/id', 'operation', 'domain'])
              for row in reader:
-                 mid = row.get('model_id:id') or row.get('model_id', '')
-                 # Ensure proper XML ID format 'model_<name_with_underscores>'
-                 if not mid.startswith('model_'):
-                     mid = f'model_{mid.replace(\".\", \"_\")}'
-                 gid = row.get('group_id:id') or row.get('group_id/id', '')
+                 mid = row.get('model_id') or row.get('model_id:id', '')
+                 if mid.startswith('model_'):
+                     mid = mid[6:].replace('_', '.')
+                 gid = row.get('group_id/id') or row.get('group_id:id', '')
                  ops = ''
                  if row.get('perm_create') in ('1', 1): ops += 'c'
                  if row.get('perm_read') in ('1', 1): ops += 'r'
@@ -388,7 +412,7 @@ sequenceDiagram
                  if row.get('perm_unlink') in ('1', 1): ops += 'd'
                  writer.writerow([row.get('id', ''), row.get('name', ''), mid, gid, ops, ''])
          os.remove(old_p)
-         print(f'[MIGRATED] Converted {old_p} -> {new_p} with model_id:id XML ID format and removed legacy file.')
+         print(f'[MIGRATED] Converted {old_p} -> {new_p} with standard Odoo 20 model_id and group_id/id convention.')
      else:
          print('[OK] No legacy ir.model.access.csv found.')
      "
@@ -410,17 +434,17 @@ sequenceDiagram
    - **Row-Level Record Rules (Restrictions) in `security/ir.access.csv` (No XML `<record model="ir.access">`)**:
      - In Odoo 20, row-level record rules (formerly `ir.rule`) are defined directly in `security/ir.access.csv` as global restrictions or group-specific rules.
      - **Global Restriction (AND-ed across all users)**:
-       Leave `group_id:id` **empty/blank**. When `group_id` is empty, Odoo 20 computes `kind = 'restriction'`, meaning the rule acts as a global filter that is AND-ed with all model permissions.
+       Leave `group_id/id` **empty/blank**. When `group_id` is empty, Odoo 20 computes `kind = 'restriction'`, meaning the rule acts as a global filter that is AND-ed with all model permissions.
        ```csv
        id,name,model_id:id,group_id:id,operation,domain
-       product_template_access_erp_manager,Product Template Full Access for ERP Managers,product.model_product_template,base.group_erp_manager,crud,
-       product_template_restriction_all_users,Product Template Restriction for Restricted Users,product.model_product_template,,crud,"['|', ('restrict_user_ids', '=', False), ('restrict_user_ids', 'in', [user.id])]"
+       product_template_access_erp_manager,Product Template Full Access for ERP Managers,product.template,base.group_erp_manager,crud,
+       product_template_restriction_all_users,Product Template Restriction for Restricted Users,product.template,,crud,"['|', ('restrict_user_ids', '=', False), ('restrict_user_ids', 'in', [user.id])]"
        ```
      - **Domain Best Practices in `security/ir.access.csv` (AI Review Compliance)**:
        1. **Valid Prefix Notation**: Always format the domain as a valid Odoo prefix list of tuples (`['|', ... , (...)]`). Never wrap the entire domain in raw Python ternary statements (`[(1, '=', 1)] if cond else [...]`).
        2. **Strict Prohibition of Ternary Operators**: NEVER use Python ternary operators anywhere in domain strings (neither returning lists nor inside tuples like `(1, '=', 1 if cond else 0)`). Any ternary operator in a domain string triggers immediate AI Review failures under Criterion 4.1 (20/100) and Criterion 5.3 (30/100).
        3. **Safe Attribute Evaluation**: In `safe_eval` domains, evaluate against user record **stored** fields/attributes (e.g. `user.id`, `user.partner_id.id`). Avoid calling arbitrary model methods (`user.has_group(...)`) as they trigger `Unsafe function access`. Never reference computed fields (`user.is_admin`) — they are rejected by the AI reviewer.
-       4. **Bypass for Administrators via Permission Row (NOT domain conditions)**: Never embed admin bypass logic inside the global restriction domain. Instead, add a **separate permission row** in `ir.access.csv` with `group_id:id = base.group_erp_manager` and an **empty domain**. When `group_id` is set, Odoo 20 computes `kind = 'permission'`, which is OR-ed with other permissions, guaranteeing managers always pass without touching the global restriction domain.
+       4. **Bypass for Administrators via Permission Row (NOT domain conditions)**: Never embed admin bypass logic inside the global restriction domain. Instead, add a **separate permission row** in `ir.access.csv` with `group_id/id = base.group_erp_manager` and an **empty domain**. When `group_id` is set, Odoo 20 computes `kind = 'permission'`, which is OR-ed with other permissions, guaranteeing managers always pass without touching the global restriction domain.
        5. **Encode Complex Conditional Logic in Models**: If business requirements dictate multiple restriction modes (e.g. per-product vs per-category vs unrestricted), map the allowed records into a Many2many relationship on the target model (e.g. `restrict_user_ids`) and use the simple canonical domain: `['|', ('restrict_user_ids', '=', False), ('restrict_user_ids', 'in', [user.id])]`. This guarantees the domain expression is completely standard, static, and passes all AI Review checks.
 
 3. **Security Groups Architecture Migration (`res.groups` & `res.groups.privilege`) in Odoo 20**:
@@ -565,12 +589,12 @@ sequenceDiagram
 
 | Old / Deprecated Pattern | Odoo 20 Standard Pattern | Reason / Pitfall Avoided |
 |---|---|---|
-| `security/ir.model.access.csv` (8-column legacy format) | `security/ir.access.csv` (6-column unified format: `id,name,model_id:id,group_id:id,operation,domain`) | Completely deprecated in Odoo 20. Triggers multi-criterion blocking penalty: fails Criterion 1.5 (40/100) and Criterion 4.1 Coding Standards (40/100). Furthermore, `model_id:id` MUST use the proper XML ID format (`model_<technical_name>`); using raw dot-notation (e.g. `undo.redo`) triggers a blocking 40/100 failure under Criterion 4.2. Must be converted to `ir.access.csv` with XML ID format and legacy CSV permanently deleted. |
+| `security/ir.model.access.csv` (8-column legacy format) | `security/ir.access.csv` (6-column unified format: `id,name,model_id,group_id/id,operation,domain`) | Completely deprecated in Odoo 20. Triggers multi-criterion blocking penalty: fails Criterion 1.5 (40/100) and Criterion 4.1 Coding Standards (40/100). Furthermore, `model_id` MUST use the technical dot-notation model name (e.g. `undo.redo`); using legacy `model_id:id` or `model_` prefixes triggers review penalties. Must be converted to `ir.access.csv` with XML ID format and legacy CSV permanently deleted. |
 | XML `<record model="ir.access">` for record rules | Define in `security/ir.access.csv` with 6 columns | In Odoo 20, both access rights and record rules are unified in `security/ir.access.csv`. Defining `<record model="ir.access">` in XML triggers AI review failure (Criterion 4.1: "The module uses model 'ir.access' for record rules"). XML in `security/` is strictly for security groups. |
 | XML `<record model="ir.rule">` | Define in `security/ir.access.csv` | `ir.rule` model was completely deleted in Odoo 20. Defining `<record model="ir.rule">` crashes real Odoo 20 (`KeyError: 'ir.rule'`). Use `security/ir.access.csv` with empty `group_id:id` for global restrictions. |
 | Python ternary expressions in domain (`[(1, '=', 1)] if ... else [...]` or `(1, '=', 1 if ... else 0)`) | Pure prefix notation domain list with simple attribute/literal values: `['|', cond1, cond2]` | Strictly forbidden by AI Reviewer (fails Criterion 4.1 20/100 and Criterion 5.3 30/100). Never use ternary expressions anywhere in domains. Encode conditional logic in models and use pure tuple conditions (e.g. `['|', ('restrict_user_ids', '=', False), ('restrict_user_ids', 'in', [user.id])]`). |
 | Method calls in domain (`user.has_group(...)`) | Stored field access: `user.restricted_type`, `user.allowed_product_ids.ids` | In Odoo 20, executing model instance methods in `safe_eval` domains triggers `Unsafe function access`. Computed fields like `user.is_admin` are also rejected by the AI reviewer. Use only stored fields/relationship attributes on `user`. |
-| Computed field reference in security domain (`user.is_admin`) | Separate permission row for admin group | Add a row with `group_id:id = base.group_erp_manager` and empty domain (kind=permission) instead of referencing `user.is_admin` in the global restriction domain. |
+| Computed field reference in security domain (`user.is_admin`) | Separate permission row for admin group | Add a row with `group_id/id = base.group_erp_manager` and empty domain (kind=permission) instead of referencing `user.is_admin` in the global restriction domain. |
 | `self.env['ir.access']._clear_caches()` in model `write()` | Remove the `write()` override entirely | Cache invalidation is handled automatically by the ORM when `ir.access` or related model records are written. The AI reviewer may flag `_clear_caches()` as non-standard even though it exists in Odoo 20 source. |
 | `'security/ir.model.access.csv'` in manifest `'data'` | `'security/ir.access.csv'` in `'data'` | Manifest must reference the new unified `ir.access.csv` file. |
 | `fields.Date.today()` | `fields.Date.context_today(self)` | `today()` ignores the user's timezone; `context_today(self)` is timezone-aware. |
@@ -605,6 +629,15 @@ sequenceDiagram
 | `type(x) == dict` | `isinstance(x, dict)` | Violates Python / Odoo coding conventions. |
 | Controller executing client-provided model without validation (`request.env[model]`) | Define `ALLOWED_MODELS = {'...'}`; check `if model not in ALLOWED_MODELS or model not in request.env: raise Forbidden(...)`; call `record.check_access('read')` | Arbitrary client model execution vulnerability. Allows unauthorized model inspection or method calls (triggers blocking 60/100 failure under Criterion 4.2). |
 | Pidgin English / grammar errors in views or descriptions (`"its open"`, `"block to setting"`, `"Last 3 Month"`, `string="Field(Details)"`) | Clean phrasing: `"Open the wizard..."`, `"Navigate to Sales -> Configuration -> Settings"`, `"Last 3 Months"`, `string="Field (Details)"` | Grammar errors persist in user-facing strings or `index.html` (triggers 70/100 penalty under Criterion 6.3). |
+| Indiscriminate `.sudo()` in model CRUD (`self.env['ir.actions.client'].sudo().create(...)`) | Remove `.sudo()`; let standard ORM permissions govern creation | Users create menus or actions without access checks; security vulnerability under Criterion 4.2. |
+| Raw unparsed date string in dynamic SQL query (`query.add_where(SQL('%s >= %s', ..., start_date))`) | Parse with `fields.Datetime.to_datetime(start_date)` before adding where clause | Potential invalid query casting or unexpected input; flagged under Criterion 4.2. |
+| HTML markup inside translatable string (`self.env._("Hi <br/><b>Report</b>")`) | Split tags from translatable prose: `f"<p>{self.env._('Hi')}</p>"` | Fragile translation files; flagged under Criterion 6.3. |
+| UPPERCASE action title in JS action definition (`name: 'SEND MAIL'`) | Use Title Case with `_t()` (`name: _t('Send Mail')`) | Non-standard UI casing; flagged under Criterion 6.3. |
+| External CDN URLs in JS or manifest (`loadJS("https://...")`) | Vendor libraries in `static/lib/` and bundle in `web.assets_backend` | Offline sandboxes and security policies fail; triggers blocking 70/100 penalty under Criterion 3.1. |
+| Legacy Chart.js path (`loadJS("/web/static/lib/Chart/Chart.js")`) | Use `await loadBundle("web.chartjs_lib")` from `@web/core/assets` | File does not exist or unbundled; flagged under Criterion 3.1. |
+| Direct DOM clearing of OWL components (`container.innerHTML = ''`) | Render declaratively with `static components` and `<t t-foreach="state.blocks" ...>` | Clears DOM without unmounting OWL components, breaking lifecycle; flagged under Criterion 4.1. |
+| Global window pollution (`window.dragMoveListener = dragMoveListener`) | Modular functions or component method callbacks | Global namespace pollution; flagged under Criterion 4.3. |
+| Overriding styles with `!important` | Proper CSS selector specificity without `!important` | Breaks cascading and themes; flagged under Criterion 4.1. |
 
 ---
 
@@ -639,11 +672,29 @@ sequenceDiagram
      - `<td align="right">` ➔ **`<td class="text-end">`** (or `style="text-align: right;"`).
      - `<table width="100%">` ➔ **`<table class="w-100">`**.
 
-3. **OWL JavaScript Components**:
+3. **OWL JavaScript Components & Frontend Assets (Criterion 3.1, 4.1, 4.3)**:
    - Modern syntax: Use standard ES6 classes extending `Component`.
    - Never use `var self = this;` — use arrow functions `() => {}` or method binding.
    - Services: Use `useService("rpc")`, `useService("action")`, `useService("notification")` instead of deprecated direct calls or undefined `self.rpc`.
-   - No direct DOM manipulation: Use OWL refs (`useRef`) and reactive state instead of `document.getElementById` or jQuery `$`.
+   - **Strict Prohibition of External CDN URLs (Criterion 3.1)**:
+     - Review Criterion 3.1 strictly blocks any frontend assets loaded from external CDNs (e.g. `https://cdnjs.cloudflare.com/...`, `https://cdn.jsdelivr.net/...`).
+     - All third-party libraries (e.g. jsPDF, html2canvas, html2pdf, ExcelJS, interactjs, font-awesome, bootstrap-icons) MUST be vendored locally under `static/lib/` and declared in `__manifest__.py` under `web.assets_backend`.
+   - **Chart.js in Odoo 20 (Criterion 3.1)**:
+     - In Odoo 20, Chart.js is bundled as `'web.chartjs_lib'`.
+     - Always load it via `await loadBundle("web.chartjs_lib")` from `@web/core/assets` inside `onWillStart`.
+     - NEVER use hardcoded paths like `/web/static/lib/Chart/Chart.js` or external CDN scripts.
+   - **OWL Component Lifecycle & Clean Unmounting (Criterion 4.1)**:
+     - **Strict Prohibition of `container.innerHTML = ''`**: Never clear DOM containers with `innerHTML = ''` when OWL components are mounted inside them. Doing so destroys DOM nodes while leaving component instances running in memory, breaking component unmounting lifecycles (`onWillUnmount`).
+     - **Declarative Child Components**: Child components must be declared via `static components = { ChildComponent }` and rendered declaratively using OWL template directives (`<t t-foreach="state.items" t-as="item" t-key="item.id"><ChildComponent widget="item"/></t>`) backed by reactive state (`useState`). OWL automatically manages the component lifecycle, mounting, and unmounting cleanly. Imperative `mount()` inside action handlers or filters is strictly prohibited.
+   - **No Global Scope Pollution (Criterion 4.3)**:
+     - Never assign listeners or handlers to the global `window` object (e.g. `window.dragMoveListener = dragMoveListener`). Keep functions scoped within ES modules or component methods.
+   - **Window Action Title Capitalization (Criterion 6.3)**:
+     - Action titles in JS action definitions must use Title Case (e.g. `name: _t('Send Mail')`), NEVER ALL-CAPS (`'SEND MAIL'`).
+   - **CSS / SCSS Hygiene & Specificity (Criterion 4.1)**:
+     - Avoid `!important` in custom stylesheets and component templates. Overriding styles with `!important` damages theme cascading.
+     - Remove unused SCSS/CSS blocks (e.g. orphaned `.dark-theme` blocks).
+   - **Clean XML Templates (Criterion 4.3)**:
+     - Remove obsolete comments describing old code or legacy frameworks (e.g. `<!-- DASHBOARD VIEW WITH INTERACTJS TEMPLATE -->`).
 
 4. **Static Assets & HTML Description (`static/description/`)**:
    - **Mandatory Description Asset Reconciliation (Criteria 1.5 & 6.2 - Blocking)**:
@@ -1001,7 +1052,7 @@ else:
         if not header:
             print(f'[FAIL CRITERION 4.2] {csv_p} is empty!')
             sys.exit(1)
-        expected_header = ['id', 'name', 'model_id:id', 'group_id:id', 'operation', 'domain']
+        expected_header = ['id', 'name', 'model_id', 'group_id/id', 'operation', 'domain']
         if header != expected_header:
             print(f'[FAIL CRITERION 4.2] Header mismatch in {csv_p}!\nFound:    {header}\nExpected: {expected_header}')
             sys.exit(1)
@@ -1009,10 +1060,10 @@ else:
             if not row or not any(row):
                 continue
             mid = row[2].strip()
-            if not mid.startswith('model_') or '.' in mid:
-                print(f'[FAIL CRITERION 4.2] Line {line_no} references model_id as {mid!r} instead of proper XML ID format (model_<technical_name>)!')
+            if mid.startswith('model_'):
+                print(f'[FAIL CRITERION 4.2] Line {line_no} references model_id with legacy model_ prefix ({mid!r}). In Odoo 20, use dot-notation technical model name!')
                 sys.exit(1)
-    print(f'[OK] security/ir.access.csv header and model_id:id XML IDs valid.')
+    print(f'[OK] security/ir.access.csv header and model_id technical names valid.')
 "
 
 # 4b. Verify res.groups XML Definitions (No deprecated category_id or users fields in res.groups)
@@ -1094,6 +1145,69 @@ if violations:
     sys.exit(1)
 else:
     print('[OK] Criterion 4.2: Controller model validation & whitelisting verified.')
+"
+
+# 4d. Verify Frontend Assets, CDN prohibition, and OWL hygiene (Criterion 3.1, 4.1, 4.3)
+python3 -c "
+import os, sys, re
+
+base = 'migration/<technical_name>'
+violations = []
+
+# Check manifest for CDN URLs
+manifest_p = os.path.join(base, '__manifest__.py')
+if os.path.exists(manifest_p):
+    with open(manifest_p, 'r', encoding='utf-8') as f:
+        m_lines = f.readlines()
+    in_assets = False
+    for line in m_lines:
+        line_s = line.strip()
+        if line_s.startswith('#'):
+            continue
+        if "'assets':" in line_s or '"assets":' in line_s:
+            in_assets = True
+        elif in_assets and line_s.startswith('}'):
+            in_assets = False
+        if in_assets and ('https://' in line_s or 'http://' in line_s):
+            violations.append(f'Manifest assets contains external CDN URL: {line_s}')
+
+# Check JS files for CDNs, Chart.js hardcoded paths, innerHTML = '', window pollution
+js_dir = os.path.join(base, 'static', 'src', 'js')
+if os.path.exists(js_dir):
+    for root, _, files in os.walk(js_dir):
+        for f in files:
+            if f.endswith('.js'):
+                p = os.path.join(root, f)
+                with open(p, 'r', encoding='utf-8') as fh:
+                    lines = fh.readlines()
+                for idx, line in enumerate(lines, 1):
+                    if 'loadJS("http' in line or 'loadJS(\'http' in line:
+                        violations.append(f'{f}:{idx}: External CDN loaded via loadJS')
+                    if '/web/static/lib/Chart/Chart.js' in line:
+                        violations.append(f'{f}:{idx}: Legacy Chart.js path used. Use loadBundle("web.chartjs_lib")')
+                    if re.search(r'\binnerHTML\s*=\s*['"\`]\s*['"\`]', line):
+                        violations.append(f'{f}:{idx}: innerHTML clearing detected without OWL component destruction')
+                    if re.search(r'\bwindow\.[A-Za-z0-9_]+\s*=', line):
+                        violations.append(f'{f}:{idx}: Global window property pollution detected')
+
+# Check CSS/SCSS for !important
+css_dir = os.path.join(base, 'static', 'src')
+if os.path.exists(css_dir):
+    for root, _, files in os.walk(css_dir):
+        for f in files:
+            if f.endswith(('.css', '.scss')):
+                p = os.path.join(root, f)
+                with open(p, 'r', encoding='utf-8') as fh:
+                    for idx, line in enumerate(fh, 1):
+                        if '!important' in line:
+                            violations.append(f'{f}:{idx}: !important rule found in stylesheet')
+
+if violations:
+    print(f'[FAIL FRONTEND AUDIT] Found {len(violations)} frontend issue(s):')
+    for v in violations:
+        print(f'  - {v}')
+    sys.exit(1)
+print(f'[OK] Frontend assets, OWL hygiene, and stylesheets verified cleanly.')
 "
 
 # 5. Check for linter issues (pylint-odoo & ruff / flake8 - Criterion 4.4)
@@ -1476,8 +1590,14 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] `depends` contains only strictly necessary modules (no superfluous `base`).
   - [ ] **`external_dependencies['python']` uses PyPI distribution names (Criterion 5.1–5.2 - Blocking)**: Every listed package resolves cleanly via PyPI / `importlib.metadata.distribution(...)` (e.g., `'pillow'`, `'mysql-connector-python'`, `'beautifulsoup4'`, NEVER import names like `'PIL'`, `'mysql.connector'`, `'bs4'`).
   - [ ] **`security/ir.model.access.csv` is DELETED** (Criterion 1.5 - Blocking): Deprecated in Odoo 20; 0 occurrences in module folder or git.
-  - [ ] **`security/ir.access.csv` is USED (Criterion 4.1)**: Uses 6-column unified format (`id,name,model_id:id,group_id:id,operation,domain`).
-  - [ ] **Criterion 4.2 Security XML ID Format (Blocking)**: `model_id:id` strictly references the model's XML ID format (`model_<technical_name_underscored>`, e.g. `model_undo_redo`), NEVER raw dot notation (e.g. `undo.redo`). Header must use `:id` suffix (`model_id:id`, `group_id:id`).
+  - [ ] **`security/ir.access.csv` is USED (Criterion 4.1)**: Uses 6-column unified format (`id,name,model_id,group_id/id,operation,domain`).
+  - [ ] **Criterion 4.1 & 4.2 Security Header and Model Format (Blocking)**: Header MUST be `id,name,model_id,group_id/id,operation,domain`. `model_id` uses raw technical dot-notation (e.g. `undo.redo`), NEVER `model_` prefix or `:id` suffix. `group_id/id` uses `/id` convention.
+  - [ ] **Criterion 3.1 No External CDNs**: All JS/CSS dependencies vendored in `static/lib/` and declared in `__manifest__.py`. Chart.js loaded via `await loadBundle("web.chartjs_lib")`.
+  - [ ] **Criterion 4.1 OWL Lifecycle**: No `innerHTML = ''` component clearing; declarative rendering with `static components` and `useState`.
+  - [ ] **Criterion 4.2 No Unwarranted sudo()**: Model CRUD methods do not indiscriminately call `.sudo()`.
+  - [ ] **Criterion 4.2 Typed Dynamic Query Dates**: Date inputs parsed via `fields.Datetime.to_datetime(...)`.
+  - [ ] **Criterion 6.3 Translatable String Hygiene**: No HTML markup (`<br/>`, `<b>`, `<p>`) inside `_t(...)` or `self.env._(...)`.
+  - [ ] **Criterion 6.3 Action Title Casing**: JS action titles use Title Case (`Send Mail`), not ALL-CAPS (`SEND MAIL`).
   - [ ] **No XML `<record model="ir.access">` (Criterion 4.1 & 4.2 - Blocking)**: In Odoo 20, both access rights and record rules MUST reside in `security/ir.access.csv`. Never define `<record model="ir.access">` in XML files. XML files under `security/` are strictly for security groups.
   - [ ] **Valid Prefix Domain Syntax**: Domains in `security/ir.access.csv` must use standard Odoo prefix notation lists (`['|', ... , (...)]`). Never use Python ternary expressions anywhere in domain strings (neither returning lists nor inside tuples like `(1, '=', 1 if ... else 0)`), method calls like `user.has_group(...)`, or computed field references like `user.is_admin`. Use pure field-operator-value tuples only.
   - [ ] **Manifest Category Precision**: Modules modifying catalog or user product access must specify `'category': 'Sales'` (or `'Sales/Sales'`).

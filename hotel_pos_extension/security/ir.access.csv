@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,operation,domain
+access_hotel_pos_line,access.hotel.pos.line,model_hotel_pos_line,base.group_user,crud,
+

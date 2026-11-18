@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
-    <!--DASHBOARD VIEW WITH NAVIGATION-BAR, INTERACTJS TEMPLATE-->
     <t t-name="owl.AdvancedDynamicDashboard">
         <div t-attf-class="container o_advanced_dynamic_dashboard {{ this.state.isDarkMode ? 'o_dark_mode' : '' }}" style="min-height:-webkit-fill-available;">
             <div class="navbar navbar-style border-bottom" role="navigation">
@@ -120,9 +119,13 @@
                 </div>
             </div>
             <div class="all_items">
-                <div class="items"/>
+                <div class="items">
+                    <t t-foreach="this.state.blocks" t-as="block" t-key="block.id">
+                        <DynamicDashboardTile t-if="block.type === 'tile'" widget="block" doAction="this.action" dialog="this.dialog" orm="this.orm"/>
+                        <DynamicDashboardChart t-else="" widget="block" doAction="this.action" dialog="this.dialog" orm="this.orm"/>
+                    </t>
+                </div>
             </div>
-                <!--CONTAINER FOR CONTENT GENERATION :TILE & CHART(FROM DynamicDashboardTile & DynamicDashboardChart-->
         </div>
     </t>
 </templates>

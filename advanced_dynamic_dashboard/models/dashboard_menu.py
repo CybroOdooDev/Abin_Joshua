@@ -51,15 +51,15 @@ class DashboardMenu(models.Model):
             name = val.get('name')
             parent_id = val.get('menu_id')
             if not val.get('client_action_id'):
-                action = self.env['ir.actions.client'].sudo().create({
+                action = self.env['ir.actions.client'].create({
                     'name': name or 'Dashboard',
                     'tag': 'AdvancedDynamicDashboard',
                 })
                 val['client_action_id'] = action.id
             else:
-                action = self.env['ir.actions.client'].sudo().browse(val['client_action_id'])
+                action = self.env['ir.actions.client'].browse(val['client_action_id'])
             if not val.get('child_menu_id'):
-                menu = self.env['ir.ui.menu'].sudo().create({
+                menu = self.env['ir.ui.menu'].create({
                     'name': name or 'Dashboard',
                     'parent_id': parent_id,
                     'action': f'ir.actions.client,{action.id}',

@@ -38,13 +38,11 @@ class DashboardMail(models.TransientModel):
         Function for sending mail to the selected users
         """
         for user in self.user_ids:
-            mail_content = self.env._(
-                "Hi %(name)s, <br/> "
-                "I hope this mail finds you well. "
-                "I am pleased to share the <b>Dashboard Report</b> with you.<br/>"
-                "Please find the attachment<br/>",
-                name=user.name,
-            )
+            greeting = self.env._("Hi %(name)s,", name=user.name)
+            intro = self.env._("I hope this email finds you well.")
+            msg = self.env._("I am pleased to share the Dashboard Report with you.")
+            attachment_msg = self.env._("Please find the attachment.")
+            mail_content = f"<p>{greeting}</p><p>{intro} {msg}</p><p>{attachment_msg}</p>"
             mail_values = {
                 'subject': self.env._('Dashboard Report'),
                 'author_id': self.env.user.partner_id.id,

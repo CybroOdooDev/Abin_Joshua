@@ -1,4 +1,4 @@
-import { loadJS } from '@web/core/assets';
+import { loadBundle } from '@web/core/assets';
 import { getColor } from "@web/core/colors/colors";
 import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
@@ -11,19 +11,7 @@ export class DynamicDashboardChart extends Component {
         this.chartRef = signal.ref();
         this.dialog = this.props.dialog;
         onWillStart(async () => {
-            if (typeof Chart === "undefined") {
-                await loadJS("/web/static/lib/Chart/Chart.js");
-            }
-            try {
-                if (typeof jsPDF === "undefined") {
-                    await loadJS("https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js");
-                }
-                if (typeof ExcelJS === "undefined") {
-                    await loadJS("https://cdn.jsdelivr.net/npm/exceljs@4.4.0/dist/exceljs.min.js");
-                }
-            } catch {
-                // Keep chart rendering resilient in offline sandboxes
-            }
+            await loadBundle("web.chartjs_lib");
         });
         onMounted(() => this.renderChart());
     }
@@ -180,7 +168,7 @@ DynamicDashboardChart.template = xml`
         t-att-data-y="this.props.widget.data_y"
         t-att-style="'height:'+this.props.widget.height+'; width:'+ this.props.widget.width+ '; transform: translate('+ this.props.widget.translate_x +', '+ this.props.widget.translate_y +');'"
         t-att-data-id="this.props.widget.id">
-        <div class="card-body mt-1" id="in_ex_body_hide" style="background-color: #f0f4f7 !important;">
+        <div class="card-body mt-1" id="in_ex_body_hide" style="background-color: #f0f4f7;">
 
             <div class="block_edit block_setting" t-on-click="(ev) => this.getConfiguration(ev)">
                 <i title="Configuration"

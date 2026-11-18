@@ -92,7 +92,7 @@ class DashboardBlock(models.Model):
 
     def get_dashboard_vals(self, action_id, start_date=None, end_date=None):
         """Fetch block values from js and create chart"""
-        block_id = []
+        block_vals = []
         for rec in self.search([('client_action_id', '=', int(action_id))]):
             filter_raw = rec.filter or "[]"
             try:
@@ -178,12 +178,12 @@ class DashboardBlock(models.Model):
                         vals.update(records[0])
                     else:
                         vals.update({'value': val})
-            block_id.append(vals)
-        for block in block_id:
+            block_vals.append(vals)
+        for block in block_vals:
             if 'x_axis' in block and isinstance(block['x_axis'], list) and all(
                     isinstance(item, dict) for item in block['x_axis']):
                 block['x_axis'] = [list(d.values())[0] for d in block['x_axis']]
-        return block_id
+        return block_vals
 
     def get_save_layout(self, grid_data_list):
         """Function fetch edited values while edit layout of the chart or tile

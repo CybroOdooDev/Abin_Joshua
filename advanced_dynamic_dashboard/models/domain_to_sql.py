@@ -19,7 +19,11 @@
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
+import logging
+from odoo import fields
 from odoo.tools import SQL
+
+_logger = logging.getLogger(__name__)
 
 
 def get_query(model, args, operation, field, start_date=None, end_date=None,
@@ -72,9 +76,17 @@ def get_query(model, args, operation, field, start_date=None, end_date=None,
         select_sql = SQL("%s AS id", SQL.identifier(model._table, 'id'))
 
     if start_date and start_date != 'null':
-        query.add_where(SQL('%s >= %s', SQL.identifier(model._table, 'create_date'), start_date))
+        try:
+            parsed_start = fields.Datetime.to_datetime(start_date)
+            query.add_where(SQL('%s >= %s', SQL.identifier(model._table, 'create_date'), parsed_start))
+        except (ValueError, TypeError) as err:
+            _logger.debug("Invalid start_date %s: %s", start_date, err)
     if end_date and end_date != 'null':
-        query.add_where(SQL('%s <= %s', SQL.identifier(model._table, 'create_date'), end_date))
+        try:
+            parsed_end = fields.Datetime.to_datetime(end_date)
+            query.add_where(SQL('%s <= %s', SQL.identifier(model._table, 'create_date'), parsed_end))
+        except (ValueError, TypeError) as err:
+            _logger.debug("Invalid end_date %s: %s", end_date, err)
 
     from_clause = SQL("%s %s", query.from_clause, join_sql) if join_sql else query.from_clause
     where_clause = SQL("WHERE %s", query.where_clause) if query._where_clauses else SQL("")

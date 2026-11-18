@@ -24,6 +24,9 @@
     'version': '20.0.1.0.0',
     'category': 'Productivity',
     'summary': """Create Configurable Dashboards Easily.""",
+    'description': """Create Configurable Advanced Dynamic Dashboard to get the
+    information that is relevant to your business, department, or a specific
+    process or need.""",
     'author': 'Cybrosys Techno Solutions',
     'company': 'Cybrosys Techno Solutions',
     'maintainer': 'Cybrosys Techno Solutions',
@@ -43,12 +46,16 @@
     'assets': {
         'web.assets_backend': [
             'advanced_dynamic_dashboard/static/lib/font-awesome/css/font-awesome.min.css',
+            'advanced_dynamic_dashboard/static/lib/bootstrap-icons/font/bootstrap-icons.css',
+            'advanced_dynamic_dashboard/static/lib/js/interactjs.js',
+            'advanced_dynamic_dashboard/static/lib/js/jspdf.min.js',
+            'advanced_dynamic_dashboard/static/lib/js/exceljs.min.js',
+            'advanced_dynamic_dashboard/static/lib/js/html2canvas.min.js',
+            'advanced_dynamic_dashboard/static/lib/js/html2pdf.bundle.min.js',
             'advanced_dynamic_dashboard/static/src/css/**/*.css',
             'advanced_dynamic_dashboard/static/src/scss/**/*.scss',
             'advanced_dynamic_dashboard/static/src/js/**/*.js',
             'advanced_dynamic_dashboard/static/src/xml/**/*.xml',
-            'advanced_dynamic_dashboard/static/lib/bootstrap-icons/font/bootstrap-icons.css',
-            'advanced_dynamic_dashboard/static/lib/js/interactjs.js',
         ],
     },
     'images': ['static/description/banner.jpg'],
