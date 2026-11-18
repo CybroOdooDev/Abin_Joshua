@@ -46,8 +46,6 @@ class DashboardMenu(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """Function to create new dashboard menu"""
-        if isinstance(vals_list, dict):
-            vals_list = [vals_list]
         vals_list = [dict(vals) for vals in vals_list]
         for val in vals_list:
             name = val.get('name')

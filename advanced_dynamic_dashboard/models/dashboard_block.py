@@ -81,8 +81,7 @@ class DashboardBlock(models.Model):
     model_name = fields.Char(related='model_id.model',
                              string="Model Technical Name",
                              help="Added model_id model")
-    edit_mode = fields.Boolean(help="Enable to edit chart and tile",
-                               default=False)
+    edit_mode = fields.Boolean(help="Enable to edit chart and tile")
 
     @api.onchange('model_id')
     def _onchange_model_id(self):
