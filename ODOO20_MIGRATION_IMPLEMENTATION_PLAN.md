@@ -110,8 +110,11 @@ graph TD
     - Always use safe existence checks: `typeof window !== "undefined" && window.lib ? window.lib : null` or component helper getters (`get interact() { return typeof window !== "undefined" && window.interact ? window.interact : null; }`).
   - **Views & QWeb**: Bootstrap 5 classes (`table-sm`), no obsolete HTML attributes (`align`), `<tree>` converted to `<list>`.
 * **Criterion 4.2: Models, Views, Security and Data (Blocking - Score Penalty down to 40/100)**:
-  - **Translatable QWeb & XML Labels**:
-    - All static text in XML views and Kanban cards (e.g. `Name:`, `Parent:`) must be wrapped in tags with `t-translation="on"` or standard element tags (e.g. `<span t-translation="on">Name:</span>`, `<strong t-translation="on">Parent:</strong>`), never bare untranslated text nodes.
+  - **Translatable QWeb & XML Labels (Full Template Translation Coverage)**:
+    - All static text nodes in XML views, Kanban cards (e.g. `Name:`, `Parent:`), and OWL templates (e.g. `Add Items`, `Edit Layout`, `Save Layout`, `Search`, `Start Date:`, `End Date:`, `Select Theme`) must be wrapped in tags with `t-translation="on"` (e.g. `<span t-translation="on">Name:</span>`, `<button t-translation="on">Save Layout</button>`, `<option t-translation="on">Select Theme</option>`), never left as bare untranslated text nodes.
+  - **Translatable Client Action Defaults (`default_name`)**:
+    - Default record names passed in JavaScript action contexts (e.g. `'default_name': _t('New Tile')`) MUST be wrapped in `_t(...)`.
+    - Never use untranslated string concatenations (e.g. `'New ' + chart_type`). Instead, provide explicit title mappings (e.g. `bar: _t('New Bar Chart')`, `pie: _t('New Pie Chart')`) or `_t('New %s', label)` so translators receive full, intelligible phrases.
   - **Prohibition of Untranslated String Literals in `t-out`**:
     - Never interpolate raw untranslated strings inside dynamic QWeb expressions (e.g. `t-out="cond ? 'Light Mode' : 'Dark Mode'"`).
     - Wrap dynamic UI labels in component getters localized via `_t(...)` (e.g. `get modeLabel() { return this.state.isDarkMode ? _t('Light Mode') : _t('Dark Mode'); }`) or use declarative QWeb tags (`<t t-if="cond">Light Mode</t><t t-else="">Dark Mode</t>`).
@@ -684,7 +687,10 @@ sequenceDiagram
      - Replace `data-target="..."` with **`data-bs-target="..."`**.
      - Replace `data-dismiss="..."` with **`data-bs-dismiss="..."`**.
    - **Translatable QWeb & XML Labels (Criterion 4.2)**:
-     - All static text nodes in XML views and Kanban cards (e.g. `Name:`, `Parent:`) must be wrapped in tags with `t-translation="on"` or standard element tags (e.g. `<span t-translation="on">Name:</span>`, `<strong t-translation="on">Parent:</strong>`), never bare untranslated text nodes.
+     - All static text nodes in XML views, Kanban cards (e.g. `Name:`, `Parent:`), and OWL templates (e.g. `Add Items`, `Edit Layout`, `Save Layout`, `Search`, `Start Date:`, `End Date:`, `Select Theme`) must be wrapped in tags with `t-translation="on"` (e.g. `<span t-translation="on">Name:</span>`, `<strong t-translation="on">Parent:</strong>`, `<button t-translation="on">Save Layout</button>`), never bare untranslated text nodes.
+   - **Translatable Client Action Defaults (`default_name`) (Criterion 4.2)**:
+     - Default record names passed in JavaScript action contexts (e.g. `'default_name': _t('New Tile')`) MUST be wrapped in `_t(...)`.
+     - Never use untranslated string concatenations (e.g. `'default_name': 'New ' + (chart_type || 'Chart')`). Instead, define explicit title maps (e.g. `bar: _t('New Bar Chart')`, `pie: _t('New Pie Chart')`) so translators receive full, natural phrases.
    - **Bootstrap 3 -> Bootstrap 5 Classes**:
      - `table-condensed` ➔ **`table-sm`** (Bootstrap 3 `table-condensed` is obsolete and flagged as an error!).
      - `panel`, `panel-default` ➔ `card`, `card-body`.
@@ -1233,10 +1239,12 @@ if os.path.exists(js_dir):
                         violations.append(f'{f}:{idx}: Direct DOM lookup in OWL component (use useRef instead)')
                     if re.search(r'^[A-Za-z0-9_]+\.template\s*=', line):
                         violations.append(f'{f}:{idx}: Component template assigned outside class body (use static template)')
+                    if re.search(r'[\'"]default_name[\'"]\s*:\s*[\'"][A-Za-z]', line):
+                        violations.append(f'{f}:{idx}: Untranslated default_name literal in JS action context (use _t)')
                     if '/* Function for' in line or '// Function' in line or '// Setup function' in line:
                         violations.append(f'{f}:{idx}: Stale boilerplate function comment')
 
-# Check XML templates for Bootstrap 4 data attributes and untranslated t-out literals
+# Check XML templates for Bootstrap 4 data attributes, untranslated plain text, and untranslated t-out literals
 xml_dir = os.path.join(base, 'static', 'src', 'xml')
 if os.path.exists(xml_dir):
     for root, _, files in os.walk(xml_dir):
@@ -1253,6 +1261,10 @@ if os.path.exists(xml_dir):
                             violations.append(f'{f}:{idx}: Legacy Bootstrap 4 data-dismiss detected (use data-bs-dismiss)')
                         if re.search(r't-out="[^"]*(\?[^"]*[\'"][A-Za-z\s]+[\'"][^"]*:[^"]*[\'"][A-Za-z\s]+[\'"])', line):
                             violations.append(f'{f}:{idx}: Untranslated string literal in t-out dynamic expression')
+                        clean = re.sub(r'<i\b[^>]*/>', '', line).strip()
+                        m = re.search(r'<(button|span|label|option)\b(?![^>]*t-translation)[^>]*>([A-Za-z]{2,}[^<]*)</\1>', clean)
+                        if m and not m.group(2).startswith('this.'):
+                            violations.append(f'{f}:{idx}: Plain text in <{m.group(1)}> not marked for translation: {m.group(2)}')
 
 # Check CSS/SCSS for !important and duplicate selector blocks
 css_dir = os.path.join(base, 'static', 'src')
@@ -1699,7 +1711,8 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] QWeb reports: `table-condensed` converted to `table-sm`.
   - [ ] QWeb reports: No obsolete `align="center"` / `align="right"`; uses `class="text-center"` / `class="text-end"`.
   - [ ] **Modern Bootstrap 5 Attributes (Criterion 4.3)**: `data-bs-toggle="dropdown"` used instead of legacy `data-toggle="dropdown"`; `data-bs-target` and `data-bs-dismiss` used instead of `data-target` and `data-dismiss`.
-  - [ ] **Translatable QWeb & XML Labels (Criterion 4.2)**: Static text in Kanban cards and QWeb templates is translatable via `<span t-translation="on">...</span>` or element tags (e.g. `<span t-translation="on">Name:</span>`, `<strong t-translation="on">Parent:</strong>`), never bare untranslated strings.
+  - [ ] **Translatable QWeb & XML Labels (Criterion 4.2)**: Static text in Kanban cards and QWeb templates is translatable via `<span t-translation="on">...</span>` or element tags (e.g. `<span t-translation="on">Name:</span>`, `<strong t-translation="on">Parent:</strong>`, `<button t-translation="on">Save Layout</button>`), never bare untranslated strings.
+  - [ ] **Translatable Client Action Contexts (Criterion 4.2)**: Default record names passed in JavaScript action contexts (`'default_name': _t('New Tile')`) are wrapped in `_t(...)`, and parameterized titles use mapped dictionaries rather than string concatenations.
   - [ ] **No Untranslated Literals in `t-out` (Criterion 4.2)**: Dynamic QWeb expressions never interpolate raw untranslated strings (`t-out="cond ? 'A' : 'B'"`). Use component getters wrapped with `_t(...)` or declarative `<t t-if="cond">A</t><t t-else="">B</t>`.
   - [ ] **In-Class `static template` Declarations (Criterion 4.1)**: OWL component templates are declared directly inside the class (`static template = xml\`...\``), never assigned externally after the class body.
   - [ ] **OWL Element Referencing (`useRef`) (Criterion 4.1)**: Uses `useRef` for component DOM references, NEVER `document.querySelector` or `document.getElementById`.

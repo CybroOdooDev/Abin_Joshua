@@ -15,31 +15,37 @@ export class DynamicDashboardChart extends Component {
 
                 <div class="block_edit block_setting" t-on-click="(ev) => this.getConfiguration(ev)">
                     <i title="Configuration"
+                        t-translation="on"
                         class="fa fa-pencil block_setting chart-edit"/>
                 </div>
 
                 <div class="block_edit block_image" data-type="png" t-on-click="(ev) => this.exportItem(ev)">
                     <i title="Save As Image" data-type="png"
+                        t-translation="on"
                         class="bi bi-image block_image chart-image"/>
                 </div>
 
                 <div class="block_edit block_pdf" data-type="pdf" t-on-click="(ev) => this.exportItem(ev)">
                     <i title="Export to PDF" data-type="pdf"
+                        t-translation="on"
                         class="bi bi-file-earmark-pdf block_pdf chart-pdf"/>
                 </div>
 
                 <div class="block_edit block_csv" t-att-data-id="this.props.widget.id" data-type="csv" t-on-click="(ev) => this.exportItem(ev)">
                     <i title="Export to CSV" data-type="csv" t-att-data-id="this.props.widget.id"
+                        t-translation="on"
                         class="bi bi-filetype-csv block_csv chart-csv"/>
                 </div>
 
                 <div class="block_edit block_xlsx" t-att-data-id="this.props.widget.id" data-type="xlsx" t-on-click="(ev) => this.exportItem(ev)">
                     <i title="Export to XLSX" data-type="xlsx" t-att-data-id="this.props.widget.id"
+                        t-translation="on"
                         class="fa fa-file-excel-o block_xlsx chart-xlsx"/>
                 </div>
 
                 <div class="block_edit block_delete" t-on-click="(ev) => this.removeTile(ev)">
                     <i title="Delete"
+                        t-translation="on"
                         class="fa fa-times block_delete chart-setting"/>
                 </div>
                 <h3 class="chart_title">

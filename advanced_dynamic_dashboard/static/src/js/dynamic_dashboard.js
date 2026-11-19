@@ -182,7 +182,7 @@ export class AdvancedDynamicDashboard extends Component {
                 views: [[false, 'form']],
                 context: {
                     'form_view_initial_mode': 'edit',
-                    'default_name': 'New Tile',
+                    'default_name': _t('New Tile'),
                     'default_type': type,
                     'default_height': '155px',
                     'default_width': '300px',
@@ -195,6 +195,15 @@ export class AdvancedDynamicDashboard extends Component {
             });
         }
         else {
+            const chartTitles = {
+                bar: _t('New Bar Chart'),
+                doughnut: _t('New Doughnut Chart'),
+                line: _t('New Line Chart'),
+                pie: _t('New Pie Chart'),
+                polarArea: _t('New Polar Area Chart'),
+                radar: _t('New Radar Chart'),
+            };
+            const defaultName = chartTitles[chart_type] || _t('New Chart');
             this.action.doAction({
                 type: 'ir.actions.act_window',
                 res_model: 'dashboard.block',
@@ -202,7 +211,7 @@ export class AdvancedDynamicDashboard extends Component {
                 views: [[false, 'form']],
                 context: {
                     'form_view_initial_mode': 'edit',
-                    'default_name': 'New ' + (chart_type || 'Chart'),
+                    'default_name': defaultName,
                     'default_type': type,
                     'default_height': '565px',
                     'default_width': '588px',
