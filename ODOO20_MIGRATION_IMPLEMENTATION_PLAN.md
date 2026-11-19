@@ -51,7 +51,10 @@ graph TD
   - No orphaned XML, JS, or image files that are not referenced in the manifest or code.
 * **Mandatory File Header**: **EVERY** Python file must contain the exact Cybrosys LGPL-3 header.
 * **Criterion 3.1: Manifest and Assets (Blocking)**:
-  - **Manifest Description Key**: The `'description'` key MUST be retained in `__manifest__.py`. Dropping it triggers a penalty under Criterion 3.1 (*"The 'description' key was dropped"*).
+  - **No Deprecated Manifest Description Key (pylint-odoo C8103)**:
+    - When `README.rst` and `index.html` are present, the `'description'` key in `__manifest__.py` is deprecated and flagged by `pylint-odoo` with `C8103: Deprecated key "description" in manifest file (manifest-deprecated-key)`. Detailed module documentation belongs in `README.rst` and `static/description/index.html`.
+  - **No Superfluous Manifest Default Keys (pylint-odoo C8116)**:
+    - In Odoo 20, modules are installable by default (`installable=True`) and do not auto-install (`auto_install=False`). Specifying `'installable': True` or `'auto_install': False` triggers `C8116: Manifest superfluous key (manifest-superfluous-key)`. Omit these default keys to maintain a clean 10.00/10 `pylint-odoo` score.
   - **Strict Prohibition of External CDN URLs**: Review Criterion 3.1 strictly blocks any frontend assets loaded from external CDNs (e.g. `https://cdnjs.cloudflare.com/...`, `https://cdn.jsdelivr.net/...`). All third-party libraries (e.g. jsPDF, html2canvas, html2pdf, ExcelJS, interactjs, font-awesome, bootstrap-icons) MUST be vendored locally under `static/lib/` and declared in `__manifest__.py` under `web.assets_backend`.
   - **Chart.js in Odoo 20**: In Odoo 20, Chart.js is bundled as `'web.chartjs_lib'`. Always load it via `await loadBundle("web.chartjs_lib")` from `@web/core/assets` inside `onWillStart`. NEVER use hardcoded paths like `/web/static/lib/Chart/Chart.js` or external CDN scripts.
 * **Criterion 4.1: Coding Standards & Modernization (Blocking - Score Penalty down to 40/100)**:
