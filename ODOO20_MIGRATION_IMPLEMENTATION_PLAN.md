@@ -1017,7 +1017,7 @@ import os, re, sys
 base = 'migration/<technical_name>'
 SUSPICIOUS_PATTERNS = [
     re.compile(r'copy', re.IGNORECASE),
-    re.compile(r'temp', re.IGNORECASE),
+    re.compile(r'(?<![a-z])temp(?![a-z])', re.IGNORECASE),
     re.compile(r'\.bak$', re.IGNORECASE),
     re.compile(r'\.tmp$', re.IGNORECASE),
     re.compile(r'~$'),
@@ -1597,7 +1597,7 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
 
    # Step 5: Purge copy, temp, and backup files (Criterion 1.5 & 6.2 - Blocking 25/100 Penalty)
    find . -iname "*copy*" -delete
-   find . -iname "*temp*" -delete
+   find . -iname "*temporary*" -o -iname "*temp.*" -o -iname "*_temp.*" -o -iname "*temp_*" -delete
    find . -type f -name "*~" -delete
    find . -type f -name "*.bak" -delete
    find . -type f -name "*.tmp" -delete
