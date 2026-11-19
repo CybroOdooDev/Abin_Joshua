@@ -72,7 +72,7 @@ class DashboardMenu(models.Model):
         res = super().write(vals)
         for rec in self:
             if 'name' in vals and rec.client_action_id:
-                rec.client_action_id.sudo().write({'name': vals['name']})
+                rec.client_action_id.write({'name': vals['name']})
             menu_vals = {}
             if 'name' in vals:
                 menu_vals['name'] = vals['name']
@@ -80,9 +80,9 @@ class DashboardMenu(models.Model):
                 menu_vals['parent_id'] = vals['menu_id']
             if menu_vals:
                 if rec.child_menu_id:
-                    rec.child_menu_id.sudo().write(menu_vals)
+                    rec.child_menu_id.write(menu_vals)
                 elif rec.client_action_id:
-                    menus = self.env['ir.ui.menu'].sudo().search([
+                    menus = self.env['ir.ui.menu'].search([
                         ('action', '=', f'ir.actions.client,{rec.client_action_id.id}')
                     ])
                     menus.write(menu_vals)
@@ -96,14 +96,14 @@ class DashboardMenu(models.Model):
             if rec.child_menu_id:
                 menus_to_delete |= rec.child_menu_id
             elif rec.client_action_id:
-                menus_to_delete |= self.env['ir.ui.menu'].sudo().search([
+                menus_to_delete |= self.env['ir.ui.menu'].search([
                     ('action', '=', f'ir.actions.client,{rec.client_action_id.id}')
                 ])
             if rec.client_action_id:
                 actions_to_delete |= rec.client_action_id
         res = super().unlink()
         if menus_to_delete:
-            menus_to_delete.sudo().unlink()
+            menus_to_delete.unlink()
         if actions_to_delete:
-            actions_to_delete.sudo().unlink()
+            actions_to_delete.unlink()
         return res
