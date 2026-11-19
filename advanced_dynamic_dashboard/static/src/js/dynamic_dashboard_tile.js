@@ -3,27 +3,61 @@ import { _t } from "@web/core/l10n/translation";
 import { Component, xml } from "@odoo/owl";
 
 export class DynamicDashboardTile extends Component {
-    // Setup function of the class DynamicDashboardTile
+    static template = xml`
+        <div class="resize-drag tile"
+            t-on-dblclick="(ev) => this.getRecords(ev)"
+            t-att-data-id="this.props.widget.id"
+            t-att-data-x="this.props.widget.data_x"
+            t-att-data-y="this.props.widget.data_y"
+            t-att-style="this.props.widget.color+this.props.widget.text_color+ 'height:'+this.props.widget.height+';width:'+this.props.widget.width + '; transform: translate('+ this.props.widget.translate_x +', '+ this.props.widget.translate_y +');'">
+            <div t-att-style="this.props.widget.color+this.props.widget.text_color"
+                class="d-flex align-items-center  w-100  my-3">
+                <a class="block_setting tile_edit tile-container__setting-icon" style="color:black;" t-on-click="(ev) => this.getConfiguration(ev)">
+                    <i class="fa fa-edit"/>
+                </a>
+                <a class="block_delete tile_edit tile-container__delete-icon" style="color:black;" t-on-click="(ev) => this.removeTile(ev)">
+                    <i class="fa fa-times"/>
+                </a>
+                <div t-att-style="this.props.widget.icon_color"
+                     class="tile-container__icon-container bg-white d-flex justify-content-center align-items-center">
+                    <i t-att-class="this.props.widget.icon"/>
+                </div>
+                <div t-att-style="this.props.widget.text_color"
+                     class="tile-container__status-container">
+                    <h2 t-att-style="this.props.widget.text_color"
+                        class="status-container__title">
+                        <t t-out="this.props.widget.name"/>
+                    </h2>
+                    <div class="status-container__figures d-flex flex-wrap align-items-baseline">
+                        <h3 class="mb-0 mb-md-1 mb-lg-0 mr-1"
+                            t-att-style="this.props.widget.val_color">
+                            <t t-out="this.props.widget.value"/>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+
     setup() {
         this.doAction = this.props.doAction.doAction;
         this.dialog = this.props.dialog;
         this.orm = this.props.orm;
     }
-    // Function to get the configuration of the tile
-    async getConfiguration(ev){
+
+    async getConfiguration(ev) {
         ev.stopPropagation();
         ev.preventDefault();
         const id = this.props.widget.id;
         await this.doAction({
-              type: 'ir.actions.act_window',
-              res_model: 'dashboard.block',
-              res_id: id,
-              view_mode: 'form',
-              views: [[false, "form"]]
-          });
+            type: 'ir.actions.act_window',
+            res_model: 'dashboard.block',
+            res_id: id,
+            view_mode: 'form',
+            views: [[false, "form"]]
+        });
     }
-    // Function to remove the tile
-    async removeTile(ev){
+
+    async removeTile(ev) {
         ev.stopPropagation();
         ev.preventDefault();
         this.dialog.add(ConfirmationDialog, {
@@ -38,51 +72,17 @@ export class DynamicDashboardTile extends Component {
             cancel: () => {},
         });
     }
-    // Function for getting records by double click
-    async getRecords(){
+
+    async getRecords() {
         const model_name = this.props.widget.model_name;
-        if (model_name){
+        if (model_name) {
             await this.doAction({
-              type: 'ir.actions.act_window',
-              res_model: model_name,
-              view_mode: 'list',
-              views: [[false, "list"]],
-              domain: this.props.widget.domain,
-          });
+                type: 'ir.actions.act_window',
+                res_model: model_name,
+                view_mode: 'list',
+                views: [[false, "list"]],
+                domain: this.props.widget.domain,
+            });
         }
     }
 }
-DynamicDashboardTile.template = xml `
-    <div class="resize-drag tile"
-        t-on-dblclick="(ev) => this.getRecords(ev)"
-        t-att-data-id="this.props.widget.id"
-        t-att-data-x="this.props.widget.data_x"
-        t-att-data-y="this.props.widget.data_y"
-        t-att-style="this.props.widget.color+this.props.widget.text_color+ 'height:'+this.props.widget.height+';width:'+this.props.widget.width + '; transform: translate('+ this.props.widget.translate_x +', '+ this.props.widget.translate_y +');'">
-        <div t-att-style="this.props.widget.color+this.props.widget.text_color"
-            class="d-flex align-items-center  w-100  my-3">
-            <a class="block_setting tile_edit tile-container__setting-icon" style="color:black;" t-on-click="(ev) => this.getConfiguration(ev)" >
-                <i class="fa fa-edit"/>
-            </a>
-            <a class="block_delete tile_edit tile-container__delete-icon" style="color:black;" t-on-click="(ev) => this.removeTile(ev)">
-                <i class="fa fa-times"/>
-            </a>
-            <div t-att-style="this.props.widget.icon_color"
-                 class="tile-container__icon-container bg-white d-flex justify-content-center align-items-center">
-                <i t-att-class="this.props.widget.icon"/>
-            </div>
-            <div t-att-style="this.props.widget.text_color"
-                 class="tile-container__status-container">
-                <h2 t-att-style="this.props.widget.text_color"
-                    class="status-container__title">
-                    <t t-out="this.props.widget.name"/>
-                </h2>
-                <div class="status-container__figures d-flex flex-wrap align-items-baseline">
-                    <h3 class="mb-0 mb-md-1 mb-lg-0 mr-1"
-                        t-att-style="this.props.widget.val_color">
-                        <t t-out="this.props.widget.value"/>
-                    </h3>
-                </div>
-            </div>
-        </div>
-    </div>`;

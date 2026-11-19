@@ -2,13 +2,14 @@
     margin: 1rem;
 }
 .resize-drag {
+  position: relative;
   border-radius: 8px;
   padding: 20px;
   margin: 1rem;
   color: white;
-  font-size: 20px;
+  font-size: 100%;
   font-family: sans-serif;
-
+  overflow: hidden;
   touch-action: none;
   box-sizing: border-box;
 }
@@ -58,12 +59,6 @@
 .dashboard_pdf i, .dashboard_mail i {
     font-size: 22px;
     line-height: 1;
-}
-
-.resize-drag {
-    position: relative;
-    font-size: 100%;
-    overflow:hidden;
 }
 
 .o_advanced_dynamic_dashboard h2, .o_advanced_dynamic_dashboard h3 {

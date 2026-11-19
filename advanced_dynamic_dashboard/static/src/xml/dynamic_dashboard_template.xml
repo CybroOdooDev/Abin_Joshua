@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="owl.AdvancedDynamicDashboard">
-        <div t-attf-class="container o_advanced_dynamic_dashboard {{ this.state.isDarkMode ? 'o_dark_mode' : '' }}" style="min-height:-webkit-fill-available;">
+        <div t-ref="root" t-attf-class="container o_advanced_dynamic_dashboard {{ this.state.isDarkMode ? 'o_dark_mode' : '' }}" style="min-height:-webkit-fill-available;">
             <div class="navbar navbar-style border-bottom" role="navigation">
                 <!-- Left Toolbar: Add Items, Edit/Save Layout, View Mode, Theme -->
                 <div class="dashboard-toolbar-left">
                     <div class="dropdown">
                         <button class="btn btn-primary o_dropdown_title dropdown-toggle"
                                 type="button" id="dropdownMenuButton"
-                                data-bs-toggle="dropdown" data-toggle="dropdown"
+                                data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">
                             <i class="fa fa-plus-circle me-1"/>
                             <span id="text_add">Add Items</span>
@@ -17,28 +17,35 @@
                              aria-labelledby="dropdownMenuButton">
                             <a class="dropdown-item add_block"
                                data-type="tile"
-                               t-on-click="(ev) => this.onClickAddItem(ev)">Tile</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)"
+                               t-translation="on">Tile</a>
                             <a class="dropdown-item add_block"
                                data-type="graph" data-chart_type="bar"
-                               t-on-click="(ev) => this.onClickAddItem(ev)">Bar Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)"
+                               t-translation="on">Bar Chart</a>
                             <a class="dropdown-item add_block"
                                data-type="graph" data-chart_type="doughnut"
-                               t-on-click="(ev) => this.onClickAddItem(ev)">Doughnut Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)"
+                               t-translation="on">Doughnut Chart</a>
                             <a class="dropdown-item add_block"
                                data-type="graph"
                                data-chart_type="line"
-                               t-on-click="(ev) => this.onClickAddItem(ev)">Line Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)"
+                               t-translation="on">Line Chart</a>
                             <a class="dropdown-item add_block"
                                data-type="graph" data-chart_type="pie"
-                               t-on-click="(ev) => this.onClickAddItem(ev)">Pie Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)"
+                               t-translation="on">Pie Chart</a>
                             <a class="dropdown-item add_block"
                                data-type="graph"
                                data-chart_type="polarArea"
-                               t-on-click="(ev) => this.onClickAddItem(ev)">Polar Area Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)"
+                               t-translation="on">Polar Area Chart</a>
                             <a class="dropdown-item add_block"
                                data-type="graph"
                                data-chart_type="radar"
-                               t-on-click="(ev) => this.onClickAddItem(ev)">Radar Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)"
+                               t-translation="on">Radar Chart</a>
                         </div>
                     </div>
 
@@ -62,13 +69,13 @@
                             <span><i t-attf-class="bi {{ this.state.isDarkMode ? 'bi-cloud-sun-fill' : 'bi-moon-stars-fill' }} view-mode-icon"/></span>
                         </label>
                         <span t-if="this.state.showModeText" class="mode show" t-att-mode="this.state.isDarkMode ? 'dark' : 'light'">
-                            <t t-out="this.state.isDarkMode ? 'Light Mode' : 'Dark Mode'"/>
+                            <t t-out="this.modeLabel"/>
                         </span>
                     </div>
 
                     <div t-if="!this.state.isDarkMode" class="o-dropdown dropdown theme">
                         <select class="form-select theme-select"
-                                t-ref="this.ThemeSelector"
+                                t-ref="themeSelector"
                                 t-on-change="(ev) => this.onChangeTheme(ev)">
                             <option value="0">Select Theme</option>
                         </select>
@@ -82,11 +89,13 @@
                         <div class="date-item">
                             <label for="start-date" class="date-label">Start Date:</label>
                             <input type="date" id="start-date" name="start-date"
+                                   t-ref="startDate"
                                    t-on-change="(ev) => this.dateFilter(ev)"/>
                         </div>
                         <div class="date-item">
                             <label for="end-date" class="date-label">End Date:</label>
                             <input type="date" id="end-date" name="end-date"
+                                   t-ref="endDate"
                                    t-on-change="(ev) => this.dateFilter(ev)"/>
                         </div>
                     </div>
@@ -106,7 +115,8 @@
                         <div class="navbar-items search-box">
                             <input class="form-control search-input-chart" type="text"
                                    placeholder="Search" t-on-change="(ev) => this.input_change(ev)"
-                                   id="search-input-chart" aria-label="Search"/>
+                                   id="search-input-chart" aria-label="Search"
+                                   t-ref="searchInput"/>
                             <span id="searchclear" t-on-click="(ev) => this.clearSearch(ev)" title="Clear">
                                 <i class="fa fa-times search-clear"/>
                             </span>
@@ -119,7 +129,7 @@
                 </div>
             </div>
             <div class="all_items">
-                <div class="items">
+                <div class="items" t-ref="items">
                     <t t-foreach="this.state.blocks" t-as="block" t-key="block.id">
                         <DynamicDashboardTile t-if="block.type === 'tile'" widget="block" doAction="this.action" dialog="this.dialog" orm="this.orm"/>
                         <DynamicDashboardChart t-else="" widget="block" doAction="this.action" dialog="this.dialog" orm="this.orm"/>

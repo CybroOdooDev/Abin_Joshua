@@ -98,8 +98,23 @@ graph TD
     - **Mandatory Typed Date Parsing**: When user-controlled date strings are passed to dynamic query builders, always parse and validate them using `fields.Datetime.to_datetime(...)` before injecting into `query.add_where(...)`. Never pass raw string dates.
   - **Field Type Mapping Casing**: Exact lowercase `'many2one'` (never uppercase `'Many2one'`).
   - **Semantic Field Labels & Redundant Strings (W8113)**: Omit `string=` when matching default computed title.
+  - **OWL Element Referencing (`useRef`) vs Direct DOM Manipulation**:
+    - Inside OWL components, NEVER query or manipulate DOM nodes with `document.querySelector`, `document.getElementById`, or `document.getElementsByClassName`.
+    - Always use OWL refs: declare `this.myRef = useRef("refName")` (with `t-ref="refName"` in XML), or scope element lookups to component element bounds (`this.rootRef.el?.querySelectorAll(...)`).
+    - Brittle parent/sibling DOM traversals (such as `offsetParent.children[0]...`) are strictly prohibited.
+  - **In-Class `static template` & `static components` Declarations**:
+    - Component templates and subcomponents must be declared directly inside the ES6 class definition (`static template = xml\`...\`;`, `static components = { ChildA };`).
+    - Never assign templates after the class body (e.g. `MyComponent.template = xml\`...\``).
+  - **Safe Third-Party Global Library Access**:
+    - Never use bare undeclared global identifiers with fallback (e.g. `window.interact || interact` or `window.ExcelJS || ExcelJS`), which cause a `ReferenceError` in strict mode if undefined.
+    - Always use safe existence checks: `typeof window !== "undefined" && window.lib ? window.lib : null` or component helper getters (`get interact() { return typeof window !== "undefined" && window.interact ? window.interact : null; }`).
   - **Views & QWeb**: Bootstrap 5 classes (`table-sm`), no obsolete HTML attributes (`align`), `<tree>` converted to `<list>`.
 * **Criterion 4.2: Models, Views, Security and Data (Blocking - Score Penalty down to 40/100)**:
+  - **Translatable QWeb & XML Labels**:
+    - All static text in XML views and Kanban cards (e.g. `Name:`, `Parent:`) must be wrapped in tags with `t-translation="on"` or standard element tags (e.g. `<span t-translation="on">Name:</span>`, `<strong t-translation="on">Parent:</strong>`), never bare untranslated text nodes.
+  - **Prohibition of Untranslated String Literals in `t-out`**:
+    - Never interpolate raw untranslated strings inside dynamic QWeb expressions (e.g. `t-out="cond ? 'Light Mode' : 'Dark Mode'"`).
+    - Wrap dynamic UI labels in component getters localized via `_t(...)` (e.g. `get modeLabel() { return this.state.isDarkMode ? _t('Light Mode') : _t('Dark Mode'); }`) or use declarative QWeb tags (`<t t-if="cond">Light Mode</t><t t-else="">Dark Mode</t>`).
   - **Standard Odoo 20 `ir.access.csv` Model and Group Convention (Blocking Rule)**:
     - In `security/ir.access.csv`, the column header MUST be `model_id` (raw dot-notation technical model name, e.g. `dashboard.block`, `product.template`), NOT `model_id:id` and NEVER with `model_` prefix.
     - The group column header MUST be `group_id/id` (e.g. `base.group_user`, `base.group_system`).
@@ -113,17 +128,6 @@ graph TD
       - `group_id/id`: **Leave blank** for global restrictions, or specify a group for group-specific permissions
       - `operation`: Operations covered (`crud`, `r`, `cu`, etc.)
       - `domain`: Valid Odoo prefix-notation domain string
-  - **Complete Model Coverage**: Every single model (`models.Model`) and transient model / wizard (`models.TransientModel`) MUST have an access row in `security/ir.access.csv`.
-  - **Strict Least Privilege**: Infrastructure, database connector, and credential models must be restricted to `base.group_system`, not `base.group_user`. Sensitive password/secret fields must specify `groups="base.group_system"`. Audit log and synchronization models must have complete views and menus.
-  - **Controller Model Validation & Whitelisting (Critical Blocking Security Rule - Score Penalty down to 60/100)**:
-    - **Arbitrary Model Execution Vulnerability**: Controllers exposing HTTP endpoints (e.g. download routes, RPC endpoints, report export handlers) that accept a model name parameter (`model`, `res_model`, etc.) from the client MUST NEVER dynamically load or execute code on that model via `request.env[model]` without explicit validation. Doing so triggers an automatic blocking **60/100** score on Criterion 4.2 (*"Controller executes code on any model provided by the client without validation, allowing potential security issues"*).
-* **Criterion 4.3: No Debug or Deprecated Code**:
-  - **No Global Scope Pollution**: Never assign listeners or handlers to the global `window` object (e.g. `window.dragMoveListener = dragMoveListener`). Keep functions scoped within ES modules or component methods.
-  - **Clean XML Templates**: Remove obsolete comments describing old code or legacy frameworks (e.g. `<!-- DASHBOARD VIEW WITH INTERACTJS TEMPLATE -->`).
-* **Criterion 6.3: Grammar, Translatable Strings and UI Content**:
-  - **Translatable String Hygiene**: Never include HTML markup (`<br/>`, `<b>`, `<p>`) inside `self.env._(...)` or `_t(...)`. Translators should translate pure sentences; construct HTML formatting outside translation calls via f-strings or templates.
-  - **Window Action Title Capitalization**: Action titles in JS action definitions must use Title Case (`name: _t('Send Mail')`), NEVER ALL-CAPS (`'SEND MAIL'`).
-  - **Documentation & Description Accuracy**: Avoid duplicating sections in `README.rst` (e.g. "Company" duplicated under "Credits"). Use realistic, verified phrasing in `index.html` (e.g. "fully compatible" instead of "fully certified").
   - **Complete Model Coverage**: Every single model (`models.Model`) and transient model / wizard (`models.TransientModel`) MUST have an access row in `security/ir.access.csv`.
   - **Strict Least Privilege**: Infrastructure, database connector, and credential models must be restricted to `base.group_system`, not `base.group_user`. Sensitive password/secret fields must specify `groups="base.group_system"`. Audit log and synchronization models must have complete views and menus.
   - **Controller Model Validation & Whitelisting (Critical Blocking Security Rule - Score Penalty down to 60/100)**:
@@ -143,6 +147,18 @@ graph TD
     - **Access Control Enforcement**: Always call `record.check_access('read')` (or `'write'`) on the recordset with the current user's UID to enforce Odoo 20 security rules (`check_access` replaces deprecated `check_access_rights`).
     - **Mandatory Test**: Unit tests MUST include a test asserting that passing an unauthorized model (e.g. `'res.users'`) to the controller raises `Forbidden`.
 * **Criterion 4.3: No Debug or Deprecated Code (Blocking - Score Penalty down to 40/100)**:
+  - **Modern Bootstrap 5 Data Attributes in XML Templates**:
+    - Never leave legacy Bootstrap 4 data attributes in templates. Replace `data-toggle="dropdown"` with `data-bs-toggle="dropdown"`, `data-target` with `data-bs-target`, and `data-dismiss` with `data-bs-dismiss`.
+  - **No Duplicate CSS/SCSS Selector Blocks**:
+    - Never define identical class or ID selectors multiple times within the same stylesheet (e.g. duplicating `.text-color-yellow` or `.mode`).
+  - **Purge Stale Boilerplate Function Comments**:
+    - Remove obsolete or trivial function doc comments in JavaScript (e.g. `/* Function for resizing... */`, `// Setup function of the class...`).
+  - **No Global Scope Pollution**: Never assign listeners or handlers to the global `window` object (e.g. `window.dragMoveListener = dragMoveListener`). Keep functions scoped within ES modules or component methods.
+  - **Clean XML Templates**: Remove obsolete comments describing old code or legacy frameworks (e.g. `<!-- DASHBOARD VIEW WITH INTERACTJS TEMPLATE -->`).
+* **Criterion 6.3: Grammar, Translatable Strings and UI Content**:
+  - **Translatable String Hygiene**: Never include HTML markup (`<br/>`, `<b>`, `<p>`) inside `self.env._(...)` or `_t(...)`. Translators should translate pure sentences; construct HTML formatting outside translation calls via f-strings or templates.
+  - **Window Action Title Capitalization**: Action titles in JS action definitions must use Title Case (`name: _t('Send Mail')`), NEVER ALL-CAPS (`'SEND MAIL'`).
+  - **Documentation & Description Accuracy**: Avoid duplicating sections in `README.rst` (e.g. "Company" duplicated under "Credits"). Use realistic, verified phrasing in `index.html` (e.g. "fully compatible" instead of "fully certified").
   - **Zero Debug Artifacts**:
     - Absolute prohibition against `print()` statements in Python and `console.log()` / `debugger;` in JavaScript.
     - Zero `breakpoint()`, `import pdb`, `pdb.set_trace()`, or `import ipdb`.
@@ -662,7 +678,13 @@ sequenceDiagram
      - Never use obsolete `expand="0"` attribute on `<group>` in `<search>` views; it causes RelaxNG validation errors.
      - Always provide a `string` attribute on `<search string="...">`.
 
-2. **Bootstrap 5 & Modern HTML in QWeb Reports**:
+2. **Bootstrap 5 & Modern HTML in QWeb Reports and Views**:
+   - **Bootstrap 4 -> Bootstrap 5 Data Attributes (Criterion 4.3)**:
+     - Replace legacy `data-toggle="dropdown"` with **`data-bs-toggle="dropdown"`**. Never leave both or legacy `data-toggle`.
+     - Replace `data-target="..."` with **`data-bs-target="..."`**.
+     - Replace `data-dismiss="..."` with **`data-bs-dismiss="..."`**.
+   - **Translatable QWeb & XML Labels (Criterion 4.2)**:
+     - All static text nodes in XML views and Kanban cards (e.g. `Name:`, `Parent:`) must be wrapped in tags with `t-translation="on"` or standard element tags (e.g. `<span t-translation="on">Name:</span>`, `<strong t-translation="on">Parent:</strong>`), never bare untranslated text nodes.
    - **Bootstrap 3 -> Bootstrap 5 Classes**:
      - `table-condensed` ➔ **`table-sm`** (Bootstrap 3 `table-condensed` is obsolete and flagged as an error!).
      - `panel`, `panel-default` ➔ `card`, `card-body`.
@@ -676,6 +698,19 @@ sequenceDiagram
    - Modern syntax: Use standard ES6 classes extending `Component`.
    - Never use `var self = this;` — use arrow functions `() => {}` or method binding.
    - Services: Use `useService("rpc")`, `useService("action")`, `useService("notification")` instead of deprecated direct calls or undefined `self.rpc`.
+   - **In-Class `static template` & `static components` Declarations (Criterion 4.1)**:
+     - Component templates and child components must be declared directly inside the ES6 class definition (`static template = xml\`...\`;` or `static template = "template.id";`, `static components = { ChildA };`).
+     - NEVER assign templates after the class body (e.g. `DynamicDashboardTile.template = xml\`...\``).
+   - **OWL Element Referencing (`useRef`) vs Direct DOM Lookups (Criterion 4.1)**:
+     - NEVER use `document.querySelector`, `document.getElementById`, or `document.getElementsByClassName` for elements inside OWL component templates.
+     - Always use OWL refs: declare `this.myRef = useRef("refName")` (with `t-ref="refName"` in XML), or scope element lookups to component element bounds (`this.rootRef.el?.querySelectorAll(...)`).
+     - Brittle parent/sibling DOM traversals (such as `offsetParent.children[0].lastChild.querySelector(...)`) are strictly prohibited.
+   - **Safe Third-Party Global Library Access (Criterion 4.1)**:
+     - Never use bare undeclared global identifiers with fallback (e.g. `window.interact || interact` or `window.ExcelJS || ExcelJS`), which cause a `ReferenceError` in strict mode if undefined.
+     - Always use safe existence checks: `typeof window !== "undefined" && window.interact ? window.interact : null` or component helper getters (`get interact() { return typeof window !== "undefined" && window.interact ? window.interact : null; }`).
+   - **Prohibition of Untranslated String Literals in `t-out` (Criterion 4.2)**:
+     - Never interpolate raw untranslated strings inside dynamic QWeb expressions (e.g. `t-out="cond ? 'Light Mode' : 'Dark Mode'"`).
+     - Wrap dynamic UI labels in component getters localized via `_t(...)` (e.g. `get modeLabel() { return this.state.isDarkMode ? _t('Light Mode') : _t('Dark Mode'); }`) or use declarative QWeb tags (`<t t-if="cond">Light Mode</t><t t-else="">Dark Mode</t>`).
    - **Strict Prohibition of External CDN URLs (Criterion 3.1)**:
      - Review Criterion 3.1 strictly blocks any frontend assets loaded from external CDNs (e.g. `https://cdnjs.cloudflare.com/...`, `https://cdn.jsdelivr.net/...`).
      - All third-party libraries (e.g. jsPDF, html2canvas, html2pdf, ExcelJS, interactjs, font-awesome, bootstrap-icons) MUST be vendored locally under `static/lib/` and declared in `__manifest__.py` under `web.assets_backend`.
@@ -690,9 +725,12 @@ sequenceDiagram
      - Never assign listeners or handlers to the global `window` object (e.g. `window.dragMoveListener = dragMoveListener`). Keep functions scoped within ES modules or component methods.
    - **Window Action Title Capitalization (Criterion 6.3)**:
      - Action titles in JS action definitions must use Title Case (e.g. `name: _t('Send Mail')`), NEVER ALL-CAPS (`'SEND MAIL'`).
-   - **CSS / SCSS Hygiene & Specificity (Criterion 4.1)**:
+   - **CSS / SCSS Hygiene & Specificity (Criterion 4.1 & 4.3)**:
      - Avoid `!important` in custom stylesheets and component templates. Overriding styles with `!important` damages theme cascading.
+     - **No Duplicate Selector Declarations**: Never define identical class or ID selectors multiple times in the same CSS/SCSS file (e.g. duplicating `.text-color-yellow` or `.mode`).
      - Remove unused SCSS/CSS blocks (e.g. orphaned `.dark-theme` blocks).
+   - **Purge Stale Boilerplate Function Comments (Criterion 4.3)**:
+     - Remove obsolete or trivial function doc comments in JavaScript (e.g. `/* Function for resizing... */`, `// Setup function of the class...`).
    - **Clean XML Templates (Criterion 4.3)**:
      - Remove obsolete comments describing old code or legacy frameworks (e.g. `<!-- DASHBOARD VIEW WITH INTERACTJS TEMPLATE -->`).
 
@@ -1171,7 +1209,7 @@ if os.path.exists(manifest_p):
         if in_assets and ('https://' in line_s or 'http://' in line_s):
             violations.append(f'Manifest assets contains external CDN URL: {line_s}')
 
-# Check JS files for CDNs, Chart.js hardcoded paths, innerHTML = '', window pollution
+# Check JS files for CDNs, Chart.js hardcoded paths, innerHTML = '', window pollution, bare fallbacks, DOM queries, static templates
 js_dir = os.path.join(base, 'static', 'src', 'js')
 if os.path.exists(js_dir):
     for root, _, files in os.walk(js_dir):
@@ -1185,12 +1223,38 @@ if os.path.exists(js_dir):
                         violations.append(f'{f}:{idx}: External CDN loaded via loadJS')
                     if '/web/static/lib/Chart/Chart.js' in line:
                         violations.append(f'{f}:{idx}: Legacy Chart.js path used. Use loadBundle("web.chartjs_lib")')
-                    if re.search(r'\binnerHTML\s*=\s*['"\`]\s*['"\`]', line):
+                    if re.search(r'\binnerHTML\s*=\s*[\'"`]\s*[\'"`]', line):
                         violations.append(f'{f}:{idx}: innerHTML clearing detected without OWL component destruction')
                     if re.search(r'\bwindow\.[A-Za-z0-9_]+\s*=', line):
                         violations.append(f'{f}:{idx}: Global window property pollution detected')
+                    if re.search(r'\|\|\s*(interact|ExcelJS|jsPDF)\b', line):
+                        violations.append(f'{f}:{idx}: Bare global identifier fallback detected (ReferenceError risk)')
+                    if re.search(r'document\.(querySelector|getElementById|getElementsByClassName)\(', line):
+                        violations.append(f'{f}:{idx}: Direct DOM lookup in OWL component (use useRef instead)')
+                    if re.search(r'^[A-Za-z0-9_]+\.template\s*=', line):
+                        violations.append(f'{f}:{idx}: Component template assigned outside class body (use static template)')
+                    if '/* Function for' in line or '// Function' in line or '// Setup function' in line:
+                        violations.append(f'{f}:{idx}: Stale boilerplate function comment')
 
-# Check CSS/SCSS for !important
+# Check XML templates for Bootstrap 4 data attributes and untranslated t-out literals
+xml_dir = os.path.join(base, 'static', 'src', 'xml')
+if os.path.exists(xml_dir):
+    for root, _, files in os.walk(xml_dir):
+        for f in files:
+            if f.endswith('.xml'):
+                p = os.path.join(root, f)
+                with open(p, 'r', encoding='utf-8') as fh:
+                    for idx, line in enumerate(fh, 1):
+                        if re.search(r'\bdata-toggle\s*=', line):
+                            violations.append(f'{f}:{idx}: Legacy Bootstrap 4 data-toggle detected (use data-bs-toggle)')
+                        if re.search(r'\bdata-target\s*=', line):
+                            violations.append(f'{f}:{idx}: Legacy Bootstrap 4 data-target detected (use data-bs-target)')
+                        if re.search(r'\bdata-dismiss\s*=', line):
+                            violations.append(f'{f}:{idx}: Legacy Bootstrap 4 data-dismiss detected (use data-bs-dismiss)')
+                        if re.search(r't-out="[^"]*(\?[^"]*[\'"][A-Za-z\s]+[\'"][^"]*:[^"]*[\'"][A-Za-z\s]+[\'"])', line):
+                            violations.append(f'{f}:{idx}: Untranslated string literal in t-out dynamic expression')
+
+# Check CSS/SCSS for !important and duplicate selector blocks
 css_dir = os.path.join(base, 'static', 'src')
 if os.path.exists(css_dir):
     for root, _, files in os.walk(css_dir):
@@ -1198,16 +1262,23 @@ if os.path.exists(css_dir):
             if f.endswith(('.css', '.scss')):
                 p = os.path.join(root, f)
                 with open(p, 'r', encoding='utf-8') as fh:
-                    for idx, line in enumerate(fh, 1):
-                        if '!important' in line:
-                            violations.append(f'{f}:{idx}: !important rule found in stylesheet')
+                    content = fh.read()
+                for idx, line in enumerate(content.splitlines(), 1):
+                    if '!important' in line:
+                        violations.append(f'{f}:{idx}: !important rule found in stylesheet')
+                selectors = re.findall(r'(?m)^(\.[a-zA-Z0-9_\-]+)\s*\{', content)
+                seen = set()
+                for sel in selectors:
+                    if sel in seen:
+                        violations.append(f'{f}: Duplicated CSS selector "{sel}"')
+                    seen.add(sel)
 
 if violations:
     print(f'[FAIL FRONTEND AUDIT] Found {len(violations)} frontend issue(s):')
     for v in violations:
         print(f'  - {v}')
     sys.exit(1)
-print(f'[OK] Frontend assets, OWL hygiene, and stylesheets verified cleanly.')
+print(f'[OK] Frontend assets, OWL hygiene, XML attributes, and stylesheets verified cleanly.')
 "
 
 # 5. Check for linter issues (pylint-odoo & ruff / flake8 - Criterion 4.4)
@@ -1620,14 +1691,22 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] Dynamic SQL joins use unique table aliases.
   - [ ] No duplicate field label strings on the same model.
   - [ ] Lambda default on functions: `default=lambda self: self.get_default(...)`.
-- [ ] **Views & QWeb Reports (Section 4.1 & 4.2)**:
+- [ ] **Views & QWeb Reports (Section 4.1, 4.2 & 4.3)**:
   - [ ] `<tree>` converted to `<list>`.
   - [ ] `invisible` uses modern syntax (`invisible="not field"`).
   - [ ] Button styling uses `btn-secondary` instead of `btn-default`.
   - [ ] Wizard `<footer>` is direct child of `<form>`, outside `<sheet>`/`<group>`.
   - [ ] QWeb reports: `table-condensed` converted to `table-sm`.
   - [ ] QWeb reports: No obsolete `align="center"` / `align="right"`; uses `class="text-center"` / `class="text-end"`.
-  - [ ] JS uses OWL services (`useService`), no `var self = this`, no direct DOM access.
+  - [ ] **Modern Bootstrap 5 Attributes (Criterion 4.3)**: `data-bs-toggle="dropdown"` used instead of legacy `data-toggle="dropdown"`; `data-bs-target` and `data-bs-dismiss` used instead of `data-target` and `data-dismiss`.
+  - [ ] **Translatable QWeb & XML Labels (Criterion 4.2)**: Static text in Kanban cards and QWeb templates is translatable via `<span t-translation="on">...</span>` or element tags (e.g. `<span t-translation="on">Name:</span>`, `<strong t-translation="on">Parent:</strong>`), never bare untranslated strings.
+  - [ ] **No Untranslated Literals in `t-out` (Criterion 4.2)**: Dynamic QWeb expressions never interpolate raw untranslated strings (`t-out="cond ? 'A' : 'B'"`). Use component getters wrapped with `_t(...)` or declarative `<t t-if="cond">A</t><t t-else="">B</t>`.
+  - [ ] **In-Class `static template` Declarations (Criterion 4.1)**: OWL component templates are declared directly inside the class (`static template = xml\`...\``), never assigned externally after the class body.
+  - [ ] **OWL Element Referencing (`useRef`) (Criterion 4.1)**: Uses `useRef` for component DOM references, NEVER `document.querySelector` or `document.getElementById`.
+  - [ ] **Safe Global Access (Criterion 4.1)**: Never uses bare global fallbacks (`|| interact`); checks via `typeof window !== "undefined" && window.lib ? window.lib : null`.
+  - [ ] **Stylesheet Hygiene (Criterion 4.1 & 4.3)**: Zero `!important` declarations, zero duplicated class/ID selector definitions, and zero dead CSS blocks.
+  - [ ] **Purge Stale Boilerplate Function Comments (Criterion 4.3)**: Remove obsolete JS function block comments (`/* Function for ... */`, `// Setup function ...`).
+  - [ ] JS uses OWL services (`useService`), no `var self = this`.
 - [ ] **Tests & Linters (Section 5 & Criterion 4.4 - Blocking)**:
   - [ ] Clean install & unit tests pass on fresh database **WITHOUT demo data** (`--without-demo=all`) with **0 failed, 0 errors**.
   - [ ] Clean install & unit tests pass on fresh database **WITH demo data** with **0 failed, 0 errors**.

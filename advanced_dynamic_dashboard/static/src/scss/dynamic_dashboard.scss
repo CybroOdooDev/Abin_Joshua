@@ -45,10 +45,6 @@ html .o_web_client > .o_action_manager {
   color: var(--red);
 }
 
-.text-color-yellow {
-  color: var(--yellow);
-}
-
 .tile-container__icon-container {
   border-radius: 50%;
   width: 4.75rem;
@@ -111,15 +107,12 @@ html .o_web_client > .o_action_manager {
 .o_advanced_dynamic_dashboard label input{
     appearance: none;
 }
-.mode{
-    padding-left: 7px;
-    font-family: 'odoo_ui_icons';
-    display: none;
-}
 .view-mode-icon{
     font-size: x-large;
 }
 .mode {
+    padding-left: 7px;
+    font-family: 'odoo_ui_icons';
     opacity: 0;
     display: inline-block;
     transition: opacity 1s ease-out;
