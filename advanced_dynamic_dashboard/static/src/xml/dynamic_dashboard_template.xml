@@ -64,8 +64,8 @@
                                 t-on-click="(ev) => this.saveLayout(ev)">Save Layout</button>
                         <label for="view_mode"
                                class="view-mode-toggle"
-                               t-on-mouseover="(ev) => this.showViewMode(ev)"
-                               t-on-mouseout="(ev) => this.hideViewMode(ev)"
+                               t-on-mouseover="() => this.showViewMode()"
+                               t-on-mouseout="() => this.hideViewMode()"
                                t-on-click="(ev) => this.changeViewMode(ev)">
                             <input type="checkbox" id="view_mode" t-att-checked="this.state.isDarkMode"/>
                             <span><i t-attf-class="bi {{ this.state.isDarkMode ? 'bi-cloud-sun-fill' : 'bi-moon-stars-fill' }} view-mode-icon"/></span>
@@ -80,6 +80,9 @@
                                 t-ref="themeSelector"
                                 t-on-change="(ev) => this.onChangeTheme(ev)">
                             <option value="0" t-translation="on">Select Theme</option>
+                            <t t-foreach="this.state.themes" t-as="theme" t-key="theme.id or theme.name">
+                                <option t-att-value="theme.style" t-out="theme.name"/>
+                            </t>
                         </select>
                     </div>
                 </div>

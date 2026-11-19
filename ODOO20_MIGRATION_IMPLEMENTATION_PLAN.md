@@ -105,6 +105,9 @@ graph TD
   - **In-Class `static template` & `static components` Declarations**:
     - Component templates and subcomponents must be declared directly inside the ES6 class definition (`static template = xml\`...\`;`, `static components = { ChildA };`).
     - Never assign templates after the class body (e.g. `MyComponent.template = xml\`...\``).
+  - **Declarative OWL Option Rendering vs Direct DOM Creation**:
+    - In dynamic `<select>` dropdowns or option lists, render `<option>` elements declaratively in QWeb templates via `<t t-foreach="this.state.items" ...><option t-att-value="..." t-out="..."/></t>`.
+    - Never create DOM elements with `document.createElement("option")` and append them imperatively in setup or render methods.
   - **Safe Third-Party Global Library Access**:
     - Never use bare undeclared global identifiers with fallback (e.g. `window.interact || interact` or `window.ExcelJS || ExcelJS`), which cause a `ReferenceError` in strict mode if undefined.
     - Always use safe existence checks: `typeof window !== "undefined" && window.lib ? window.lib : null` or component helper getters (`get interact() { return typeof window !== "undefined" && window.interact ? window.interact : null; }`).
@@ -157,9 +160,12 @@ graph TD
   - **Purge Stale Boilerplate Function Comments**:
     - Remove obsolete or trivial function doc comments in JavaScript (e.g. `/* Function for resizing... */`, `// Setup function of the class...`).
   - **No Global Scope Pollution**: Never assign listeners or handlers to the global `window` object (e.g. `window.dragMoveListener = dragMoveListener`). Keep functions scoped within ES modules or component methods.
+  - **Zero Unused Event Handlers / Callback Parameters**:
+    - In component methods and XML template listeners, avoid declaring unused event parameters (`(ev)` or `ev`) when the event object is never accessed (e.g. use `showViewMode()` and `() => this.showViewMode()` instead of `showViewMode(ev)`).
   - **Clean XML Templates**: Remove obsolete comments describing old code or legacy frameworks (e.g. `<!-- DASHBOARD VIEW WITH INTERACTJS TEMPLATE -->`).
 * **Criterion 6.3: Grammar, Translatable Strings and UI Content**:
   - **Translatable String Hygiene**: Never include HTML markup (`<br/>`, `<b>`, `<p>`) inside `self.env._(...)` or `_t(...)`. Translators should translate pure sentences; construct HTML formatting outside translation calls via f-strings or templates.
+  - **Active Phrasing & Style Quality**: Avoid pidgin phrasing and passive `"allows users to + verb"` patterns in README and documentation (e.g. use `"enables users to dynamically build"` or `"provides dynamic dashboard blocks"` instead of `"allows users to build"`).
   - **Window Action Title Capitalization**: Action titles in JS action definitions must use Title Case (`name: _t('Send Mail')`), NEVER ALL-CAPS (`'SEND MAIL'`).
   - **Documentation & Description Accuracy**: Avoid duplicating sections in `README.rst` (e.g. "Company" duplicated under "Credits"). Use realistic, verified phrasing in `index.html` (e.g. "fully compatible" instead of "fully certified").
   - **Zero Debug Artifacts**:
@@ -727,8 +733,13 @@ sequenceDiagram
    - **OWL Component Lifecycle & Clean Unmounting (Criterion 4.1)**:
      - **Strict Prohibition of `container.innerHTML = ''`**: Never clear DOM containers with `innerHTML = ''` when OWL components are mounted inside them. Doing so destroys DOM nodes while leaving component instances running in memory, breaking component unmounting lifecycles (`onWillUnmount`).
      - **Declarative Child Components**: Child components must be declared via `static components = { ChildComponent }` and rendered declaratively using OWL template directives (`<t t-foreach="state.items" t-as="item" t-key="item.id"><ChildComponent widget="item"/></t>`) backed by reactive state (`useState`). OWL automatically manages the component lifecycle, mounting, and unmounting cleanly. Imperative `mount()` inside action handlers or filters is strictly prohibited.
+   - **Declarative Option Rendering in OWL (Criterion 4.1)**:
+     - Dynamic dropdowns (such as theme selectors or model pickers) must be populated declaratively using reactive state and `<t t-foreach="this.state.items" ...><option t-att-value="..." t-out="..."/></t>`.
+     - Prohibit `document.createElement("option")` and imperative element appending in setup, onMounted, or render methods.
    - **No Global Scope Pollution (Criterion 4.3)**:
      - Never assign listeners or handlers to the global `window` object (e.g. `window.dragMoveListener = dragMoveListener`). Keep functions scoped within ES modules or component methods.
+   - **Prune Unused Event Callback Parameters (Criterion 4.3)**:
+     - In component methods and template listeners, avoid defining unused event parameters (`(ev)` or `ev`) when the event object is never accessed (use `showViewMode()` and `() => this.showViewMode()` instead of `showViewMode(ev)`).
    - **Window Action Title Capitalization (Criterion 6.3)**:
      - Action titles in JS action definitions must use Title Case (e.g. `name: _t('Send Mail')`), NEVER ALL-CAPS (`'SEND MAIL'`).
    - **CSS / SCSS Hygiene & Specificity (Criterion 4.1 & 4.3)**:
@@ -1017,7 +1028,7 @@ import os, re, sys
 base = 'migration/<technical_name>'
 SUSPICIOUS_PATTERNS = [
     re.compile(r'copy', re.IGNORECASE),
-    re.compile(r'(?<![a-z])temp(?![a-z])', re.IGNORECASE),
+    re.compile(r'temp', re.IGNORECASE),
     re.compile(r'\.bak$', re.IGNORECASE),
     re.compile(r'\.tmp$', re.IGNORECASE),
     re.compile(r'~$'),
@@ -1241,6 +1252,8 @@ if os.path.exists(js_dir):
                         violations.append(f'{f}:{idx}: Component template assigned outside class body (use static template)')
                     if re.search(r'[\'"]default_name[\'"]\s*:\s*[\'"][A-Za-z]', line):
                         violations.append(f'{f}:{idx}: Untranslated default_name literal in JS action context (use _t)')
+                    if re.search(r'document\.createElement\([\'"]option[\'"]\)', line):
+                        violations.append(f'{f}:{idx}: Imperative option element creation detected (use OWL declarative t-foreach)')
                     if '/* Function for' in line or '// Function' in line or '// Setup function' in line:
                         violations.append(f'{f}:{idx}: Stale boilerplate function comment')
 
@@ -1544,6 +1557,7 @@ GRAMMAR_PATTERNS = [
     (re.compile(r'string=[\"\'][A-Za-z0-9]+(?<!\s)\([A-Za-z0-9]'), 'Missing space before opening parenthesis in string attribute'),
     (re.compile(r'string=[\"\']Export as (?:xlsx|csv|pdf)[\"\']'), 'Uncapitalized file format acronym in button string (use XLSX, CSV, PDF)'),
     (re.compile(r'\ballows\s+to\s+[a-z]+', re.IGNORECASE), 'Prohibited \"allows to + verb\" pattern detected'),
+    (re.compile(r'\ballows\s+users\s+to\b', re.IGNORECASE), 'Prohibited \"allows users to\" pattern detected; use \"enables users to\"'),
 ]
 
 for root, _, files in os.walk(base):
@@ -1597,7 +1611,7 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
 
    # Step 5: Purge copy, temp, and backup files (Criterion 1.5 & 6.2 - Blocking 25/100 Penalty)
    find . -iname "*copy*" -delete
-   find . -iname "*temporary*" -o -iname "*temp.*" -o -iname "*_temp.*" -o -iname "*temp_*" -delete
+   find . -iname "*temp*" -delete
    find . -type f -name "*~" -delete
    find . -type f -name "*.bak" -delete
    find . -type f -name "*.tmp" -delete
@@ -1720,6 +1734,8 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] **Stylesheet Hygiene (Criterion 4.1 & 4.3)**: Zero `!important` declarations, zero duplicated class/ID selector definitions, and zero dead CSS blocks.
   - [ ] **Purge Stale Boilerplate Function Comments (Criterion 4.3)**: Remove obsolete JS function block comments (`/* Function for ... */`, `// Setup function ...`).
   - [ ] JS uses OWL services (`useService`), no `var self = this`.
+  - [ ] Dynamic select options populated declaratively via `<t t-foreach>` in OWL templates; zero `document.createElement("option")`.
+  - [ ] Event handler callbacks omit unused event parameters (e.g. `showViewMode()` rather than dangling `showViewMode(ev)`).
 - [ ] **Tests & Linters (Section 5 & Criterion 4.4 - Blocking)**:
   - [ ] Clean install & unit tests pass on fresh database **WITHOUT demo data** (`--without-demo=all`) with **0 failed, 0 errors**.
   - [ ] Clean install & unit tests pass on fresh database **WITH demo data** with **0 failed, 0 errors**.
@@ -1736,7 +1752,7 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] Binary attachment assertions in tests use `bytes(attachment.raw)` or `.content` (never `assertIn(..., attachment.raw)` which triggers `TypeError: 'LocalBinaryFile' is not iterable`).
   - [ ] Test record creation populates underlying source fields rather than readonly related fields (e.g., `'user_id': user.id` on `calendar.event`, not ignored `'partner_id': partner.id`).
 - [ ] **Documentation Parity & Grammar (Section 6.3)**:
-  - [ ] No "allows to + verb" (use "allows users to + verb" or "allows + verb-ing").
+  - [ ] No "allows to + verb" or "allows users to" (prefer active phrasing: "enables users to", "provides").
   - [ ] No run-on / pidgin English ("its open", "it open", "click the menu its open").
   - [ ] No malformed prepositions ("block to setting", "session to the sale settings").
   - [ ] Selection options and labels properly pluralized ("Last 3 Months", not "Last 3 Month").

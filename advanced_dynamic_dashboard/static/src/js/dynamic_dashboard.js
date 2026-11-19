@@ -27,6 +27,7 @@ export class AdvancedDynamicDashboard extends Component {
             isEditingLayout: false,
             showModeText: false,
             blocks: [],
+            themes: [],
         });
         onMounted(() => {
             this.renderDashboard();
@@ -99,15 +100,7 @@ export class AdvancedDynamicDashboard extends Component {
 
     async renderDashboard() {
         const themes = await this.orm.call('dashboard.theme', 'get_records', [[]]);
-        const themeSelector = this.themeSelectorRef.el;
-        if (themeSelector) {
-            themes.forEach((theme) => {
-                const option = document.createElement("option");
-                option.value = theme.style;
-                option.text = theme.name;
-                themeSelector.append(option);
-            });
-        }
+        this.state.themes = themes;
         const blocks = await this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId]);
         this.state.blocks = blocks;
     }
@@ -251,11 +244,11 @@ export class AdvancedDynamicDashboard extends Component {
         });
     }
 
-    showViewMode(ev) {
+    showViewMode() {
         this.state.showModeText = true;
     }
 
-    hideViewMode(ev) {
+    hideViewMode() {
         this.state.showModeText = false;
     }
 
