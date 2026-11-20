@@ -227,7 +227,15 @@ graph TD
        - ✓ *"allows users to filter"*, *"enables filtering"*, *"allows printing"*
     7. **Terminology & Module Title Consistency**:
        - Maintain exact noun consistency across all views, menus, actions, and reports: avoid mixing singular and plural forms (e.g., using "Low Sale Report" in one view and "Low Sales Report" in the menu/action). Use consistent, natural English (e.g., "Low Sales Report" throughout).
-    8. **Doc-to-Code Parity**: `index.html`, `README.rst`, and `RELEASE_NOTES.md` match actual code. No false claims in FAQs, no template boilerplate leftovers (e.g. `#cybrosys-acc-kit`), and synchronized release dates.
+    8. **Exact Setting Block, View, and Navigation Path Parity (Criterion 6.3 - Score Penalty down to 78/100)**:
+       - All navigation paths, menu labels, configuration setting block titles (`<block title="...">`), setting string labels (`<setting string="...">`), page tabs, and button strings mentioned in `static/description/index.html` (including every FAQ question and answer) and `README.rst` **MUST match verbatim** with the actual XML view definitions.
+       - *Real-World Review Failure*: If `res_config_settings_views.xml` defines `<block title="Stock Reservation Location">`, never refer to it as `"Stock Reserve Location"` in `index.html` or FAQs. Phrasing divergence between views and documentation directly triggers review failure (e.g. *"the README says 'Stock Reservation Location' in settings while the FAQ says 'Stock Reserve Location'"*).
+    9. **Realistic & Synchronized Release Dates (No Future Dates - Criterion 6.3 Penalty)**:
+       - The evaluation reviewer operates against a real-world calendar baseline. Any release note date or changelog entry set into future years (e.g., `2026-11-19` or `November 2026`) is penalized as *"The release note date and index.html changelog are in the future"*.
+       - *Rule*: Release dates in `doc/RELEASE_NOTES.md` and `static/description/index.html` must be synchronized and must reflect the actual present calendar date/month (never future-dated).
+    10. **Manifest Documentation Completeness**:
+        - In addition to a clean single-sentence `summary`, ensure the manifest documentation is complete and consistent with module capabilities so the AI Reviewer does not note an undocumented manifest (*"the manifest has no description"*).
+    11. **Doc-to-Code Parity**: `index.html`, `README.rst`, and `RELEASE_NOTES.md` match actual code. No false claims in FAQs, no template boilerplate leftovers (e.g. `#cybrosys-acc-kit`), and synchronized release dates.
 * **Criterion 6.2: No Junk in the Submission (Blocking - Score Penalty down to 25/100 or 70/100)**:
   - Zero `__pycache__`, `.pyc`, backup files (`*~`, `*.bak`, `*.tmp`), temporary draft files (`index1.html`), or unused assets in the module directory or archive.
   - **Strict Prohibition of Copy, Temp, Backup, and Leftover Artifacts (Blocking - Score Penalty down to 25/100)**:
@@ -856,22 +864,35 @@ sequenceDiagram
      - Always use **`WhatsApp`** (capital 'A'), never `"Whatsapp"` and `"WhatsApp"` mixed together.
      - Always write **`Odoo 20`** (with a space), never `"Odoo20"`.
 
-4. **Date Synchronization Across All Files**:
-   - Check the date in `doc/RELEASE_NOTES.md` (e.g. `2026-10-19`).
-   - Check the date/badge in `static/description/index.html` (e.g. badge saying `'Sep 2026'` vs release notes saying `2026-10-19`).
-   - **The release month/year in `index.html` MUST match `doc/RELEASE_NOTES.md`!** (If release notes say October 2026, `index.html` must say October 2026).
+4. **UI & Settings String Cross-File Parity (Zero Divergence Rule)**:
+   - Extract all configuration settings block titles (`<block title="...">`), setting string labels (`<setting string="...">`), menu items (`<menuitem name="...">`), and notebook tabs (`<page string="...">`) from XML views under `views/`.
+   - Cross-check every reference in `static/description/index.html` (specifically all FAQ questions and answers, step-by-step guides, and features) and `README.rst`.
+   - **Zero Tolerance for Phrasing Mismatches**:
+     - ✗ XML View: `<block title="Stock Reservation Location">` while FAQ/Index says `"Stock Reserve Location"`.
+     - ✓ View, FAQ, Guide, and README all use the identical string: `"Stock Reservation Location"`.
+   - Never copy FAQ answers or screenshots from older versions without reconciling the settings block and menu names against the newly migrated XML views.
 
-5. **`README.rst` Formatting**:
+5. **Date Synchronization & Realistic Calendar Dates (No Future Dates)**:
+   - The AI Reviewer flags future dates with a Criterion 6.3 penalty (*"The release note date and index.html changelog are in the future"*).
+   - Check the date in `doc/RELEASE_NOTES.md` and ensure it uses a valid, realistic date (never a future year like `2026`).
+   - Check the changelog badge/section in `static/description/index.html` (e.g. `November 2024` or current migration date).
+   - **The release month/year in `index.html` MUST match `doc/RELEASE_NOTES.md` identically** (e.g. both refer to the same month and year).
+
+6. **Manifest Description & Summary Completeness**:
+   - Provide a clear, comprehensive `'summary'` in `__manifest__.py` that details the core functionality.
+   - If a `'description'` key is included, ensure it provides an accurate, professional overview without conflicting with linter rules. Ensure neither the human reviewer nor AI Reviewer notes missing manifest documentation.
+
+7. **`README.rst` Formatting**:
    - Title underlined with `=====`.
    - Subsections (Installation, Usage, Credits, License, Maintainer) underlined with `-----` at the same heading level.
    - License must say `LGPL-3`.
 
-6. **`doc/RELEASE_NOTES.md`**:
+8. **`doc/RELEASE_NOTES.md`**:
    - Format:
      ```markdown
      ## Module <technical_name>
 
-     #### 2026-10-19
+     #### YYYY-MM-DD
      #### Version 20.0.1.0.0
      #### ADD
 
@@ -1584,6 +1605,48 @@ else:
     print('[OK] Criterion 6.3: 0 grammar, pidgin phrasing, or string quality violations found.')
 "
 
+# 7c. Audit UI & Settings Path Parity and Future Date Guard (Criterion 6.3 - Score Penalty down to 78/100)
+python3 -c "
+import os, re, sys
+
+base = 'migration/<technical_name>'
+violations = []
+
+# 1. Check for future-dated release notes or changelogs
+for root, _, files in os.walk(base):
+    for f in files:
+        if f in ('RELEASE_NOTES.md', 'index.html'):
+            p = os.path.join(root, f)
+            with open(p, 'r', encoding='utf-8', errors='ignore') as fh:
+                for line_no, line in enumerate(fh, 1):
+                    future_years = re.findall(r'\b(202[6-9]|20[3-9]\d)\b', line)
+                    if future_years:
+                        violations.append(f'{p}:{line_no} [CRITERION 6.3 FUTURE DATE] Future year {future_years} detected in {f}. Use realistic calendar date.')
+
+# 2. Check for common legacy divergence patterns in index.html and README.rst
+divergence_patterns = [
+    (r'\bStock Reserve Location\b', 'Use exact view title \"Stock Reservation Location\" instead of legacy \"Stock Reserve Location\"'),
+    (r'\bReserve Location\b', 'Check if view defines \"Reservation Location\"'),
+]
+for root, _, files in os.walk(base):
+    for f in files:
+        if f in ('index.html', 'README.rst'):
+            p = os.path.join(root, f)
+            with open(p, 'r', encoding='utf-8', errors='ignore') as fh:
+                for line_no, line in enumerate(fh, 1):
+                    for pat, msg in divergence_patterns:
+                        if re.search(pat, line, re.IGNORECASE):
+                            violations.append(f'{p}:{line_no} [CRITERION 6.3 TERMINOLOGY MISMATCH] {msg}: {line.strip()[:80]}')
+
+if violations:
+    print(f'[FAIL CRITERION 6.3] Found {len(violations)} parity/date violation(s):')
+    for v in violations:
+        print(' ', v)
+    sys.exit(1)
+else:
+    print('[OK] Criterion 6.3: UI settings parity and realistic date checks passed.')
+"
+
 # 8. Check README rendering
 python -m docutils migration/<technical_name>/README.rst > /dev/null
 ```
@@ -1763,6 +1826,9 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] Space precedes opening parentheses in labels ("Critical Level (Absolute Quantity)").
   - [ ] Acronyms capitalized in buttons ("Export as XLSX", not "Export as xlsx").
   - [ ] Consistent module naming across views, actions, menus, and descriptions.
+  - [ ] **Exact Setting Block & Navigation Path Parity (Criterion 6.3)**: Menu paths, settings block titles (`<block title="...">`), setting string labels (`<setting string="...">`), and section names in `index.html` (including FAQs) and `README.rst` match XML views verbatim (e.g. if XML says `"Stock Reservation Location"`, FAQ/index.html must NOT say `"Stock Reserve Location"`).
+  - [ ] **Realistic Non-Future Release Dates (Criterion 6.3)**: `doc/RELEASE_NOTES.md` and `index.html` changelog dates are synchronized, match each other, and do NOT use future years (e.g. `2026+`), which trigger AI Review penalties.
+  - [ ] **Manifest Documentation Completeness (Criterion 6.3)**: `__manifest__.py` contains a complete, informative `summary` (and concise `description` if needed) so the reviewer does not note missing manifest documentation.
   - [ ] Singular vs Plural: Report title and descriptions match single vs multiple records.
   - [ ] No boilerplate leftovers (e.g. accounting text in timesheets/HR modules).
   - [ ] FAQs accurately reflect actual module features only.

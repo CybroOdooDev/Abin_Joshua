@@ -128,14 +128,7 @@ class SaleStockReservation(models.TransientModel):
             move = self.env['stock.move'].create(move_vals)
             rec.move_id = move.id
             move._action_confirm()
-            self.env['stock.move.line'].create({
-                'move_id': move.id,
-                'product_id': rec.product_id.id,
-                'uom_id': rec.unit_of_measure_id.id,
-                'location_id': source_location.id,
-                'location_dest_id': destination_location.id,
-                'quantity': reserve_qty,
-            })
+            move._action_assign()
             history_vals_list.append((0, 0, {
                 'order_line_name': rec.order_line_name,
                 'product_id': rec.product_id.id,

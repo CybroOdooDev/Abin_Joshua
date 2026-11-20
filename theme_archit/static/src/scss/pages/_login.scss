@@ -1,0 +1,143 @@
+.login {
+    background-image: linear-gradient(#11111100, #11111100), url(./../img/banner/2.jpg);
+    justify-content: center;
+    height: 100vh;
+    background-size: cover;
+    width: 100%;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
+    .h-full {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .wrapper {
+        position: relative;
+        .login_form {
+            background: aliceblue;
+            padding: 40px 1px;
+            border-radius: 25px;
+            margin-top: 50px;
+            h3 {
+                color: $color-brand;
+                font-family: myFirstFont;
+                text-align: center;
+                font-size: 40px;
+                padding-bottom: 30px;
+                letter-spacing: 2px;
+            }
+            form {
+                .form-group {
+                    width: 70%;
+                    margin: auto;
+                    margin-bottom: auto;
+                    margin-bottom: 32px;
+                    .form-control {
+                        border-radius: 0;
+                        height: calc(2.5em + 0.95rem + 2px);
+                        padding: 0.575rem 0.75rem;
+                        box-shadow: none !important;
+                        background-color: transparent !important;
+                        &:focus {
+                            color: #5f5f5f;
+                            background-color: #fff;
+                            border-color: $color-brand2;
+                            outline: 0;
+                        }
+                    }
+                }
+                .txt {
+                    border: 1px solid;
+                    border-color: transparent;
+                    border-top-color: $color-border !important;
+                    border-right-color: $color-border !important;
+                    border-bottom-color: $color-border !important;
+                    border-left-color: $color-border !important;
+                    &:focus {
+                        color: #5f5f5f;
+                        background-color: #fff;
+                        border-color: #fa3737 !important;
+                        outline: 0;
+                    }
+                }
+                .check {
+                    display: flex;
+                    justify-content: end;
+                }
+            }
+        }
+    }
+}
+
+body:has(.o_user_switch) {
+    .login .wrapper .login_form,
+    .loging_enter .wrapper .loging_template,
+    .login {
+        display: none !important;
+    }
+}
+
+.oe_website_login_container .o_user_switch,
+.o_user_switch {
+    max-width: 400px;
+    margin: 60px auto 40px auto;
+    position: relative;
+    z-index: 10;
+    p {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+    }
+    .list-group {
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .list-group-item {
+        border: none;
+        border-bottom: 1px solid #f0f0f0;
+        background-color: #ffffff;
+        color: #191919;
+        font-weight: 500;
+        padding: 12px 18px;
+        transition: background-color 0.2s ease-in-out;
+        &:last-child {
+            border-bottom: none;
+        }
+        &:hover {
+            background-color: #f8f9fa;
+        }
+    }
+    .btn-link {
+        color: #f77062 !important;
+        font-weight: 500;
+        text-decoration: none;
+        margin-top: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        &:hover {
+            color: #fe5196 !important;
+            text-decoration: underline;
+        }
+    }
+}
+
+.o_user_switch_btn {
+    color: #f77062 !important;
+    font-weight: 500;
+    font-size: 0.875rem;
+    text-decoration: none;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    cursor: pointer;
+    &:hover {
+        color: #fe5196 !important;
+        text-decoration: underline;
+    }
+}

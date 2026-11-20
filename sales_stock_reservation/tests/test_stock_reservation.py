@@ -103,6 +103,8 @@ class TestStockReservation(common.TransactionCase):
         self.assertTrue(move, "A stock move should be linked to the reservation.")
         self.assertIn(move.state, ['confirmed', 'assigned'],
                       "The stock move should be in 'confirmed' or 'assigned' state.")
+        self.assertEqual(move.quantity, 10.0,
+                         "Reserved move quantity should not be duplicated.")
 
         customer_mail = self.env['mail.mail'].search([
             ('email_to', '=', self.partner.email),
@@ -252,6 +254,8 @@ class TestStockReservation(common.TransactionCase):
         reserved_line = sale_order.reserved_stock_ids[0]
         self.assertEqual(reserved_line.reserved_quantity, 4.0,
                          "Reserved quantity should reflect partial reservation entered.")
+        self.assertEqual(reserved_line.move_id.quantity, 4.0,
+                         "Reserved move quantity should match partial reservation.")
 
         warning_chatter = sale_order.message_ids.filtered(
             lambda m: "no email address configured" in (m.body or ''),
