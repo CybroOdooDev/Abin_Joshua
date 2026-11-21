@@ -457,6 +457,25 @@ html {
   padding: 10px 15px;
 }
 
+.btn-secondary {
+  background: #191919;
+  color: #fff !important;
+  padding: 10px 15px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid transparent !important;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-secondary:hover {
+  background-color: #d4434c !important;
+  border-color: #d4434c !important;
+  color: #fff !important;
+}
+
 
 .btn-primary {
   background-color: #000 !important;
@@ -3746,6 +3765,35 @@ div {
   padding: 0.575rem 0.75rem;
   box-shadow: none !important;
   background-color: transparent !important;
+}
+
+.loging_enter .wrapper .loging_template form .form-group .input-group .btn,
+.login .wrapper .login_form form .form-group .input-group .btn {
+  background-color: #191919 !important;
+  color: #ffffff !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0.575rem 1rem;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 0 !important;
+  border: none !important;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.loging_enter .wrapper .loging_template form .form-group .input-group .btn:hover,
+.login .wrapper .login_form form .form-group .input-group .btn:hover {
+  background-color: #d4434c !important;
+  color: #ffffff !important;
+}
+
+.loging_enter .wrapper .loging_template form .form-group .input-group .btn .oi,
+.login .wrapper .login_form form .form-group .input-group .btn .oi {
+  font-size: 16px;
+  line-height: 1;
 }
 
 body:has(.o_user_switch) .login .wrapper .login_form,

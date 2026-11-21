@@ -56,6 +56,23 @@
             color: $color-white;
         }
     }
+    &-secondary {
+        background: $color-brand;
+        color: $color-white !important;
+        padding: 10px 15px;
+        font-size: 14px;
+        font-weight: 500;
+        border: 1px solid transparent !important;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        &:hover {
+            background-color: $color-brand2 !important;
+            border-color: $color-brand2 !important;
+            color: $color-white !important;
+        }
+    }
     &-black {
         background: $color-brand;
         padding: 10px 20px;

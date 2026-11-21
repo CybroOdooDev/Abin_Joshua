@@ -34,9 +34,10 @@
                                                                readonly="readonly"/>
                                                         <a role="button"
                                                            href="/web/database/selector"
-                                                           class="btn btn-secondary">
+                                                           class="btn btn-secondary d-flex align-items-center gap-1">
                                                             Select
-                                                            <i class="fa fa-database"
+                                                            <i class="oi"
+                                                               data-icon="database"
                                                                role="img"
                                                                aria-label="Database"
                                                                title="Database"/>

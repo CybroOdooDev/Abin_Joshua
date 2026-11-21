@@ -47,6 +47,33 @@
                             outline: 0;
                         }
                     }
+                    .input-group {
+                        .btn {
+                            background-color: $color-brand !important;
+                            color: $color-white !important;
+                            display: inline-flex;
+                            align-items: center;
+                            justify-content: center;
+                            gap: 6px;
+                            padding: 0.575rem 1rem;
+                            font-size: 14px;
+                            font-weight: 500;
+                            border-radius: 0 !important;
+                            border: none !important;
+                            text-decoration: none;
+                            transition: all 0.3s ease;
+
+                            &:hover {
+                                background-color: $color-brand2 !important;
+                                color: $color-white !important;
+                            }
+
+                            .oi {
+                                font-size: 16px;
+                                line-height: 1;
+                            }
+                        }
+                    }
                 }
                 .txt {
                     border: 1px solid;
