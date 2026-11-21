@@ -17,7 +17,7 @@
 #############################################################################
 {
     'name': 'Product Sales By Location',
-    'version': '19.5.1.0.0',
+    'version': '20.0.1.0.0',
     'category': 'Sales',
     'summary': " We can set the location of products for delivery. ",
     'description': " This app allows our user to set a location on sale order"
