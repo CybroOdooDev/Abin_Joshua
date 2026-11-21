@@ -34,6 +34,7 @@
     'website': "https://www.cybrosys.com",
     'depends': ['website'],
     'data': [
+        'data/website_menu_data.xml',
         'views/footer.xml',
         'views/header.xml',
         'views/loging_templates.xml',
