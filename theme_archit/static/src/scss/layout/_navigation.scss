@@ -191,6 +191,29 @@
             padding-left: 30px;
         }
     }
+    form.dropdown-item {
+        background: transparent !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        &:hover {
+            background: transparent !important;
+        }
+        #o_logout {
+            background: transparent !important;
+            color: #191919 !important;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0.5rem 0.75rem !important;
+            width: 100% !important;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            &:hover {
+                background-color: rgba(0, 0, 0, 0.06) !important;
+                color: #191919 !important;
+            }
+        }
+    }
 }
 /* top line needs a little padding */
 .navbar-toggler span:nth-child(1) {

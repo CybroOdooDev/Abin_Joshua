@@ -1619,6 +1619,59 @@ div {
   border-radius: 0;
 }
 
+/* User dropdown menu: fix Logout button background and text visibility */
+.dropdown-menu form.dropdown-item,
+.js_usermenu form.dropdown-item {
+  background: transparent !important;
+  background-color: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.dropdown-menu form.dropdown-item:hover,
+.js_usermenu form.dropdown-item:hover {
+  background: transparent !important;
+  background-color: transparent !important;
+}
+
+.dropdown-menu #o_logout,
+.dropdown-menu .dropdown-item #o_logout,
+.dropdown-menu form.dropdown-item button.btn,
+.js_usermenu #o_logout {
+  background: transparent !important;
+  background-color: transparent !important;
+  color: #191919 !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 0.95rem !important;
+  font-weight: 400 !important;
+  padding: 0.5rem 0.75rem !important;
+  margin: 0 !important;
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  border-radius: 0 !important;
+  opacity: 1 !important;
+  transition: background-color 0.2s ease, color 0.2s ease !important;
+}
+
+.dropdown-menu #o_logout:hover,
+.dropdown-menu .dropdown-item:hover #o_logout,
+.dropdown-menu form.dropdown-item:hover button.btn,
+.js_usermenu #o_logout:hover {
+  background-color: rgba(0, 0, 0, 0.06) !important;
+  color: #191919 !important;
+}
+
+.dropdown-menu #o_logout i,
+.dropdown-menu #o_logout .oi {
+  color: inherit !important;
+  margin-right: 0.35rem !important;
+}
+
+
 .part1 .wrapper .img_warapper {
   max-width: 650px;
 }
