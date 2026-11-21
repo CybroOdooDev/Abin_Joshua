@@ -924,90 +924,78 @@ html {
   }
 }
 
-.banner .owl-carousel {
+.banner .carousel {
   position: relative;
 }
 
-.banner .owl-carousel .owl-nav {
-  position: absolute;
-  display: none;
-  right: 0%;
-  bottom: 50%;
-  width: 100%;
-  text-align: center;
-  padding-top: 23px;
-}
-
-@media screen and (max-width: 996px) {
-  .banner .owl-carousel .owl-nav {
-    right: 0%;
-    bottom: 20%;
-  }
-}
-
-@media screen and (max-width: 576px) {
-  .banner .owl-carousel .owl-nav {
-    right: 0%;
-    bottom: 20%;
-  }
-}
-
-.banner .owl-carousel .owl-prev {
+.banner .carousel .carousel-control-prev,
+.banner .carousel .carousel-control-next {
+  width: auto;
+  opacity: 0;
   color: #fff;
-  margin-right: 15px;
-  position: absolute;
-  left: 0;
+  transition: all 0.35s ease-out;
+  z-index: 5;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
 }
 
-.banner .owl-carousel .owl-prev:hover {
-  color: #fff;
-  transition: 0.5s;
-  padding-right: 15px;
-}
-
-.banner .owl-carousel .owl-prev:hover i {
-  font-size: 45px;
-  transition: 0.5s;
-}
-
-.banner .owl-carousel .owl-prev i {
+.banner .carousel .carousel-control-prev i,
+.banner .carousel .carousel-control-prev span.fa,
+.banner .carousel .carousel-control-next i,
+.banner .carousel .carousel-control-next span.fa {
   font-size: 45px;
   padding: 15px;
-  margin-left: -50px;
+  color: #fff;
+  transition: 0.5s;
 }
 
 @media screen and (max-width: 576px) {
-  .banner .owl-carousel .owl-prev i {
+  .banner .carousel .carousel-control-prev i,
+  .banner .carousel .carousel-control-prev span.fa,
+  .banner .carousel .carousel-control-next i,
+  .banner .carousel .carousel-control-next span.fa {
     font-size: 28px;
   }
 }
 
-.banner .owl-carousel .owl-next {
+.banner .carousel .carousel-control-prev:hover,
+.banner .carousel .carousel-control-next:hover {
+  opacity: 1;
   color: #fff;
-  position: absolute;
-  right: 0;
 }
 
-.banner .owl-carousel .owl-next:hover {
-  color: #fff;
-  padding-left: 15px !important;
-  transition: 0.5s;
+.banner .carousel .carousel-control-prev {
+  left: 30px;
+  margin-left: -20px;
+  transition: all 0.35s ease-out;
 }
 
-.banner .owl-carousel .owl-next:hover i {
-  font-size: 45px;
-  padding: 15px;
+.banner .carousel .carousel-control-next {
+  right: 30px;
+  margin-right: -20px;
+  transition: all 0.35s ease-out;
 }
 
-.banner .owl-carousel .owl-next i {
-  font-size: 45px;
-  padding: 15px;
+.banner .carousel .carousel-indicators {
+  bottom: 25px;
+  z-index: 5;
 }
 
-@media screen and (max-width: 576px) {
-  .banner .owl-carousel .owl-next i {
-    font-size: 28px;
-  }
+.banner .carousel .carousel-indicators button {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin: 0 5px;
+  background-color: #fff;
+  opacity: 0.5;
+  border: none;
+}
+
+.banner .carousel .carousel-indicators button.active {
+  opacity: 1;
+  background-color: #191919;
 }
 
 .banner .banner_lef .box {
@@ -1128,35 +1116,22 @@ html {
   transform-origin: center left;
 }
 
-.banner:hover .owl-nav {
-  display: block !important;
+.banner:hover .carousel .carousel-control-prev,
+.banner:hover .carousel .carousel-control-next {
+  opacity: 0.85;
+  margin-left: 0;
+  margin-right: 0;
 }
 
-.banner:hover .owl-prev i {
-  margin-left: 0 !important;
+.banner:hover .carousel .carousel-control-prev:hover,
+.banner:hover .carousel .carousel-control-next:hover {
+  opacity: 1;
 }
 
 /* Feel free to change duration  */
 .animated {
   animation-duration: 1000 ms;
   animation-fill-mode: both;
-}
-
-/* .owl-animated-out - only for current item */
-/* This is very important class. Use z-index if you want move Out item above In item */
-.owl-animated-out {
-  z-index: 1;
-}
-
-/* .owl-animated-in - only for upcoming item
-/* This is very important class. Use z-index if you want move In item above Out item */
-.owl-animated-in {
-  z-index: 0;
-}
-
-/* .fadeOut is style taken from Animation.css and this is how it looks in owl.carousel.css:  */
-.fadeOut {
-  animation-name: fadeOut;
 }
 
 @keyframes fadeOut {

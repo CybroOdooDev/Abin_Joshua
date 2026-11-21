@@ -58,12 +58,8 @@
     ],
     'assets': {
         'web.assets_frontend': [
-            'theme_archit/static/src/js/index.js',
             'theme_archit/static/src/js/contact.js',
-            'theme_archit/static/src/js/owl.carousel.min.js',
             'theme_archit/static/src/css/animate.min.css',
-            'theme_archit/static/src/css/owl.carousel.min.css',
-            'theme_archit/static/src/css/owl.theme.default.min.css',
             'theme_archit/static/src/css/style.css',
             'theme_archit/static/src/css/buy_now_fix.css',
         ],

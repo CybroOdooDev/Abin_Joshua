@@ -13,33 +13,109 @@
         <section class="main" id="pink">
             <!-- Section banner starts here -->
             <section class="banner">
-                <div class="owl-carousel">
-                        <div class="banner_bg">
-                            <div class="container">
-                                <div class="banner_content">
-                                    <div class="row">
-                                        <div class="col-lg-6 col-12">
-                                            <div class="banner_lef">
-                                                <div class="box">
-                                                    <div class="role">
-                                                        <div class="block"/>
-                                                        <p>French Valley</p>
-                                                    </div>
-                                                    <div class="title">
-                                                        <span class="block"/>
-                                                        <h1>Luxurios Apartment
-                                                            <span></span>
-                                                        </h1>
+                <div id="archit_index_carousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000">
+                    <div class="carousel-indicators">
+                        <button type="button" data-bs-target="#archit_index_carousel" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"/>
+                        <button type="button" data-bs-target="#archit_index_carousel" data-bs-slide-to="1" aria-label="Slide 2"/>
+                        <button type="button" data-bs-target="#archit_index_carousel" data-bs-slide-to="2" aria-label="Slide 3"/>
+                    </div>
+                    <div class="carousel-inner">
+                        <div class="carousel-item active">
+                            <div class="banner_bg">
+                                <div class="container">
+                                    <div class="banner_content">
+                                        <div class="row">
+                                            <div class="col-lg-6 col-12">
+                                                <div class="banner_lef">
+                                                    <div class="box">
+                                                        <div class="role">
+                                                            <div class="block"/>
+                                                            <p>French Valley</p>
+                                                        </div>
+                                                        <div class="title">
+                                                            <span class="block"/>
+                                                            <h1>Luxurios Apartment
+                                                                <span></span>
+                                                            </h1>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="col-lg-6 col-12">
+                                                <div class="banner_right">
+                                                    <a href="#"
+                                                       class="btn btn-primary">
+                                                        MORE ABOUT RADER
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div class="col-lg-6 col-12">
-                                            <div class="banner_right">
-                                                <a href="#"
-                                                   class="btn btn-primary">
-                                                    MORE ABOUT RADER
-                                                </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="banner_bg2">
+                                <div class="container">
+                                    <div class="banner_content">
+                                        <div class="row">
+                                            <div class="col-lg-6 col-12">
+                                                <div class="banner_lef">
+                                                    <div class="box">
+                                                        <div class="role">
+                                                            <div class="block"/>
+                                                            <p>French Valley</p>
+                                                        </div>
+                                                        <div class="title">
+                                                            <span class="block"/>
+                                                            <h1>Luxurios Apartment
+                                                                <span></span>
+                                                            </h1>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 col-12">
+                                                <div class="banner_right">
+                                                    <a href="#"
+                                                       class="btn btn-primary">
+                                                        MORE ABOUT RADER
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="carousel-item">
+                            <div class="banner_bg3">
+                                <div class="container">
+                                    <div class="banner_content">
+                                        <div class="row">
+                                            <div class="col-lg-6 col-12">
+                                                <div class="banner_lef">
+                                                    <div class="box">
+                                                        <div class="role">
+                                                            <div class="block"/>
+                                                            <p>French Valley</p>
+                                                        </div>
+                                                        <div class="title">
+                                                            <span class="block"/>
+                                                            <h1>Luxurios Apartment
+                                                                <span></span>
+                                                            </h1>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6 col-12">
+                                                <div class="banner_right">
+                                                    <a href="#"
+                                                       class="btn btn-primary">
+                                                        MORE ABOUT RADER
+                                                    </a>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -47,74 +123,15 @@
                             </div>
                         </div>
                     </div>
-                    <div>
-                        <div class="banner_bg2">
-                            <div class="container">
-                                <div class="banner_content">
-                                    <div class="row">
-                                        <div class="col-lg-6 col-12">
-                                            <div class="banner_lef">
-                                                <div class="box">
-                                                    <div class="role">
-                                                        <div class="block"/>
-                                                        <p>French Valley</p>
-                                                    </div>
-                                                    <div class="title">
-                                                        <span class="block"/>
-                                                        <h1>Luxurios Apartment
-                                                            <span></span>
-                                                        </h1>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6 col-12">
-                                            <div class="banner_right">
-                                                <a href="#"
-                                                   class="btn btn-primary">
-                                                    MORE ABOUT RADER
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="banner_bg3">
-                            <div class="container">
-                                <div class="banner_content">
-                                    <div class="row">
-                                        <div class="col-lg-6 col-12">
-                                            <div class="banner_lef">
-                                                <div class="box">
-                                                    <div class="role">
-                                                        <div class="block"/>
-                                                        <p>French Valley</p>
-                                                    </div>
-                                                    <div class="title">
-                                                        <span class="block"/>
-                                                        <h1>Luxurios Apartment
-                                                            <span></span>
-                                                        </h1>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6 col-12">
-                                            <div class="banner_right">
-                                                <a href="#"
-                                                   class="btn btn-primary">
-                                                    MORE ABOUT RADER
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <button class="carousel-control-prev" type="button" data-bs-target="#archit_index_carousel" data-bs-slide="prev" aria-label="Previous">
+                        <span class="fa fa-angle-left" aria-hidden="true"/>
+                        <span class="visually-hidden">Previous</span>
+                    </button>
+                    <button class="carousel-control-next" type="button" data-bs-target="#archit_index_carousel" data-bs-slide="next" aria-label="Next">
+                        <span class="fa fa-angle-right" aria-hidden="true"/>
+                        <span class="visually-hidden">Next</span>
+                    </button>
+                </div>
             </section>
             <!-- Section banner ends here -->
         </section>
