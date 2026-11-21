@@ -470,10 +470,12 @@ html {
   gap: 6px;
 }
 
-.btn-secondary:hover {
-  background-color: #d4434c !important;
-  border-color: #d4434c !important;
-  color: #fff !important;
+.btn-secondary:hover,
+.btn-secondary:focus,
+.btn-secondary:active {
+  background-color: #f2d5b5 !important;
+  border-color: #f2d5b5 !important;
+  color: #212529 !important;
 }
 
 
@@ -3785,15 +3787,25 @@ div {
 }
 
 .loging_enter .wrapper .loging_template form .form-group .input-group .btn:hover,
-.login .wrapper .login_form form .form-group .input-group .btn:hover {
-  background-color: #d4434c !important;
-  color: #ffffff !important;
+.loging_enter .wrapper .loging_template form .form-group .input-group .btn:focus,
+.loging_enter .wrapper .loging_template form .form-group .input-group .btn:active,
+.login .wrapper .login_form form .form-group .input-group .btn:hover,
+.login .wrapper .login_form form .form-group .input-group .btn:focus,
+.login .wrapper .login_form form .form-group .input-group .btn:active {
+  background-color: #f2d5b5 !important;
+  border-color: #f2d5b5 !important;
+  color: #212529 !important;
 }
 
-.loging_enter .wrapper .loging_template form .form-group .input-group .btn .oi,
-.login .wrapper .login_form form .form-group .input-group .btn .oi {
-  font-size: 16px;
-  line-height: 1;
+.loging_enter .wrapper .loging_template form .form-group .input-group .btn svg,
+.login .wrapper .login_form form .form-group .input-group .btn svg,
+.loging_enter .wrapper .loging_template form .form-group .input-group .btn .o_database_icon,
+.login .wrapper .login_form form .form-group .input-group .btn .o_database_icon {
+  width: 14px;
+  height: 14px;
+  fill: currentColor;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 body:has(.o_user_switch) .login .wrapper .login_form,

@@ -67,10 +67,10 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        &:hover {
-            background-color: $color-brand2 !important;
-            border-color: $color-brand2 !important;
-            color: $color-white !important;
+        &:hover, &:focus, &:active {
+            background-color: #f2d5b5 !important;
+            border-color: #f2d5b5 !important;
+            color: #212529 !important;
         }
     }
     &-black {

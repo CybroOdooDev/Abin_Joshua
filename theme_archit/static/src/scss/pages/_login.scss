@@ -63,14 +63,18 @@
                             text-decoration: none;
                             transition: all 0.3s ease;
 
-                            &:hover {
-                                background-color: $color-brand2 !important;
-                                color: $color-white !important;
+                            &:hover, &:focus, &:active {
+                                background-color: #f2d5b5 !important;
+                                border-color: #f2d5b5 !important;
+                                color: #212529 !important;
                             }
 
-                            .oi {
-                                font-size: 16px;
-                                line-height: 1;
+                            svg, .o_database_icon {
+                                width: 14px;
+                                height: 14px;
+                                fill: currentColor;
+                                display: inline-block;
+                                vertical-align: middle;
                             }
                         }
                     }
