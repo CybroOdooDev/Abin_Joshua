@@ -447,6 +447,24 @@ html {
   src: url(./../fonts/OstrichSans-Medium.otf);
 }
 
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/web/static/src/libs/materialsymbols/material_symbols_outlined_subset.woff2') format('woff2'),
+       url('/web/static/src/libs/materialsymbols/material_symbols_backend.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'odoo_ui_icons';
+  font-style: normal;
+  font-weight: normal;
+  font-display: block;
+  src: url('/web/static/lib/odoo_ui_icons/fonts/odoo_ui_icons.woff2') format('woff2'),
+       url('/web/static/lib/odoo_ui_icons/fonts/odoo_ui_icons_backend.woff') format('woff');
+}
+
 .btn {
   outline: none !important;
   box-shadow: none !important;
@@ -4214,18 +4232,54 @@ body:has(.o_user_switch) .login {
   text-decoration: underline;
 }
 
-/* Header phone icon: always visible (do not rely on hover background)
-   Scope to tel: links so other navbar icons (e.g., search) keep their styles. */
+/* Header phone icon: always visible (do not rely on hover background) */
 #o_main_nav a[href^="tel:"] i,
+#o_main_nav a[href^="tel:"] .oi,
 #o_main_nav a[href^="tel:"] .fa,
 #o_main_nav a[href^="tel:"] [class^="fa-"],
-#o_main_nav a[href^="tel:"] svg {
+#o_main_nav a[href^="tel:"] svg,
+.navbar a[href^="tel:"] i,
+.navbar a[href^="tel:"] .oi,
+.navbar a[href^="tel:"] .fa,
+.navbar a[href^="tel:"] [class^="fa-"],
+.navbar a[href^="tel:"] svg {
   opacity: 1 !important;
   visibility: visible !important;
   color: #191919 !important;
-  /* match header text color */
   fill: #191919 !important;
-  /* for svg icons */
+  display: inline-block !important;
+  font-size: 16px !important;
+  line-height: 1 !important;
+  vertical-align: middle !important;
+}
+
+/* Header search button: round black circle with white icon */
+.o_search_btn {
+  background-color: #191919 !important;
+  color: #ffffff !important;
+  border-radius: 50% !important;
+  width: 38px !important;
+  height: 38px !important;
+  min-width: 38px !important;
+  padding: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border: none !important;
+  transition: all 0.3s ease;
+}
+
+.o_search_btn i,
+.o_search_btn .oi {
+  color: #ffffff !important;
+  font-size: 18px !important;
+  line-height: 1 !important;
+  display: inline-block !important;
+}
+
+.o_search_btn:hover {
+  background-color: #333333 !important;
+  color: #ffffff !important;
 }
 
 /* Ensure wishlist icon is visible on mobile */

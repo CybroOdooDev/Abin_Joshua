@@ -226,3 +226,44 @@
 .navbar-toggler span:nth-child(3) {
     transform: translate(0%, 0%) rotate(0deg);
 }
+
+// Header search button: round black circle with white icon
+.o_search_btn {
+    background-color: $color-brand !important;
+    color: $color-white !important;
+    border-radius: 50% !important;
+    width: 38px !important;
+    height: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    border: none !important;
+    transition: all 0.3s ease;
+    i, .oi {
+        color: $color-white !important;
+        font-size: 18px !important;
+        line-height: 1 !important;
+        display: inline-block !important;
+    }
+    &:hover {
+        background-color: darken($color-brand, 10%) !important;
+        color: $color-white !important;
+    }
+}
+
+// Header phone icon and tel links
+.navbar a[href^="tel:"],
+#o_main_nav a[href^="tel:"] {
+    i, .oi, .fa, svg {
+        opacity: 1 !important;
+        visibility: visible !important;
+        color: $color-brand !important;
+        fill: $color-brand !important;
+        display: inline-block !important;
+        font-size: 16px !important;
+        line-height: 1 !important;
+        vertical-align: middle !important;
+    }
+}
