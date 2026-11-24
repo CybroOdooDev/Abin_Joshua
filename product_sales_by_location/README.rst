@@ -18,22 +18,24 @@
 Product Sales By Location
 =========================
 
-Allows users to set specific stock delivery locations on sale order lines, creating delivery orders routed from the selected locations.
+Enables users to set specific stock delivery locations on sale order lines, creating delivery orders routed from the selected locations.
 
 Key Features
 ------------
 
 * Specify a source stock location directly on each sale order line.
-* Automatically generates delivery orders (stock pickings) routed from the selected locations.
-* Supports multi-location fulfillment for orders with varied product sourcing.
+* Automatically generate delivery orders (stock pickings) routed from the selected locations.
+* Support multi-location fulfillment for orders with varied product sourcing.
 
 Installation
 ------------
-No external dependencies.
+No external dependencies required.
 
-Configuration
--------------
-No additional configuration is required. Ensure multi-locations are enabled under Inventory settings.
+Usage
+-----
+1. Navigate to Sales -> Orders -> Quotations and create or edit a quotation.
+2. In the Order Lines section, select the desired stock source Location on each line.
+3. Confirm the quotation. Delivery orders (stock pickings) are automatically generated from the selected locations.
 
 Company
 -------
@@ -50,11 +52,10 @@ Contacts
 * Website : https://cybrosys.com
 
 Maintainer
-==========
+----------
 .. image:: https://cybrosys.com/images/logo.png
    :target: https://cybrosys.com
 
-
-This module is maintained by Cybrosys Technologies.
+This module is maintained by Cybrosys Techno Solutions.
 
 For support and more information, please visit `Our Website <https://cybrosys.com/>`__
