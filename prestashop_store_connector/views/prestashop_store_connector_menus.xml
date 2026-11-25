@@ -7,17 +7,22 @@
     <menuitem id="prestashop_instances_menu"
               name="Instances"
               parent="prestashop_store_connector.prestashop_connector_menu"
-              action="prestashop_connector_action" sequence="1"/>
+              action="prestashop_connector_action"
+              groups="base.group_system"
+              sequence="1"/>
     <menuitem id="orders_menu"
               name="Orders"
               parent="prestashop_store_connector.prestashop_connector_menu"
-              action="prestashop_order_action" sequence="2"/>
+              action="prestashop_order_action"
+              sequence="2"/>
     <menuitem id="contacts_menu"
               name="Contacts"
               parent="prestashop_store_connector.prestashop_connector_menu"
-              action="prestashop_contact_action" sequence="5"/>
+              action="prestashop_contact_action"
+              sequence="5"/>
     <menuitem id="products_menu"
               name="Products"
               parent="prestashop_store_connector.prestashop_connector_menu"
-              action="prestashop_product_action" sequence="10"/>
+              action="prestashop_product_action"
+              sequence="10"/>
 </odoo>

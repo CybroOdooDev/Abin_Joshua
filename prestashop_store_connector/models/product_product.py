@@ -1,22 +1,20 @@
-# -*- coding: utf-8 -*-
-# Part of Odoo. See LICENSE file for full copyright and licensing details.
 #############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
 #
-#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
-#    Author:  Cybrosys Techno Solutions(<https://www.cybrosys.com>)
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
+#    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    You can modify it under the terms of the GNU AFFERO
-#    GENERAL PUBLIC LICENSE (AGPL v3), Version 3.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU AFFERO GENERAL PUBLIC LICENSE (AGPL v3) for more details.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
-#    You should have received a copy of the GNU AFFERO GENERAL PUBLIC LICENSE
-#    (AGPL v3) along with this program.
+#    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
+#    (LGPL v3) along with this program.
 #    If not, see <http://www.gnu.org/licenses/>.
 #
 #############################################################################
@@ -24,17 +22,20 @@ from odoo import fields, models
 
 
 class ProductProduct(models.Model):
-    """To add a Prestashop id"""
-    _inherit = "product.product"
+    """Add PrestaShop tracking fields to product variants."""
 
-    prestashop = fields.Integer(string="Prestashop Id",
-                                help="Prestashop Id of the product")
+    _inherit = 'product.product'
 
-    is_delivery_product = fields.Boolean(string="Prestashop delivery product",
-                                         help="Identify the product as the "
-                                              "Prestashop delivery product")
-    is_discount_product = fields.Boolean(string="Prestashop discount product",
-                                         help="Identify the product as the "
-                                              "Prestashop discount product")
-
-
+    prestashop = fields.Integer(
+        string="PrestaShop ID",
+        copy=False,
+        help="PrestaShop identifier of the product.",
+    )
+    is_delivery_product = fields.Boolean(
+        string="PrestaShop Delivery Product",
+        help="Identify whether the product represents PrestaShop delivery charges.",
+    )
+    is_discount_product = fields.Boolean(
+        string="PrestaShop Discount Product",
+        help="Identify whether the product represents PrestaShop order discounts.",
+    )

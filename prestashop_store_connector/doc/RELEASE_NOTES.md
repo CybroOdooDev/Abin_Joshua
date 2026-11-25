@@ -1,6 +1,7 @@
-## Module <prestashop_store_connector>
+## Module prestashop_store_connector
 
-#### 27.08.2026
-#### Version 19.0.1.0.0
+#### 2026-11-25
+#### Version 20.0.1.0.0
 #### ADD
-- Initial commit for Prestashop Connector
+
+- Initial release for Odoo 20: integrates Odoo 20 with PrestaShop stores to import and export products, contacts, and sales orders.

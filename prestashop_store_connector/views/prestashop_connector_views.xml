@@ -11,6 +11,22 @@
             </p>
         </field>
     </record>
+    <!-- Search View -->
+    <record id="prestashop_connector_view_search" model="ir.ui.view">
+        <field name="name">prestashop.connector.view.search</field>
+        <field name="model">prestashop.connector</field>
+        <field name="arch" type="xml">
+            <search string="Prestashop Connector">
+                <field name="name"/>
+                <field name="api_url"/>
+                <filter name="connected" string="Connected" domain="[('state', '=', 'connected')]"/>
+                <filter name="not_connected" string="Not Connected" domain="[('state', '=', 'not_connected')]"/>
+                <group>
+                    <filter name="group_by_state" string="State" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
     <!-- List View -->
     <record id="prestashop_connector_view_tree" model="ir.ui.view">
         <field name="name">prestashop.connector.view.list</field>
@@ -22,7 +38,6 @@
                 <field name="state" widget="badge"
                        decoration-warning="state == 'not_connected'"
                        decoration-success="state == 'connected'"/>
-
             </list>
         </field>
     </record>
@@ -34,9 +49,7 @@
             <form string="Prestashop Connector">
                 <header>
                     <button name="action_connect" class="btn btn-primary"
-                            string="Connect" type="object" invisible="state == 'connected'">
-
-                    </button>
+                            string="Connect" type="object" invisible="state == 'connected'"/>
                     <field name="state" widget="statusbar"
                            statusbar_visible="not_connected,connected"/>
                 </header>
@@ -61,9 +74,8 @@
                                             class="btn btn-primary"
                                             name="action_import_products"
                                             type="object"
-                                            invisible="import_products_button == False">
-                                        <i class="fa fa-fw o_button_icon fa-lg fa-refresh"/>
-                                    </button>
+                                            icon="refresh"
+                                            invisible="not import_products_button"/>
                                 </group>
                                 <group>
                                     <field name="export_products_button"/>
@@ -72,9 +84,8 @@
                                             class="btn btn-primary"
                                             name="action_export_products"
                                             type="object"
-                                            invisible="export_products_button == False">
-                                        <i class="fa fa-fw o_button_icon fa-lg fa-refresh"/>
-                                    </button>
+                                            icon="refresh"
+                                            invisible="not export_products_button"/>
                                 </group>
                             </group>
                         </page>
@@ -87,9 +98,8 @@
                                             class="btn btn-primary"
                                             name="action_import_contacts"
                                             type="object"
-                                            invisible="import_contacts_button == False">
-                                        <i class="fa fa-fw o_button_icon fa-lg fa-refresh"/>
-                                    </button>
+                                            icon="refresh"
+                                            invisible="not import_contacts_button"/>
                                 </group>
                                 <group>
                                     <field name="export_contacts_button"/>
@@ -98,9 +108,8 @@
                                             class="btn btn-primary"
                                             name="action_export_contacts"
                                             type="object"
-                                            invisible="export_contacts_button == False">
-                                        <i class="fa fa-fw o_button_icon fa-lg fa-refresh"/>
-                                    </button>
+                                            icon="refresh"
+                                            invisible="not export_contacts_button"/>
                                 </group>
                             </group>
                         </page>
@@ -113,9 +122,8 @@
                                             class="btn btn-primary"
                                             name="action_import_orders"
                                             type="object"
-                                            invisible="import_orders_button == False">
-                                        <i class="fa fa-fw o_button_icon fa-lg fa-refresh"/>
-                                    </button>
+                                            icon="refresh"
+                                            invisible="not import_orders_button"/>
                                 </group>
                                 <group>
                                     <field name="export_orders_button"/>
@@ -124,9 +132,8 @@
                                             class="btn btn-primary"
                                             name="action_export_orders"
                                             type="object"
-                                            invisible="export_orders_button == False">
-                                        <i class="fa fa-fw o_button_icon fa-lg fa-refresh"/>
-                                    </button>
+                                            icon="refresh"
+                                            invisible="not export_orders_button"/>
                                 </group>
                             </group>
                         </page>
