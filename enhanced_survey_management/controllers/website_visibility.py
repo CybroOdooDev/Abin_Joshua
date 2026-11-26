@@ -1,45 +1,51 @@
-# -*- coding: utf-8 -*-
-###############################################################################
+#############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
-#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
 #    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    This program is free software: you can modify
-#    it under the terms of the GNU LESSER GENERAL PUBLIC LICENSE (LGPL) as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU LESSER GENERAL PUBLIC LICENSE for more details.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
-###############################################################################
+#############################################################################
 from odoo import http
 from odoo.http import request
 
 
 class WebsiteView(http.Controller):
-    """Inherited http.Controller to add custom route"""
+    """Controller for public website survey visibility."""
 
-    @http.route('/public/survey', type='http', auth="public",
-                website=True)
+    @http.route(
+        '/public/survey',
+        type='http',
+        auth="public",
+        website=True,
+    )
     def public_user_access(self):
-        """ Controller function to access survey from website """
+        """Render surveys published with website access mode."""
         survey = request.env['survey.survey'].sudo().search(
-            [('access_mode', '=', 'website')])
+            [('access_mode', '=', 'website')],
+        )
         values = {
             'survey_list': [{
                 'title': rec.title,
                 'attempts': rec.attempts_limit,
                 'date': rec.create_date,
-                'access_token': rec.access_token
+                'access_token': rec.access_token,
             } for rec in survey],
             'page_name': 'survey',
         }
-        return request.render("enhanced_survey_management.survey_visibility",
-                              values)
+        return request.render(
+            "enhanced_survey_management.survey_visibility",
+            values,
+        )

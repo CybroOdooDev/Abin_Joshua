@@ -1,54 +1,55 @@
-# -*- coding: utf-8 -*-
-###############################################################################
+#############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
-#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
 #    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    This program is free software: you can modify
-#    it under the terms of the GNU LESSER GENERAL PUBLIC LICENSE (LGPL) as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU LESSER GENERAL PUBLIC LICENSE for more details.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
-###############################################################################
+#############################################################################
 import json
+
 from odoo import models
 
 
 class SurveyUserInput(models.Model):
-    """Inherited user input to make acceptable for custom question"""
+    """Inherited user input to save custom question answers."""
+
     _inherit = "survey.user_input"
 
     def _save_lines(self, question, answer, comment=None, overwrite_existing=True):
-        """Function to save custom answers"""
+        """Save custom or standard survey question answers."""
         old_answers = self.env['survey.user_input.line'].search([
             ('user_input_id', '=', self.id),
             ('question_id', '=', question.id),
         ])
-        if question.question_type in [
+        custom_types = [
             'password', 'time', 'url', 'email', 'range', 'many2many',
             'file', 'many2one', 'week', 'color', 'month', 'address',
-            'name', 'selection', 'qr', 'barcode'
-        ]:
-            res = self._save_user_answers(question, old_answers, answer)
-        elif question.matrix_subtype == 'custom':
-            res = self._save_user_answers(question, old_answers, answer)
-        else:
-            res = super()._save_lines(question, answer, comment, overwrite_existing=overwrite_existing)
-        return res
+            'name', 'selection', 'qr', 'barcode',
+        ]
+        if question.question_type in custom_types or question.matrix_subtype == 'custom':
+            return self._save_user_answers(question, old_answers, answer)
+        return super()._save_lines(
+            question, answer, comment, overwrite_existing=overwrite_existing,
+        )
 
     def _save_user_answers(self, question, user_input_line, answer):
-        """Function to save custom answers"""
+        """Create or update user input line with custom question answer values."""
         vals = self._get_user_answers(
-            question, answer, question.question_type)
+            question, answer, question.question_type,
+        )
         if user_input_line:
             user_input_line.write(vals)
         else:
@@ -56,7 +57,7 @@ class SurveyUserInput(models.Model):
         return user_input_line
 
     def _get_user_answers(self, question, answer, answer_type):
-        """Function to save custom answers"""
+        """Prepare answer value dictionary for custom question types."""
         vals = {
             'user_input_id': self.id,
             'question_id': question.id,
@@ -80,15 +81,21 @@ class SurveyUserInput(models.Model):
             vals['value_many2one'] = answer[0]
             vals['value_many2one_option'] = answer[1]
         elif question.question_type == 'many2many':
-            vals['value_many2many'] = answer
+            vals['value_many2many'] = (
+                ", ".join(str(item) for item in answer if item)
+                if isinstance(answer, (list, tuple))
+                else answer
+            )
         elif question.question_type == 'week':
             vals['value_week'] = answer
         elif question.question_type == 'color':
             vals['value_color'] = answer
         elif question.question_type == 'month':
             vals['value_month'] = answer
-        elif (question.question_type == 'matrix'
-                and question.matrix_subtype == 'custom'):
+        elif (
+            question.question_type == 'matrix'
+            and question.matrix_subtype == 'custom'
+        ):
             vals['value_matrix'] = (
                 json.dumps(answer) if not isinstance(answer, str) else answer
             )
@@ -112,23 +119,23 @@ class SurveyUserInput(models.Model):
             vals['value_selection'] = answer
         elif question.question_type == 'file':
             attachment = self.env['ir.attachment'].create({
-                'name': str(answer[1]), 'raw': answer[0], 'type': 'binary'
+                'name': str(answer[1]), 'raw': answer[0], 'type': 'binary',
             })
             vals['value_file'] = int(attachment.id if attachment else False)
             vals['filename'] = attachment.name if attachment else False
         return vals
 
     def _save_line_matrix(self, question, old_answers, answers, comment=None):
-        """Function to save custom matrix"""
+        """Save custom matrix answers."""
         if question.matrix_subtype == 'custom':
             return self._save_user_answers(question, old_answers, answers)
         return super()._save_line_matrix(
-            question, old_answers, answers, comment
+            question, old_answers, answers, comment,
         )
 
     def _save_line_selection_answer(self, question, answer):
-        """Function to save selection type answers"""
+        """Save selection-type question answers."""
         vals = self._get_user_answers(
-            question, answer, question.question_type
+            question, answer, question.question_type,
         )
         return self.env['survey.user_input.line'].create(vals)

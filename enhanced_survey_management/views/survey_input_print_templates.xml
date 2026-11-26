@@ -4,8 +4,8 @@
     <template id="survey_page_print" name="Survey: print page(Inherit)"
               inherit_id="survey.survey_page_print">
         <xpath expr="//div[@role='alert']" position="before">
-            <t t-if="question.question_type in ['time','date', 'month', 'address', 'url', 'week', 'color', 'email', 'password',
-                     'many2one', 'file','range','many2many', 'name', 'matrix', 'selection', 'qr', 'barcode']">
+            <t t-if="question.question_type in ['time', 'month', 'address', 'url', 'week', 'color', 'email', 'password',
+                     'many2one', 'file', 'range', 'many2many', 'name', 'selection', 'qr', 'barcode'] or (question.question_type == 'matrix' and question.matrix_subtype == 'custom')">
                 <t t-if="question.question_type == 'time'"
                    t-call="enhanced_survey_management.question_time"/>
                 <t t-if="question.question_type == 'month'"
@@ -32,7 +32,7 @@
                    t-call="enhanced_survey_management.question_name"/>
                 <t t-if="question.question_type == 'file'"
                    t-call="enhanced_survey_management.question_file"/>
-                <t t-if="question.question_type == 'matrix'"
+                <t t-if="question.question_type == 'matrix' and question.matrix_subtype == 'custom'"
                    t-call="enhanced_survey_management.question_matrix_custom"/>
                 <t t-if="question.question_type == 'many2many'"
                    t-call="enhanced_survey_management.question_many2many"/>

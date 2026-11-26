@@ -1,149 +1,195 @@
-# -*- coding: utf-8 -*-
-###############################################################################
+#############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
-#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
 #    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    This program is free software: you can modify
-#    it under the terms of the GNU LESSER GENERAL PUBLIC LICENSE (LGPL) as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU LESSER GENERAL PUBLIC LICENSE for more details.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
-###############################################################################
+#############################################################################
 import json
 import textwrap
 from datetime import datetime
+
 from odoo import api, fields, models
 
 
 class SurveyUserInputLine(models.Model):
-    """Inherited user input line to add custom answer types """
+    """Inherited user input line to add custom answer types."""
+
     _inherit = 'survey.user_input.line'
 
     answer_type = fields.Selection(
-        selection_add=[('url', 'URL'),
-                       ('many2one', 'Many2one'),
-                       ('many2many', 'Many2many'),
-                       ('week', 'Week'),
-                       ('color', 'Color'),
-                       ('month', 'Month'),
-                       ('name', 'Name'),
-                       ('matrix', 'Matrix'),
-                       ('address', 'Address'),
-                       ('selection', 'Selection'),
-                       ('time', 'Time'),
-                       ('password', 'Password'),
-                       ('email', 'Email'),
-                       ('range', 'Range'),
-                       ('file', 'File'),
-                       ('qr', 'Qrcode'),
-                       ('barcode', 'Barcode')], help="Custom answer types")
-    value_url = fields.Char(string='User URL',
-                            help='Answer question type : URL')
-    value_email = fields.Char(string='User Email',
-                              help="Answer question type : Email")
-    value_week = fields.Char(string='User Week',
-                             help="Answer question type : Week")
-    value_color = fields.Char(string='User Color',
-                              help="Answer question type : Color")
-    value_many2one = fields.Char(string='Survey Many2one',
-                                 help="Answer question type : Many2one")
-    value_many2one_option = fields.Char(string='Many2one selected',
-                                        help="Answer question type : Selected")
-    value_many2many = fields.Char(string='Survey Many2many',
-                                  help="Answer question type : Many2many")
-    value_time = fields.Float(string='Time Value',
-                              help="Answer question type : Time")
-    value_matrix = fields.Text(string='Custom Matrix Values',
-                               help="Answer question type : Custom Matrix")
-    value_selection = fields.Char(string='User Selection',
-                                  help="Answer question type : Selection")
-    value_password = fields.Char(string='Password Value',
-                                 help="Answer question type : Password")
-    value_range = fields.Char(string='Range Value',
-                              help="Answer question type:Range")
-    value_file = fields.Many2one('ir.attachment',
-                                 string='Survey file',
-                                 help="Answer question type : Attachment")
-    filename = fields.Char(string='File', help="Attachment file name")
-    file_data = fields.Binary(help="Attachment file data",
-                              related="value_file.raw")
-    value_month = fields.Char(string='Month Value',
-                              help="Answer question type : Month")
-    value_address = fields.Text(string='Address Value',
-                                help="Answer question type : Address")
-    value_name = fields.Text(string='Name Values',
-                             help="Answer question type : Full name")
-    value_qr = fields.Char(string='Qr Values',
-                           help="Answer question type : QRcode")
-    value_barcode = fields.Char(string='Barcode Values',
-                                help="Answer question type : Barcode")
+        selection_add=[
+            ('url', 'URL'),
+            ('many2one', 'Many2one'),
+            ('many2many', 'Many2many'),
+            ('week', 'Week'),
+            ('color', 'Color'),
+            ('month', 'Month'),
+            ('name', 'Name'),
+            ('matrix', 'Matrix'),
+            ('address', 'Address'),
+            ('selection', 'Selection'),
+            ('time', 'Time'),
+            ('password', 'Password'),
+            ('email', 'Email'),
+            ('range', 'Range'),
+            ('file', 'File'),
+            ('qr', 'QR Code'),
+            ('barcode', 'Barcode'),
+        ],
+        help="Custom answer types.",
+    )
+    value_url = fields.Char(
+        string='User URL',
+        help="Answer for URL question.",
+    )
+    value_email = fields.Char(
+        string='User Email',
+        help="Answer for Email question.",
+    )
+    value_week = fields.Char(
+        string='User Week',
+        help="Answer for Week question.",
+    )
+    value_color = fields.Char(
+        string='User Color',
+        help="Answer for Color question.",
+    )
+    value_many2one = fields.Char(
+        string='Survey Many2one',
+        help="Stored record ID for Many2one question.",
+    )
+    value_many2one_option = fields.Char(
+        string='Many2one Selected',
+        help="Selected display value for Many2one question.",
+    )
+    value_many2many = fields.Char(
+        string='Survey Many2many',
+        help="Answer for Many2many question.",
+    )
+    value_time = fields.Float(
+        string='Time Value',
+        help="Answer for Time question.",
+    )
+    value_matrix = fields.Text(
+        string='Custom Matrix Values',
+        help="Answer for Custom Matrix question.",
+    )
+    value_selection = fields.Char(
+        string='User Selection',
+        help="Answer for Selection question.",
+    )
+    value_password = fields.Char(
+        string='Password Value',
+        help="Answer for Password question.",
+    )
+    value_range = fields.Char(
+        string='Range Value',
+        help="Answer for Range question.",
+    )
+    value_file = fields.Many2one(
+        'ir.attachment',
+        string='Survey File',
+        help="Attachment uploaded for File question.",
+    )
+    filename = fields.Char(string='File', help="Attachment file name.")
+    file_data = fields.Binary(
+        help="Attachment file data.",
+        related="value_file.raw",
+    )
+    value_month = fields.Char(
+        string='Month Value',
+        help="Answer for Month question.",
+    )
+    value_address = fields.Text(
+        string='Address Value',
+        help="Answer for Address question.",
+    )
+    value_name = fields.Text(
+        string='Name Values',
+        help="Answer for Full Name question.",
+    )
+    value_qr = fields.Char(
+        string='QR Values',
+        help="Answer for QR Code question.",
+    )
+    value_barcode = fields.Char(
+        string='Barcode Values',
+        help="Answer for Barcode question.",
+    )
 
     def get_value_time(self):
-        """Function to return answer for question type time """
-        if self.value_time:
-            time_str = f"{self.value_time:.2f}".replace('.', ':')
+        """Return formatted HH:MM answer for time-type questions."""
+        line = self[:1]
+        if line and line.value_time:
+            time_str = f"{line.value_time:.2f}".replace('.', ':')
             return datetime.strptime(time_str, "%H:%M").strftime("%H:%M")
         return None
 
     def get_value_address(self, field):
-        """Function to return answer for question type address"""
-        if not self[0].value_address:
+        """Return requested address sub-field value for address questions."""
+        line = self[:1]
+        if not line or not line.value_address:
             return ''
         try:
-            data = json.loads(self[0].value_address.replace("'", "\""))
+            data = json.loads(line.value_address.replace("'", "\""))
         except (json.JSONDecodeError, TypeError):
             return ''
         if data:
-            question_id = self[0].question_id.id
-            return data.get(f'{question_id}-{field}', '')
+            return data.get(f'{line.question_id.id}-{field}', '')
         return ''
 
     def get_value_matrix(self, item):
-        """Function to return answer for custom matrix"""
-        if not self.value_matrix:
+        """Return cell value for custom matrix questions."""
+        line = self[:1]
+        if not line or not line.value_matrix:
             return None
         try:
-            data = json.loads(self.value_matrix)
+            data = json.loads(line.value_matrix)
         except (json.JSONDecodeError, TypeError):
             return None
         if data:
-            question_id = self.question_id.id
-            return data.get(f'{item}-{question_id}')
+            return data.get(f'{item}-{line.question_id.id}')
         return None
 
     def get_value_name(self, field):
-        """Function to return answer for Full name"""
-        if not self.value_name:
+        """Return requested name component for full name questions."""
+        line = self[:1]
+        if not line or not line.value_name:
             return ''
         try:
-            data = json.loads(self.value_name)
+            data = json.loads(line.value_name)
         except (json.JSONDecodeError, TypeError):
             return ''
         if data:
-            question_id = self.question_id.id
-            return data.get(f'{question_id}-{field}', '')
+            return data.get(f'{line.question_id.id}-{field}', '')
         return ''
 
     @api.depends('answer_type')
     def _compute_display_name(self):
-        """Override compute function to add custom answer display"""
+        """Compute display name across standard and custom answer types."""
         for line in self:
             if line.answer_type == 'char_box':
                 line.display_name = line.value_char_box
             elif line.answer_type == 'text_box' and line.value_text_box:
-                line.display_name = textwrap.shorten(line.value_text_box,
-                                                     width=50,
-                                                     placeholder=" [...]")
+                line.display_name = textwrap.shorten(
+                    line.value_text_box,
+                    width=50,
+                    placeholder=" [...]",
+                )
             elif line.answer_type == 'numerical_box':
                 line.display_name = line.value_numerical_box
             elif line.answer_type == 'date':
@@ -186,9 +232,10 @@ class SurveyUserInputLine(models.Model):
                 line.display_name = line.filename
             elif line.answer_type == 'suggestion':
                 if line.matrix_row_id:
-                    line.display_name = '%s: %s' % (
-                        line.suggested_answer_id.value,
-                        line.matrix_row_id.value)
+                    line.display_name = (
+                        f'{line.suggested_answer_id.value}: '
+                        f'{line.matrix_row_id.value}'
+                    )
                 else:
                     line.display_name = line.suggested_answer_id.value
             if not line.display_name:

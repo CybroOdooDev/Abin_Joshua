@@ -170,7 +170,7 @@ graph TD
   - **Translatable String Hygiene**: Never include HTML markup (`<br/>`, `<b>`, `<p>`) inside `self.env._(...)` or `_t(...)`. Translators should translate pure sentences; construct HTML formatting outside translation calls via f-strings or templates.
   - **Active Phrasing & Style Quality**: Avoid pidgin phrasing and passive `"allows users to + verb"` patterns in README and documentation (e.g. use `"enables users to dynamically build"` or `"provides dynamic dashboard blocks"` instead of `"allows users to build"`).
   - **Window Action Title Capitalization**: Action titles in JS action definitions must use Title Case (`name: _t('Send Mail')`), NEVER ALL-CAPS (`'SEND MAIL'`).
-  - **Documentation & Description Accuracy**: Avoid duplicating sections in `README.rst` (e.g. "Company" duplicated under "Credits"). Use realistic, verified phrasing in `index.html` (e.g. "fully compatible" instead of "fully certified").
+  - **Documentation & Description Accuracy**: Avoid duplicating sections or contact blocks in `README.rst` (e.g., repeating `"Company"` or `Contact: odoo@cybrosys.com` inside `Credits` alongside a separate `Contacts` section) and ensure `docutils --strict` reports 0 warnings. Use accurate, verified phrasing in `index.html` and `README.rst`: avoid unverified certification/marketing claims (`"fully certified"`, `"our certified team"`, `"certified developers"`, `"100% bug fix commitment"`), verify numeric counts against actual code (e.g., do not claim `"15+"` types if `Selection` defines a different count), and describe actual Odoo 20 UI navigation paths cleanly.
   - **Zero Debug Artifacts**:
     - Absolute prohibition against `print()` statements in Python and `console.log()` / `debugger;` in JavaScript.
     - Zero `breakpoint()`, `import pdb`, `pdb.set_trace()`, or `import ipdb`.
@@ -230,9 +230,10 @@ graph TD
     8. **Exact Setting Block, View, and Navigation Path Parity (Criterion 6.3 - Score Penalty down to 78/100)**:
        - All navigation paths, menu labels, configuration setting block titles (`<block title="...">`), setting string labels (`<setting string="...">`), page tabs, and button strings mentioned in `static/description/index.html` (including every FAQ question and answer) and `README.rst` **MUST match verbatim** with the actual XML view definitions.
        - *Real-World Review Failure*: If `res_config_settings_views.xml` defines `<block title="Stock Reservation Location">`, never refer to it as `"Stock Reserve Location"` in `index.html` or FAQs. Phrasing divergence between views and documentation directly triggers review failure (e.g. *"the README says 'Stock Reservation Location' in settings while the FAQ says 'Stock Reserve Location'"*).
-    9. **Realistic & Synchronized Release Dates (No Future Dates - Criterion 6.3 Penalty)**:
-       - The evaluation reviewer operates against a real-world calendar baseline. Any release note date or changelog entry set into future years (e.g., `2026-11-19` or `November 2026`) is penalized as *"The release note date and index.html changelog are in the future"*.
-       - *Rule*: Release dates in `doc/RELEASE_NOTES.md` and `static/description/index.html` must be synchronized and must reflect the actual present calendar date/month (never future-dated).
+    9. **Synchronized Current Release Dates & Copyright Alignment (Criterion 6.3 - Blocking)**:
+       - Release dates in `doc/RELEASE_NOTES.md` and the `static/description/index.html` changelog must match each other (`Month YYYY`), never exceed today's real calendar date (`> date.today()`), **and** stay aligned with Python file copyright headers (`Copyright (C) <YYYY>-TODAY` in `.py` files).
+       - Never backdate `doc/RELEASE_NOTES.md` or `index.html` changelog entries to a prior year (e.g., `2025-11-26` / `November 2025` while `.py` headers use `Copyright (C) 2026-TODAY`) — reviewers flag mismatched copyright vs release note years.
+       - *Rule*: Set `doc/RELEASE_NOTES.md` to today's ISO date (`YYYY-MM-DD`), set `static/description/index.html` changelog to the identical `Month YYYY`, and align `.py` `Copyright (C) <YYYY>-TODAY` with the current migration year (`release_year >= copyright_start_year` and matching for new Odoo 20 migrations).
     10. **Manifest Documentation Completeness**:
         - In addition to a clean single-sentence `summary`, ensure the manifest documentation is complete and consistent with module capabilities so the AI Reviewer does not note an undocumented manifest (*"the manifest has no description"*).
     11. **Doc-to-Code Parity**: `index.html`, `README.rst`, and `RELEASE_NOTES.md` match actual code. No false claims in FAQs, no template boilerplate leftovers (e.g. `#cybrosys-acc-kit`), and synchronized release dates.
@@ -620,6 +621,10 @@ sequenceDiagram
     - Never assign method return values to variables that are not subsequently read or asserted.
     - Common pitfall in unit tests: writing `invoice = self.order._create_invoices()` without asserting `self.assertTrue(invoice)`. This immediately fails Criterion 4.4 with `F841 local variable 'invoice' is assigned to but never used`.
     - Fix: Either assert `self.assertTrue(invoice)` or execute the action without assignment: `self.order._create_invoices()`.
+- **No Dead Code, Unused Compatibility Stubs, or Test-Only Wrappers (Criterion 4.1 & 4.3)**:
+  - **NEVER** keep dead compatibility wrappers or un-decorated pseudo-hooks left over after refactoring (for example, keeping `def _onchange_barcode(self): self._check_barcode()` **without** `@api.onchange(...)` merely so `tests/` can invoke `record._onchange_barcode()`).
+  - When replacing `@api.onchange` logic with `@api.constrains` (or vice versa), update callers and unit tests directly to test the active constraint/onchange/action path (`assertRaises(ValidationError)` or `Form(...).save()` / `.onchange(...)`) and **delete** the compatibility stub completely.
+  - Every private helper method in `models/` and `wizard/` (unless overriding a core Odoo extension hook) must be exercised by active production paths, views, actions, or decorators — never retain stubs invoked exclusively by unit tests.
 
 #### Odoo 20 Deprecated API Migrations
 
@@ -655,6 +660,7 @@ sequenceDiagram
 | `base.group_user` CRUD on database credentials | Restrict to `base.group_system` in `ir.access.csv` | Allows any internal user to read credentials or run sync via RPC. |
 | Sensitive password/token field without `groups` | `password = fields.Char(groups='base.group_system')` | Exposes plaintext credentials over RPC to unprivileged users. |
 | Audit / Sync log model without views or menu | Provide list, form, search view, action, and menu | Orphaned models without UI fail audit section 4.2. |
+| Dead / undecorated compatibility stub (`def _onchange_barcode(self): self._check_barcode()` without `@api.onchange`, test-only wrappers) | Update callers/tests to active `@api.constrains` / `@api.onchange` hook and delete the compatibility stub | Unused-looking compatibility methods invoked only from tests trigger code cleanliness review findings (Criterion 4.1 / 4.3). |
 | Phantom required field in XML view (e.g. `ref_col_name`) | Remove phantom field from view and model | Blocks record saves and fails view validation. |
 | Dead / unused model field (e.g. `sync.table.unique`) | Purge dead field from model | Violates clean schema and code standards. |
 | `<group expand="0">` in search view | `<group>` (remove obsolete `expand`) | Fails Odoo 20 RelaxNG view validation. |
@@ -853,11 +859,13 @@ sequenceDiagram
    - **Acronym Casing in UI Buttons**:
      - Always capitalize file format acronyms on buttons: `'Export as XLSX'` or `'Export as CSV'`, NOT `'Export as xlsx'`.
 
-2. **Elimination of Template Boilerplate Leftovers**:
+2. **Elimination of Template Boilerplate, Unverified Claims & Count Mismatches**:
    - Search `index.html` and `README.rst` for copy-paste artifacts from other Cybrosys apps:
      - ✗ *"chart of accounts migrations"*, *"core accounting operations"*, *"manage balance sheet"*, etc., in a timesheet or HR module!
      - ✗ Misplaced features in FAQs: e.g. claiming *"tasks performed"* if tasks are not part of the module data/report.
-   - Check every single question and answer in the FAQ section of `index.html` against actual functionality.
+   - Remove unverified certification/marketing superlatives anywhere in `index.html` (including banners, badges, and footer/team blurbs): replace `"fully certified"`, `"our certified team"`, `"certified developers"`, `"100% Bug Fix Commitment"` with neutral factual wording (`"fully compatible with Odoo 20"`, `"Odoo engineering team"`).
+   - Verify every numeric count or capability claim (e.g., `"15+"` question types or `"5"` reports) matches the actual `Selection` options, XML views, and report templates in code — remove or correct inaccurate estimates.
+   - Check every single question and answer in the FAQ section and screenshot captions of `index.html` against actual functionality and UI paths.
 
 3. **Brand & Capitalization Consistency**:
    - Proper noun casing must be consistent across the entire document:
@@ -872,20 +880,22 @@ sequenceDiagram
      - ✓ View, FAQ, Guide, and README all use the identical string: `"Stock Reservation Location"`.
    - Never copy FAQ answers or screenshots from older versions without reconciling the settings block and menu names against the newly migrated XML views.
 
-5. **Date Synchronization & Realistic Calendar Dates (No Future Dates)**:
-   - The AI Reviewer flags future dates with a Criterion 6.3 penalty (*"The release note date and index.html changelog are in the future"*).
-   - Check the date in `doc/RELEASE_NOTES.md` and ensure it uses a valid, realistic date (never a future year like `2026`).
-   - Check the changelog badge/section in `static/description/index.html` (e.g. `November 2024` or current migration date).
-   - **The release month/year in `index.html` MUST match `doc/RELEASE_NOTES.md` identically** (e.g. both refer to the same month and year).
+5. **Date Synchronization, Current Calendar Dates & Copyright Alignment**:
+   - Check today's system date (`date.today()`) and ensure `doc/RELEASE_NOTES.md` uses a valid non-future ISO date (`YYYY-MM-DD`, never strictly `> date.today()`).
+   - Check the changelog badge/section in `static/description/index.html` (`Month YYYY`) and ensure it matches `doc/RELEASE_NOTES.md` identically (same month and year) and is not `> date.today()`.
+   - **Copyright Alignment (Blocking)**: Ensure the release note year matches/aligns with Python header `Copyright (C) <YYYY>-TODAY` (`release_year >= copyright_start_year`, and matching `date.today().year` for migrated Odoo 20 modules). **Never** backdate `doc/RELEASE_NOTES.md` or `index.html` to a prior year (e.g. `2025-11-26` / `November 2025`) when Python headers declare `Copyright (C) 2026-TODAY`.
 
 6. **Manifest Description & Summary Completeness**:
    - Provide a clear, comprehensive `'summary'` in `__manifest__.py` that details the core functionality.
    - If a `'description'` key is included, ensure it provides an accurate, professional overview without conflicting with linter rules. Ensure neither the human reviewer nor AI Reviewer notes missing manifest documentation.
 
-7. **`README.rst` Formatting**:
-   - Title underlined with `=====`.
-   - Subsections (Installation, Usage, Credits, License, Maintainer) underlined with `-----` at the same heading level.
+7. **`README.rst` Formatting, Section Hygiene & Wording**:
+   - Title underlined with `=====` matching exact character length.
+   - Subsections (e.g., `Installation`, `Configuration`, `Usage`, `License`, `Bug Tracker`, `Credits`, `Contacts`, `Maintainer`) underlined with `-----` at the same heading level.
+   - **No Section or Contact Duplication**: Do NOT repeat `Contact: odoo@cybrosys.com` inside `Credits` if a separate `Contacts` section already exists (keep Developer/Contributor attribution in `Credits`, contact links/emails in `Contacts`, and valid repository URLs in `Bug Tracker`).
+   - Replace passive/vague phrasing (`"allows users to"`, generic boilerplate), update documentation/GitHub links to `20.0`, and verify concrete UI menu navigation paths.
    - License must say `LGPL-3`.
+   - Must pass `python -m docutils --strict migration/<technical_name>/README.rst > /dev/null` with 0 warnings and 0 errors.
 
 8. **`doc/RELEASE_NOTES.md`**:
    - Format:
@@ -1510,14 +1520,66 @@ def audit_orm_patterns(filepath):
                             if isinstance(target, ast.Subscript) and isinstance(target.value, ast.Name) and target.value.id == vals_arg:
                                 violations.append(f'{filepath}:{subnode.lineno} [MUTATING CALLER VALS] In-place mutation of caller {vals_arg} in write(); copy dict with vals = dict({vals_arg})')
 
+            # 5. Dead or undecorated _onchange_* compatibility stubs in models/wizard
+            if is_model_file and node.name.startswith('_onchange_'):
+                has_onchange_dec = any(
+                    (isinstance(dec, ast.Attribute) and dec.attr == 'onchange') or
+                    (isinstance(dec, ast.Name) and dec.id == 'onchange') or
+                    (isinstance(dec, ast.Call) and (
+                        (isinstance(dec.func, ast.Attribute) and dec.func.attr == 'onchange') or
+                        (isinstance(dec.func, ast.Name) and dec.id == 'onchange')
+                    ))
+                    for dec in node.decorator_list
+                )
+                has_super_call = any(
+                    isinstance(sub, ast.Call) and isinstance(sub.func, ast.Name) and sub.func.id == 'super'
+                    for sub in ast.walk(node)
+                )
+                if not has_onchange_dec and not has_super_call:
+                    violations.append(
+                        f'{filepath}:{node.lineno} [DEAD STUB] {node.name} lacks @api.onchange decorator; remove dead compatibility stub or restore @api.onchange'
+                    )
+
     return violations
 
 base = 'migration/<technical_name>'
 all_violations = []
+prod_contents = []
+test_contents = []
+private_candidates = []
+HOOK_PREFIXES = ('_compute_', '_inverse_', '_search_', '_check_', '_default_', '_selection_', '_onchange_')
+
 for root, _, files in os.walk(base):
     for f in files:
+        p = os.path.join(root, f)
         if f.endswith('.py'):
-            all_violations.extend(audit_orm_patterns(os.path.join(root, f)))
+            all_violations.extend(audit_orm_patterns(p))
+            with open(p, 'r', encoding='utf-8', errors='ignore') as fh:
+                txt = fh.read()
+            if os.sep + 'tests' + os.sep in p or os.path.basename(root) == 'tests':
+                test_contents.append(txt)
+            else:
+                prod_contents.append((p, txt))
+                if 'models' in p or 'wizard' in p:
+                    try:
+                        t = ast.parse(txt, filename=p)
+                        for n in ast.walk(t):
+                            if (isinstance(n, ast.FunctionDef) and n.name.startswith('_') and not n.name.startswith('__')
+                                    and not n.name.startswith(HOOK_PREFIXES) and not n.decorator_list):
+                                has_super = any(isinstance(s, ast.Call) and isinstance(s.func, ast.Name) and s.func.id == 'super' for s in ast.walk(n))
+                                if not has_super:
+                                    private_candidates.append((p, n.lineno, n.name))
+                    except Exception:
+                        pass
+        elif f.endswith('.xml'):
+            with open(p, 'r', encoding='utf-8', errors='ignore') as fh:
+                prod_contents.append((p, fh.read()))
+
+combined_tests = '\n'.join(test_contents)
+for p, lineno, mname in private_candidates:
+    prod_refs = sum(txt.count(mname) for _, txt in prod_contents)
+    if prod_refs <= 1 and mname in combined_tests:
+        print(f'[WARN CRITERION 4.1] {p}:{lineno} undecorated private method {mname} is referenced only in tests/; verify it is an Odoo core override and not a leftover compatibility stub')
 
 if all_violations:
     print(f'[FAIL CRITERION 4.1] Found {len(all_violations)} ORM anti-pattern violation(s):')
@@ -1584,6 +1646,14 @@ GRAMMAR_PATTERNS = [
     (re.compile(r'\ballows\s+users\s+to\b', re.IGNORECASE), 'Prohibited \"allows users to\" pattern detected; use \"enables users to\"'),
 ]
 
+DOC_WORDING_PATTERNS = [
+    (re.compile(r'\bfully\s+certified\b', re.IGNORECASE), 'Unverified claim \"fully certified\"; use \"fully compatible\"'),
+    (re.compile(r'\bour\s+certified\s+(?:team|developers|experts)\b', re.IGNORECASE), 'Unverified marketing claim \"certified team/developers\"; use factual wording'),
+    (re.compile(r'\b100%\s+bug\s+fix\s+commitment\b', re.IGNORECASE), 'Boilerplate hype \"100% Bug Fix Commitment\"; remove unverified claim'),
+    (re.compile(r'\bWhatsapp\b'), 'Incorrect brand casing \"Whatsapp\"; always capitalize \"WhatsApp\"'),
+    (re.compile(r'(?<![/_-])\bOdoo20\b'), 'Missing space in \"Odoo20\"; always write \"Odoo 20\"'),
+]
+
 for root, _, files in os.walk(base):
     if '__pycache__' in root:
         continue
@@ -1591,10 +1661,20 @@ for root, _, files in os.walk(base):
         if f.endswith(('.xml', '.py', '.html', '.rst', '.md')):
             p = os.path.join(root, f)
             with open(p, 'r', encoding='utf-8', errors='ignore') as fh:
-                for line_no, line in enumerate(fh, 1):
-                    for regex, msg in GRAMMAR_PATTERNS:
+                content = fh.read().replace('\r\n', '\n')
+            for line_no, line in enumerate(content.splitlines(), 1):
+                for regex, msg in GRAMMAR_PATTERNS:
+                    if regex.search(line):
+                        violations.append(f'{p}:{line_no} [CRITERION 6.3] {msg}: {line.strip()[:80]}')
+                if f.endswith(('.html', '.rst', '.md')):
+                    for regex, msg in DOC_WORDING_PATTERNS:
                         if regex.search(line):
-                            violations.append(f'{p}:{line_no} [CRITERION 6.3] {msg}: {line.strip()[:80]}')
+                            violations.append(f'{p}:{line_no} [CRITERION 6.3 WORDING] {msg}: {line.strip()[:80]}')
+            if f == 'README.rst':
+                credits_match = re.search(r'(?ms)^Credits\n-+\n(.*?)(?=^[A-Za-z][^\n]*\n[-=]+|\Z)', content)
+                has_contacts = bool(re.search(r'(?m)^Contacts?\n-+', content))
+                if credits_match and has_contacts and re.search(r'\bContact\s*:', credits_match.group(1)):
+                    violations.append(f'{p}:1 [CRITERION 6.3 README DUPLICATION] \"Contact:\" duplicated inside Credits while Contacts section exists')
 
 if violations:
     print(f'[FAIL CRITERION 6.3] Found {len(violations)} grammar or phrasing violation(s):')
@@ -1605,23 +1685,70 @@ else:
     print('[OK] Criterion 6.3: 0 grammar, pidgin phrasing, or string quality violations found.')
 "
 
-# 7c. Audit UI & Settings Path Parity and Future Date Guard (Criterion 6.3 - Score Penalty down to 78/100)
+# 7c. Audit UI & Settings Path Parity, Date Sync, and Copyright Alignment (Criterion 6.3)
 python3 -c "
-import os, re, sys
+import datetime, os, re, sys
 
 base = 'migration/<technical_name>'
 violations = []
+today = datetime.date.today()
 
-# 1. Check for future-dated release notes or changelogs
+MONTHS = {
+    'january': 1, 'jan': 1, 'february': 2, 'feb': 2, 'march': 3, 'mar': 3,
+    'april': 4, 'apr': 4, 'may': 5, 'june': 6, 'jun': 6,
+    'july': 7, 'jul': 7, 'august': 8, 'aug': 8, 'september': 9, 'sep': 9, 'sept': 9,
+    'october': 10, 'oct': 10, 'november': 11, 'nov': 11, 'december': 12, 'dec': 12,
+}
+
+# 1a. Collect copyright start years from Python headers
+copyright_years = []
 for root, _, files in os.walk(base):
     for f in files:
-        if f in ('RELEASE_NOTES.md', 'index.html'):
+        if f.endswith('.py'):
             p = os.path.join(root, f)
             with open(p, 'r', encoding='utf-8', errors='ignore') as fh:
-                for line_no, line in enumerate(fh, 1):
-                    future_years = re.findall(r'\b(202[6-9]|20[3-9]\d)\b', line)
-                    if future_years:
-                        violations.append(f'{p}:{line_no} [CRITERION 6.3 FUTURE DATE] Future year {future_years} detected in {f}. Use realistic calendar date.')
+                head = fh.read(1500)
+            for y in re.findall(r'Copyright\s*\(C\)\s*(20\d\d)', head, re.IGNORECASE):
+                y_int = int(y)
+                copyright_years.append((p, y_int))
+                if y_int > today.year:
+                    violations.append(f'{p}:1 [CRITERION 6.3 FUTURE COPYRIGHT] Copyright year {y_int} exceeds current year {today.year}')
+
+# 1b. Parse doc/RELEASE_NOTES.md ISO dates and verify <= today and copyright alignment
+rn_dates = []
+rn_path = os.path.join(base, 'doc', 'RELEASE_NOTES.md')
+if os.path.exists(rn_path):
+    with open(rn_path, 'r', encoding='utf-8', errors='ignore') as fh:
+        for line_no, line in enumerate(fh, 1):
+            for y_s, m_s, d_s in re.findall(r'\b(20\d\d)-(\d{2})-(\d{2})\b', line):
+                try:
+                    dt = datetime.date(int(y_s), int(m_s), int(d_s))
+                    rn_dates.append((line_no, dt))
+                    if dt > today:
+                        violations.append(f'{rn_path}:{line_no} [CRITERION 6.3 FUTURE DATE] Release note date {dt} exceeds today {today}')
+                except ValueError:
+                    violations.append(f'{rn_path}:{line_no} [CRITERION 6.3 INVALID DATE] Invalid ISO date {y_s}-{m_s}-{d_s}')
+
+# 1c. Parse static/description/index.html changelog Month YYYY dates and verify <= today and sync with RELEASE_NOTES.md
+idx_dates = []
+idx_path = os.path.join(base, 'static', 'description', 'index.html')
+if os.path.exists(idx_path):
+    with open(idx_path, 'r', encoding='utf-8', errors='ignore') as fh:
+        for line_no, line in enumerate(fh, 1):
+            for m_name, y_s in re.findall(r'\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+(20\d\d)\b', line, re.IGNORECASE):
+                ym = (int(y_s), MONTHS[m_name.lower()])
+                idx_dates.append((line_no, ym))
+                if ym > (today.year, today.month):
+                    violations.append(f'{idx_path}:{line_no} [CRITERION 6.3 FUTURE DATE] Changelog {m_name} {y_s} exceeds current month {today:%B %Y}')
+
+if rn_dates:
+    latest_rn = max(dt for _, dt in rn_dates)
+    if copyright_years:
+        max_copy_year = max(y for _, y in copyright_years)
+        if latest_rn.year < max_copy_year:
+            violations.append(f'{rn_path}:1 [CRITERION 6.3 COPYRIGHT/DATE MISMATCH] Release note year {latest_rn.year} precedes .py copyright year {max_copy_year}')
+    if idx_dates and not any(ym == (latest_rn.year, latest_rn.month) for _, ym in idx_dates):
+        violations.append(f'{idx_path}:1 [CRITERION 6.3 DATE SYNC MISMATCH] index.html changelog Month YYYY does not match RELEASE_NOTES.md ({latest_rn:%B %Y})')
 
 # 2. Check for common legacy divergence patterns in index.html and README.rst
 divergence_patterns = [
@@ -1644,11 +1771,11 @@ if violations:
         print(' ', v)
     sys.exit(1)
 else:
-    print('[OK] Criterion 6.3: UI settings parity and realistic date checks passed.')
+    print('[OK] Criterion 6.3: UI settings parity, release date sync, and copyright alignment checks passed.')
 "
 
-# 8. Check README rendering
-python -m docutils migration/<technical_name>/README.rst > /dev/null
+# 8. Check README rendering strictly (0 warnings / 0 errors)
+python -m docutils --strict migration/<technical_name>/README.rst > /dev/null
 ```
 
 ---
@@ -1783,6 +1910,7 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] Dynamic SQL joins use unique table aliases.
   - [ ] No duplicate field label strings on the same model.
   - [ ] Lambda default on functions: `default=lambda self: self.get_default(...)`.
+  - [ ] Zero dead compatibility stubs or undecorated `_onchange_*` wrappers (delete unused wrappers and update tests/callers to the active `@api.constrains` / `@api.onchange` hook).
 - [ ] **Views & QWeb Reports (Section 4.1, 4.2 & 4.3)**:
   - [ ] `<tree>` converted to `<list>`.
   - [ ] `invisible` uses modern syntax (`invisible="not field"`).
@@ -1827,15 +1955,16 @@ python -m docutils migration/<technical_name>/README.rst > /dev/null
   - [ ] Acronyms capitalized in buttons ("Export as XLSX", not "Export as xlsx").
   - [ ] Consistent module naming across views, actions, menus, and descriptions.
   - [ ] **Exact Setting Block & Navigation Path Parity (Criterion 6.3)**: Menu paths, settings block titles (`<block title="...">`), setting string labels (`<setting string="...">`), and section names in `index.html` (including FAQs) and `README.rst` match XML views verbatim (e.g. if XML says `"Stock Reservation Location"`, FAQ/index.html must NOT say `"Stock Reserve Location"`).
-  - [ ] **Realistic Non-Future Release Dates (Criterion 6.3)**: `doc/RELEASE_NOTES.md` and `index.html` changelog dates are synchronized, match each other, and do NOT use future years (e.g. `2026+`), which trigger AI Review penalties.
+  - [ ] **Synchronized Current Release Dates & Copyright Alignment (Criterion 6.3)**: `doc/RELEASE_NOTES.md` ISO date (`YYYY-MM-DD`) and `index.html` changelog (`Month YYYY`) are synchronized, do NOT exceed `date.today()`, and align with Python `.py` `Copyright (C) <YYYY>-TODAY` (never backdated to `2025` alongside `2026` copyright headers).
   - [ ] **Manifest Documentation Completeness (Criterion 6.3)**: `__manifest__.py` contains a complete, informative `summary` (and concise `description` if needed) so the reviewer does not note missing manifest documentation.
+  - [ ] **Accurate Verified Phrasing & Counts (`index.html` / `README.rst`)**: No unverified certification/superlative hype (`"fully certified"`, `"our certified team"`), no stale count mismatches (e.g., `"15+"` when code defines fewer options), and no duplicated `Contact:` blocks inside `Credits` alongside `Contacts`.
   - [ ] Singular vs Plural: Report title and descriptions match single vs multiple records.
   - [ ] No boilerplate leftovers (e.g. accounting text in timesheets/HR modules).
   - [ ] FAQs accurately reflect actual module features only.
   - [ ] Brand casing consistent (e.g. "WhatsApp", not "Whatsapp").
   - [ ] Date synchronization: `index.html` month/year matches `RELEASE_NOTES.md`.
-  - [ ] `README.rst` headings and license are properly formatted.
-  - [ ] `doc/RELEASE_NOTES.md` has ISO date and "Odoo 20" title.
+  - [ ] `README.rst` headings and license are properly formatted, and `python -m docutils --strict README.rst` passes with 0 warnings/errors.
+  - [ ] `doc/RELEASE_NOTES.md` has ISO date matching current migration date/copyright year and "Odoo 20" title.
 - [ ] **Packaging & Git Tree Verification (Criterion 1.2, 1.5 & 6.2 - Blocking)**:
   - [ ] **Purge `index1.html` (Criterion 1.5 & 6.2 - Blocking)**: `static/description/index1.html` permanently deleted (`rm -f static/description/index1.html` and `git rm -f static/description/index1.html`).
   - [ ] **Stage `index.html` in Git (Criterion 1.2 - Blocking)**: `git add static/description/index.html` executed so `index.html` is tracked and committed in Git's tree.

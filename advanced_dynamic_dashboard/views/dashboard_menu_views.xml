@@ -12,14 +12,14 @@
                         <div>
                             <div class="text-center">
                                 <h3 class="my-2 ms-3">
-                                    <span t-translation="on">Name:</span>
+                                    <span>Name:</span>
                                     <field name="name"/>
                                 </h3>
                             </div>
                             <div class="row">
                                 <hr class="mt4 mb4"/>
                                 <div class="col-6 text-center">
-                                    <strong t-translation="on">Parent:</strong>
+                                    <strong>Parent:</strong>
                                 </div>
                                 <div class="col-6 text-center">
                                     <field name="menu_id"/>

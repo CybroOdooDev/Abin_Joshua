@@ -7,7 +7,6 @@ import { SurveyForm } from "@survey/interactions/survey_form";
 patch(SurveyForm.prototype, {
     start() {
         super.start();
-        // Only add listener for custom file input handling
         this.addListener(this.el, "change", (ev) => {
             if (ev.target.matches(".o_file")) {
                 this._onChangeFile(ev);
@@ -78,7 +77,7 @@ patch(SurveyForm.prototype, {
             }
             const parts = parsed.hostname.split(".");
             return parts.length >= 2 && parts[parts.length - 1].length >= 2;
-        } catch (_) {
+        } catch {
             return false;
         }
     },
@@ -88,7 +87,7 @@ patch(SurveyForm.prototype, {
 
         let address = {};
         let names = {};
-        let matrix = {};
+        const matrix = {};
 
         const customInputs = this.el.querySelectorAll("[data-question-type]");
 
@@ -113,7 +112,7 @@ patch(SurveyForm.prototype, {
                 case "many2one": {
                     const option =
                         input.selectedOptions?.[0] ||
-                        input.querySelector(`option[value="${input.value}"]`);
+                        input.querySelector(`option[value="${CSS.escape(input.value)}"]`);
                     if (option) {
                         params[input.name] = [
                             input.value,
@@ -165,14 +164,19 @@ patch(SurveyForm.prototype, {
                     break;
 
                 case "many2many": {
-                    const el = this.el.querySelector(`.${CSS.escape(input.name)}`);
-                    if (el) {
-                        params[input.name] = el.value;
+                    if (input.selectedOptions) {
+                        params[input.name] = Array.from(input.selectedOptions)
+                            .map((opt) => opt.value)
+                            .filter(Boolean)
+                            .join(", ");
+                    } else {
+                        const el = this.el.querySelector(`.${CSS.escape(input.name)}`);
+                        if (el) {
+                            params[input.name] = el.value;
+                        }
                     }
                     break;
                 }
-
-
             }
         });
     },

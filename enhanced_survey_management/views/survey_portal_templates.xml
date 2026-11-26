@@ -1,23 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <!-- Survey portal Views -->
-    <template id="portal_my_home_survey"
-              name="survey" customize_show="True"
-              inherit_id="portal.portal_my_home" priority="20">
-        <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-            <t t-call="portal.portal_docs_entry">
-                <t t-set="title">Survey</t>
-                <t t-set="url" t-value="'/my/survey/ans'"/>
-                <t t-set="placeholder_count" t-value="'survey_count'"/>
-            </t>
-        </xpath>
-    </template>
     <!-- Survey portal Breadcrumbs -->
     <template id="portal_my_home_menu_survey" name="Portal layout : Survey menu"
               inherit_id="portal.portal_breadcrumbs"
               priority="20">
         <xpath expr="//ol[hasclass('o_portal_submenu')]" position="inside">
-            <li t-if="page_name == 'survey'" t-attf-class="breadcrumb-item #{'active ' if not survey_boolean else ''}">
+            <li t-if="page_name == 'survey'"
+                t-attf-class="breadcrumb-item #{'active ' if not survey_boolean else ''}">
                 <a t-if="survey_boolean" t-attf-href="/my/survey/ans">Surveys</a>
                 <t t-else="">Surveys</t>
             </li>
@@ -26,6 +15,7 @@
             </li>
         </xpath>
     </template>
+
     <!-- Survey portal Views: Surveys -->
     <template id="portal_survey_result" name="Survey">
         <t t-call="portal.portal_layout" breadcrumbs_searchbar="True">
@@ -63,6 +53,7 @@
             </table>
         </t>
     </template>
+
     <!-- Survey portal views results -->
     <template id="portal_survey_result_view" name="Survey Result">
         <t t-call="portal.portal_layout" breadcrumbs_searchbar="True">
@@ -113,8 +104,7 @@
                             <span t-out="qst['question_type']"/>
                         </td>
                         <td class="text-end">
-                            <span t-out="qst['answer']"
-                                  style="white-space: normal !important;"/>
+                            <span t-out="qst['answer']" class="text-wrap"/>
                         </td>
                         <td class="text-end">
                             <span t-out="qst['score']"/>

@@ -1,9 +1,10 @@
 import { registry } from "@web/core/registry";
 import { _t } from "@web/core/l10n/translation";
+import { rpc } from "@web/core/network/rpc";
 import { DynamicDashboardTile } from './dynamic_dashboard_tile';
 import { DynamicDashboardChart } from './dynamic_dashboard_chart';
 import { useService } from "@web/core/utils/hooks";
-import { Component, useRef, onMounted, useState } from "@odoo/owl";
+import { Component, onMounted, proxy, signal } from "@odoo/owl";
 
 
 export class AdvancedDynamicDashboard extends Component {
@@ -11,18 +12,17 @@ export class AdvancedDynamicDashboard extends Component {
     static template = "owl.AdvancedDynamicDashboard";
 
     setup() {
-        this.rootRef = useRef("root");
-        this.themeSelectorRef = useRef("themeSelector");
-        this.startDateRef = useRef("startDate");
-        this.endDateRef = useRef("endDate");
-        this.searchInputRef = useRef("searchInput");
-        this.itemsRef = useRef("items");
+        this.rootRef = signal.ref();
+        this.themeSelectorRef = signal.ref();
+        this.startDateRef = signal.ref();
+        this.endDateRef = signal.ref();
+        this.searchInputRef = signal.ref();
+        this.itemsRef = signal.ref();
         this.action = useService("action");
         this.orm = useService("orm");
         this.dialog = useService("dialog");
-        this.rpc = useService("rpc");
-        this.actionId = this.props.actionId;
-        this.state = useState({
+        this.actionId = this.props.actionId ?? this.props.action?.id ?? false;
+        this.state = proxy({
             isDarkMode: false,
             isEditingLayout: false,
             showModeText: false,
@@ -43,8 +43,8 @@ export class AdvancedDynamicDashboard extends Component {
     }
 
     onChangeTheme() {
-        const themeStyle = this.themeSelectorRef.el?.value || "";
-        this.rootRef.el?.setAttribute('style', themeStyle + 'min-height:-webkit-fill-available;');
+        const themeStyle = this.themeSelectorRef()?.value || "";
+        this.rootRef()?.setAttribute('style', themeStyle + 'min-height:-webkit-fill-available;');
     }
 
     ResizeDrag() {
@@ -52,7 +52,8 @@ export class AdvancedDynamicDashboard extends Component {
         if (!interactJs) {
             return;
         }
-        const elements = this.itemsRef.el ? this.itemsRef.el.querySelectorAll('.resize-drag') : [];
+        const itemsEl = this.itemsRef();
+        const elements = itemsEl ? itemsEl.querySelectorAll('.resize-drag') : [];
         elements.forEach((element) => {
             interactJs(element).resizable({
                 edges: { left: true, right: true, bottom: true, top: true },
@@ -101,8 +102,10 @@ export class AdvancedDynamicDashboard extends Component {
     async renderDashboard() {
         const themes = await this.orm.call('dashboard.theme', 'get_records', [[]]);
         this.state.themes = themes;
-        const blocks = await this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId]);
-        this.state.blocks = blocks;
+        if (this.actionId) {
+            const blocks = await this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId]);
+            this.state.blocks = blocks;
+        }
     }
 
     editLayout(ev) {
@@ -110,7 +113,8 @@ export class AdvancedDynamicDashboard extends Component {
         ev.preventDefault();
         const interactJs = this.interact;
         if (interactJs) {
-            const elements = this.itemsRef.el ? this.itemsRef.el.querySelectorAll('.resize-drag') : [];
+            const itemsEl = this.itemsRef();
+            const elements = itemsEl ? itemsEl.querySelectorAll('.resize-drag') : [];
             elements.forEach((element) => {
                 interactJs(element).draggable(true);
                 interactJs(element).resizable(true);
@@ -126,7 +130,8 @@ export class AdvancedDynamicDashboard extends Component {
         this.state.isEditingLayout = false;
         const interactJs = this.interact;
         const data_list = [];
-        const elements = this.itemsRef.el ? this.itemsRef.el.querySelectorAll('.resize-drag') : [];
+        const itemsEl = this.itemsRef();
+        const elements = itemsEl ? itemsEl.querySelectorAll('.resize-drag') : [];
         elements.forEach((element) => {
             if (interactJs) {
                 interactJs(element).draggable(false);
@@ -149,11 +154,11 @@ export class AdvancedDynamicDashboard extends Component {
         ev.stopPropagation();
         ev.preventDefault();
         this.state.isDarkMode = !this.state.isDarkMode;
-        const dashboard = this.rootRef.el;
+        const dashboard = this.rootRef();
         if (this.state.isDarkMode) {
             dashboard?.setAttribute('style', 'background-color: #383E45;min-height:-webkit-fill-available;');
         } else {
-            const themeStyle = this.themeSelectorRef.el?.value || "";
+            const themeStyle = this.themeSelectorRef()?.value || "";
             dashboard?.setAttribute('style', themeStyle + 'min-height:-webkit-fill-available;');
         }
     }
@@ -161,11 +166,12 @@ export class AdvancedDynamicDashboard extends Component {
     onClickAddItem(event) {
         event.stopPropagation();
         event.preventDefault();
-        const type = event.target.getAttribute('data-type');
+        const type = event.currentTarget.getAttribute('data-type');
         let chart_type = null;
         if (type == 'graph') {
-            chart_type = event.target.getAttribute('data-chart_type');
+            chart_type = event.currentTarget.getAttribute('data-chart_type');
         }
+        const actionId = parseInt(this.actionId) || false;
         if (type == 'tile') {
             const randomColor = '#' + ('000000' + Math.floor(Math.random() * 16777216).toString(16)).slice(-6);
             this.action.doAction({
@@ -183,7 +189,7 @@ export class AdvancedDynamicDashboard extends Component {
                     'default_text_color': '#FFFFFF',
                     'default_val_color': '#F3F3F3',
                     'default_fa_icon': 'fa fa-bar-chart',
-                    'default_client_action_id': parseInt(this.actionId)
+                    'default_client_action_id': actionId
                 }
             });
         }
@@ -210,30 +216,33 @@ export class AdvancedDynamicDashboard extends Component {
                     'default_width': '588px',
                     'default_graph_type': chart_type,
                     'default_fa_icon': 'fa fa-bar-chart',
-                    'default_client_action_id': parseInt(this.actionId)
+                    'default_client_action_id': actionId
                 },
             });
         }
     }
 
     async dateFilter() {
-        const start_date = this.startDateRef.el?.value || "null";
-        const end_date = this.endDateRef.el?.value || "null";
-        const blocks = await this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId, start_date, end_date]);
-        this.state.blocks = blocks;
+        const start_date = this.startDateRef()?.value || "null";
+        const end_date = this.endDateRef()?.value || "null";
+        if (this.actionId) {
+            const blocks = await this.orm.call("dashboard.block", "get_dashboard_vals", [[], this.actionId, start_date, end_date]);
+            this.state.blocks = blocks;
+        }
     }
 
     input_change() {
-        const input = this.searchInputRef.el?.value || "";
+        const input = this.searchInputRef()?.value || "";
         if (input === "") {
             this.clearSearch();
         }
     }
 
     async clickSearch() {
-        const input = this.searchInputRef.el?.value || "";
-        const response = await this.rpc('/custom_dashboard/search_input_chart', { 'search_input': input });
-        const blocks = this.itemsRef.el ? this.itemsRef.el.querySelectorAll(".resize-drag") : [];
+        const input = this.searchInputRef()?.value || "";
+        const response = await rpc('/custom_dashboard/search_input_chart', { 'search_input': input });
+        const itemsEl = this.itemsRef();
+        const blocks = itemsEl ? itemsEl.querySelectorAll(".resize-drag") : [];
         blocks.forEach((element) => {
             const dataId = JSON.parse(element.getAttribute('data-id'));
             if (response.includes(dataId)) {
@@ -253,17 +262,20 @@ export class AdvancedDynamicDashboard extends Component {
     }
 
     clearSearch() {
-        if (this.searchInputRef.el) {
-            this.searchInputRef.el.value = '';
+        const searchEl = this.searchInputRef();
+        if (searchEl) {
+            searchEl.value = '';
         }
-        const blocks = this.itemsRef.el ? this.itemsRef.el.querySelectorAll(".resize-drag") : [];
+        const itemsEl = this.itemsRef();
+        const blocks = itemsEl ? itemsEl.querySelectorAll(".resize-drag") : [];
         blocks.forEach((element) => {
             element.style.visibility = "visible";
         });
     }
 
     async printPdf() {
-        const elements = this.itemsRef.el ? Array.from(this.itemsRef.el.querySelectorAll('.resize-drag')) : [];
+        const itemsEl = this.itemsRef();
+        const elements = itemsEl ? Array.from(itemsEl.querySelectorAll('.resize-drag')) : [];
         const newElement = document.createElement('div');
         newElement.className = 'pdf';
         elements.forEach((elem) => {
@@ -288,7 +300,8 @@ export class AdvancedDynamicDashboard extends Component {
     }
 
     async createPDF() {
-        const elements = this.itemsRef.el ? Array.from(this.itemsRef.el.querySelectorAll('.resize-drag')) : [];
+        const itemsEl = this.itemsRef();
+        const elements = itemsEl ? Array.from(itemsEl.querySelectorAll('.resize-drag')) : [];
         const newElement = document.createElement('div');
         newElement.className = 'pdf';
         elements.forEach((elem) => {

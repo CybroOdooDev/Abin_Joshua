@@ -2,7 +2,7 @@ import { loadBundle } from '@web/core/assets';
 import { getColor } from "@web/core/colors/colors";
 import { _t } from "@web/core/l10n/translation";
 import { ConfirmationDialog } from "@web/core/confirmation_dialog/confirmation_dialog";
-import { Component, xml, onWillStart, onMounted, useRef } from "@odoo/owl";
+import { Component, xml, onWillStart, onMounted, onPatched, onWillUnmount, signal } from "@odoo/owl";
 
 export class DynamicDashboardChart extends Component {
     static template = xml`
@@ -15,37 +15,31 @@ export class DynamicDashboardChart extends Component {
 
                 <div class="block_edit block_setting" t-on-click="(ev) => this.getConfiguration(ev)">
                     <i title="Configuration"
-                        t-translation="on"
                         class="fa fa-pencil block_setting chart-edit"/>
                 </div>
 
                 <div class="block_edit block_image" data-type="png" t-on-click="(ev) => this.exportItem(ev)">
                     <i title="Save As Image" data-type="png"
-                        t-translation="on"
                         class="bi bi-image block_image chart-image"/>
                 </div>
 
                 <div class="block_edit block_pdf" data-type="pdf" t-on-click="(ev) => this.exportItem(ev)">
                     <i title="Export to PDF" data-type="pdf"
-                        t-translation="on"
                         class="bi bi-file-earmark-pdf block_pdf chart-pdf"/>
                 </div>
 
                 <div class="block_edit block_csv" t-att-data-id="this.props.widget.id" data-type="csv" t-on-click="(ev) => this.exportItem(ev)">
                     <i title="Export to CSV" data-type="csv" t-att-data-id="this.props.widget.id"
-                        t-translation="on"
                         class="bi bi-filetype-csv block_csv chart-csv"/>
                 </div>
 
                 <div class="block_edit block_xlsx" t-att-data-id="this.props.widget.id" data-type="xlsx" t-on-click="(ev) => this.exportItem(ev)">
                     <i title="Export to XLSX" data-type="xlsx" t-att-data-id="this.props.widget.id"
-                        t-translation="on"
                         class="fa fa-file-excel-o block_xlsx chart-xlsx"/>
                 </div>
 
                 <div class="block_edit block_delete" t-on-click="(ev) => this.removeTile(ev)">
                     <i title="Delete"
-                        t-translation="on"
                         class="fa fa-times block_delete chart-setting"/>
                 </div>
                 <h3 class="chart_title">
@@ -54,7 +48,7 @@ export class DynamicDashboardChart extends Component {
                 <div class="row-class">
                     <div class="col-md-12 chart_canvas" id="chart_canvas"
                         t-att-data-id="this.props.widget.id">
-                        <canvas id="canvas" t-ref="chartCanvas" t-att-data-title="this.props.widget.name"/>
+                        <canvas id="canvas" t-ref="this.chartRef" t-att-data-title="this.props.widget.name"/>
                     </div>
                 </div>
             </div>
@@ -62,19 +56,22 @@ export class DynamicDashboardChart extends Component {
 
     setup() {
         this.doAction = this.props.doAction.doAction;
-        this.chartRef = useRef("chartCanvas");
+        this.chartRef = signal.ref();
+        this.chartInstance = null;
         this.dialog = this.props.dialog;
         onWillStart(async () => {
             await loadBundle("web.chartjs_lib");
         });
         onMounted(() => this.renderChart());
+        onPatched(() => this.renderChart());
+        onWillUnmount(() => this.destroyChart());
     }
 
     exportItem(ev) {
         ev.stopPropagation();
         ev.preventDefault();
         const type = ev.currentTarget.getAttribute('data-type');
-        const canvas = this.chartRef.el;
+        const canvas = this.chartRef();
         if (!canvas) {
             return;
         }
@@ -178,16 +175,25 @@ export class DynamicDashboardChart extends Component {
         });
     }
 
+    destroyChart() {
+        if (this.chartInstance) {
+            this.chartInstance.destroy();
+            this.chartInstance = null;
+        }
+    }
+
     renderChart() {
-        if (this.props.widget.graph_type && this.chartRef.el) {
+        this.destroyChart();
+        const canvas = this.chartRef();
+        if (this.props.widget.graph_type && canvas) {
             const x_axis = this.props.widget.x_axis || [];
             const y_axis = this.props.widget.y_axis || [];
             const data = [];
             for (let i = 0; i < x_axis.length; i++) {
                 data.push({ key: x_axis[i], value: y_axis[i] });
             }
-            new Chart(
-                this.chartRef.el,
+            this.chartInstance = new Chart(
+                canvas,
                 {
                     type: this.props.widget.graph_type || 'bar',
                     data: {

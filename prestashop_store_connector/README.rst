@@ -39,7 +39,6 @@ Credits
   (V19) Fahmida M A,
   (V18) Fahmida M A,
   (V17) Yadhu Shankar E
-* Contact: odoo@cybrosys.com
 
 Contacts
 --------

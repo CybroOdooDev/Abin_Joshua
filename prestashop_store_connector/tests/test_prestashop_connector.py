@@ -87,7 +87,7 @@ class TestPrestashopConnector(TransactionCase):
         self.assertFalse(copied_carrier.prestashop)
 
     def test_action_connect_and_failure(self):
-        """Test action_connect transitions state and raises UserError on error."""
+        """Test action_connect updates state and handles API failures."""
         self.connector.state = 'not_connected'
         mock_service = MagicMock()
         mock_service.get.return_value = {'shops': {}}
@@ -103,7 +103,7 @@ class TestPrestashopConnector(TransactionCase):
             self.connector.action_connect()
 
     def test_check_connection_constraint_batch_and_error(self):
-        """Test _check_connection supports multi-record batches and rejects bad keys."""
+        """Test _check_connection handles batches and rejects bad keys."""
         mock_service = MagicMock()
         mock_service.get.return_value = {'shops': {}}
         with patch(CLIENT_PATCH_PATH, return_value=mock_service):
@@ -136,7 +136,7 @@ class TestPrestashopConnector(TransactionCase):
             self.assertEqual(result['params']['type'], 'danger')
 
     def test_action_import_products_branches(self):
-        """Test importing new products, list stock nodes, and updating existing stock."""
+        """Test importing new products and updating existing stock quants."""
         self.connector.state = 'connected'
         mock_service = MagicMock()
         mock_service.get.side_effect = [
@@ -186,7 +186,7 @@ class TestPrestashopConnector(TransactionCase):
             self.connector.action_import_products()
 
     def test_action_export_products_branches(self):
-        """Test exporting unlinked products and skipping already-exported products."""
+        """Test exporting new products and skipping already-linked records."""
         self.connector.state = 'connected'
         product = self.env['product.product'].create({
             'name': 'Odoo Export Product',
@@ -250,7 +250,7 @@ class TestPrestashopConnector(TransactionCase):
         self.assertEqual(result['params']['type'], 'danger')
 
     def test_action_export_contacts_branches(self):
-        """Test exporting contacts, duplicate email recovery, and error paths."""
+        """Test exporting contacts, duplicate recovery, and error paths."""
         self.connector.state = 'connected'
         self.env['res.partner'].search([
             '|',
@@ -280,6 +280,7 @@ class TestPrestashopConnector(TransactionCase):
         dup_search_calls = []
 
         def fake_search(resource, flt):
+            """Simulate PrestaShop customer and address lookups."""
             if resource == 'customers' and flt.get('filter[id]') in (9000, 9888, 9777):
                 return [flt['filter[id]']]
             if resource == 'addresses' and flt.get('filter[id_customer]') in (9000, 9888, 9777):
@@ -312,7 +313,7 @@ class TestPrestashopConnector(TransactionCase):
             self.connector.action_export_contacts()
 
     def test_action_import_orders_branches(self):
-        """Test importing active orders with shipping/discount and skipping cancelled."""
+        """Test importing orders with shipping/discount and cancelled skip."""
         self.connector.state = 'connected'
         partner = self.env['res.partner'].create({'name': 'Order Buyer', 'prestashop': 9401})
         product = self.env['product.product'].create({'name': 'Order Item', 'prestashop': 9501})
@@ -362,7 +363,7 @@ class TestPrestashopConnector(TransactionCase):
         self.assertGreaterEqual(len(imported_order.order_line), 3)
 
     def test_action_import_orders_creates_missing_partner_and_product(self):
-        """Test order import creates missing partner and product automatically."""
+        """Test order import creates missing partners and products."""
         self.connector.state = 'connected'
         mock_service = MagicMock()
         mock_service.get.side_effect = [
@@ -395,7 +396,7 @@ class TestPrestashopConnector(TransactionCase):
         self.assertTrue(self.env['product.product'].search([('prestashop', '=', 9599)], limit=1))
 
     def test_action_export_orders_branches(self):
-        """Test exporting confirmed sales orders and partial/inactive-country skips."""
+        """Test exporting confirmed orders and inactive-country skips."""
         self.connector.state = 'connected'
         mock_service = MagicMock()
         self.env['sale.order'].search([('state', '=', 'sale')]).write({'prestashop': 9700})
@@ -431,6 +432,7 @@ class TestPrestashopConnector(TransactionCase):
         bad_order.action_confirm()
 
         def fake_search(resource, flt):
+            """Simulate PrestaShop order and address lookups."""
             if resource == 'orders' and flt.get('filter[id]') == 9700:
                 return [9700]
             if resource == 'addresses' and flt.get('filter[id_customer]') == 9402:
@@ -440,6 +442,7 @@ class TestPrestashopConnector(TransactionCase):
             return []
 
         def fake_get(resource, rec_id):
+            """Simulate PrestaShop address and country lookups."""
             if resource == 'addresses' and rec_id == 55:
                 return {'address': {'id_country': 1}}
             if resource == 'addresses' and rec_id == 56:
@@ -462,3 +465,129 @@ class TestPrestashopConnector(TransactionCase):
         self.assertEqual(res_partial['params']['type'], 'warning')
         self.assertEqual(sale_order.prestashop, 9902)
         self.assertFalse(bad_order.prestashop)
+
+    def test_sync_actions_webservice_errors(self):
+        """Test sync actions wrap PrestaShopWebServiceError as UserError."""
+        self.connector.state = 'connected'
+        product = self.env['product.product'].create({'name': 'Err Product'})
+        partner = self.env['res.partner'].create({'name': 'Err Order Partner'})
+        order = self.env['sale.order'].create({
+            'partner_id': partner.id,
+            'prestashop': 9720,
+            'order_line': [(0, 0, {
+                'product_id': product.id,
+                'product_uom_qty': 1,
+                'price_unit': 10.0,
+            })],
+        })
+        order.action_confirm()
+
+        mock_service = MagicMock()
+        mock_service.search.side_effect = PrestaShopWebServiceError('Search err')
+        mock_service.get.side_effect = PrestaShopWebServiceError('Get err')
+        mock_service.add.side_effect = PrestaShopWebServiceError('Add err')
+
+        for method_name in (
+            'action_export_products',
+            'action_import_contacts',
+            'action_import_orders',
+            'action_export_orders',
+        ):
+            with (
+                patch(CLIENT_PATCH_PATH, return_value=mock_service),
+                self.assertRaises(UserError),
+            ):
+                getattr(self.connector, method_name)()
+
+    def test_get_stock_location_fallback_and_error(self):
+        """Test warehouse fallback and missing stock location error."""
+        location = self.connector._get_stock_location()
+        self.assertTrue(location)
+
+        with patch.object(type(self.env), 'ref', return_value=self.env['stock.location']):
+            fallback_loc = self.connector._get_stock_location()
+            self.assertTrue(fallback_loc)
+
+            with (
+                patch.object(
+                    type(self.env['stock.warehouse']),
+                    'search',
+                    return_value=self.env['stock.warehouse'],
+                ),
+                self.assertRaises(UserError),
+            ):
+                self.connector._get_stock_location()
+
+    def test_export_address_and_skipped_order_exports(self):
+        """Test address country/state sync and all-skipped order exports."""
+        self.connector.state = 'connected'
+        country = self.env.ref('base.us')
+        state = self.env['res.country.state'].search(
+            [('country_id', '=', country.id)],
+            limit=1,
+        )
+        if not state:
+            state = self.env['res.country.state'].create({
+                'name': 'Test State',
+                'code': 'TS',
+                'country_id': country.id,
+            })
+        partner = self.env['res.partner'].create({
+            'name': 'Geo Partner',
+            'street': '123 Main St',
+            'city': 'Austin',
+            'country_id': country.id,
+            'state_id': state.id,
+            'prestashop': 9410,
+        })
+        mock_service = MagicMock()
+        mock_service.search.side_effect = [[21], [5]]
+        self.connector._export_partner_address(
+            mock_service,
+            partner,
+            'Geo',
+            'Partner',
+            street_fallback=True,
+        )
+        addr_call = mock_service.add.call_args[0][1]['address']
+        self.assertEqual(addr_call['address1'], '123 Main St')
+        self.assertEqual(addr_call['id_country'], 21)
+        self.assertEqual(addr_call['id_state'], 5)
+
+        self.env['sale.order'].search([('state', '=', 'sale')]).write({'prestashop': 9710})
+        no_cust_partner = self.env['res.partner'].create({'name': 'No Cust'})
+        no_addr_partner = self.env['res.partner'].create({
+            'name': 'No Addr',
+            'prestashop': 9411,
+        })
+        no_prod_partner = self.env['res.partner'].create({
+            'name': 'No Prod',
+            'prestashop': 9412,
+        })
+        unexported_prod = self.env['product.product'].create({'name': 'Blocked Prod'})
+        for order_partner in (no_cust_partner, no_addr_partner, no_prod_partner):
+            order = self.env['sale.order'].create({
+                'partner_id': order_partner.id,
+                'order_line': [(0, 0, {
+                    'product_id': unexported_prod.id,
+                    'product_uom_qty': 1,
+                    'price_unit': 25.0,
+                })],
+            })
+            order.action_confirm()
+
+        def skip_search(resource, flt):
+            """Simulate lookups causing each order export to skip."""
+            if resource == 'orders' and flt.get('filter[id]') == 9710:
+                return [9710]
+            if resource == 'addresses' and flt.get('filter[id_customer]') == 9412:
+                return [77]
+            return []
+
+        mock_service.search.side_effect = skip_search
+        mock_service.get.side_effect = PrestaShopWebServiceError('Country err')
+        mock_service.add.side_effect = PrestaShopWebServiceError('Add blocked')
+        with patch(CLIENT_PATCH_PATH, return_value=mock_service):
+            res_skipped = self.connector.action_export_orders()
+        self.assertEqual(res_skipped['params']['type'], 'danger')
+        self.assertEqual(res_skipped['params']['title'], 'Order Export Skipped')

@@ -132,7 +132,10 @@
                     t-att-data-id="question.id"
                     t-attf-id="{{question.id}}-country">
                 <option value="" selected="1">
-                    <t t-out="answer_lines.get_value_address('country') if answer_lines else 'Country'"/>
+                    <t t-if="answer_lines and answer_lines.get_value_address('country')">
+                        <t t-out="answer_lines.get_value_address('country')"/>
+                    </t>
+                    <t t-else="">Country</t>
                 </option>
             </select>
             <select style="width:33%;float:left;margin-left:10px;"
@@ -141,7 +144,10 @@
                     t-attf-name="{{question.id}}-state"
                     t-attf-id="{{question.id}}-state">
                 <option value="" selected="1">
-                    <t t-out="answer_lines.get_value_address('state') if answer_lines else 'State'"/>
+                    <t t-if="answer_lines and answer_lines.get_value_address('state')">
+                        <t t-out="answer_lines.get_value_address('state')"/>
+                    </t>
+                    <t t-else="">State</t>
                 </option>
             </select>
             <input type="text" style="width:33%;" class="form-control datetimepicker-input
@@ -153,15 +159,16 @@
     </template>
     <!-- Question: QR Template -->
     <template id="question_qr" name="Question: QR">
-        <t t-if="question.qrcode and not answer_line">
-            <img t-att-src="'/report/barcode/?barcode_type=QR&amp;value=%s&amp;width=110&amp;height=110&amp;humanreadable=1' %(question.qrcode)"
-            />
+        <t t-if="question.qrcode and not answer_lines">
+            <img t-att-src="'/report/barcode/?barcode_type=QR&amp;value=%s&amp;width=110&amp;height=110&amp;humanreadable=1' %(question.qrcode)"/>
         </t>
         <t t-else="">
             <div>
-                <input type="text" style="width:33%;float:left; " class="form-control datetimepicker-input
+                <input type="text" style="width:33%;float:left;"
+                       class="form-control datetimepicker-input
                 o_survey_question_date bg-transparent text-dark rounded-0 p-0"
-                       t-att-name="question.id" placeholder="Qrcode"
+                       t-att-name="question.id" placeholder="QR Code"
+                       t-att-value="answer_lines[0].value_qr if answer_lines else None"
                        t-att-data-question-type="question.question_type"/>
                 <button type="button" style="margin-left: 10px;"
                         class="btn btn-info fa fa-qrcode"/>
@@ -187,7 +194,6 @@
                    t-att-name="question.id"
                    t-att-data-question-type="question.question_type"
                    t-att-value="answer_lines[0].value_password if answer_lines else None"/>
-
         </div>
     </template>
     <!-- Question: URL Template -->
@@ -197,8 +203,7 @@
                    class="form-control o_survey_question_text_box bg-transparent text-dark rounded-0 p-0"
                    t-att-name="question.id"
                    t-att-data-question-type="question.question_type"
-                   t-att-value="answer_lines[0].value_url if answer_lines else None"
-            />
+                   t-att-value="answer_lines[0].value_url if answer_lines else None"/>
         </div>
     </template>
     <!-- Question: Week Template -->
@@ -231,8 +236,7 @@
                    t-attf-id="range_weight_{{question.id}}"
                    oninput="this.nextElementSibling.value = this.value"
                    t-att-value="answer_lines[0].value_range if answer_lines else None"
-                   t-att-data-question-type="question.question_type"
-            />
+                   t-att-data-question-type="question.question_type"/>
             <output t-attf-id="range_disp_{{question.id}}"/>
             <t t-if="answer_lines">
                 <t t-out="answer_lines[0].value_range"/>
@@ -374,7 +378,7 @@
                                     <div style="padding-left:30px">
                                         <input type="date"
                                                class="form-control datetimepicker-input o_survey_question_date bg-transparent text-dark rounded-0 p-0"
-                                               t-attf-data-target="#datetimepicker_#{question.id}"
+                                               t-attf-data-bs-target="#datetimepicker_#{question.id}"
                                                t-att-name="'%s-%s' % (item_idx, question.id)"
                                                t-att-placeholder="question.question_placeholder"
                                                t-att-data-matrix-type="question.matrix_subtype"
@@ -389,7 +393,7 @@
                                          style="padding-left:30px">
                                         <input type="datetime-local"
                                                class="form-control datetimepicker-input o_survey_question_datetime bg-transparent text-dark rounded-0 p-0"
-                                               t-attf-data-target="#datetimepicker_#{question.id}"
+                                               t-attf-data-bs-target="#datetimepicker_#{question.id}"
                                                t-att-name="'%s-%s' % (item_idx, question.id)"
                                                t-att-placeholder="question.question_placeholder"
                                                t-att-value='answer_lines.get_value_matrix(item_idx) if answer_lines else None'
@@ -431,8 +435,7 @@
                                                t-att-name="'%s-%s' % (item_idx, question.id)"
                                                t-att-data-matrix-type="question.matrix_subtype"
                                                t-att-data-question-type="question.matrix_subtype"
-                                               t-att-value='answer_lines.get_value_matrix(item_idx) if answer_lines else None'
-                                        />
+                                               t-att-value='answer_lines.get_value_matrix(item_idx) if answer_lines else None'/>
                                     </div>
                                 </t>
                                 <t t-if="col_label.answer_type == 'many2one'">
@@ -470,8 +473,7 @@
                                                placeholder="example@mail.com"
                                                t-att-data-matrix-type="question.matrix_subtype"
                                                t-att-data-question-type="question.matrix_subtype"
-                                               t-att-value='answer_lines.get_value_matrix(item_idx) if answer_lines else None'
-                                        />
+                                               t-att-value='answer_lines.get_value_matrix(item_idx) if answer_lines else None'/>
                                     </div>
                                 </t>
                                 <t t-if="col_label.answer_type == 'url'">
@@ -494,8 +496,7 @@
                                                t-att-data-row-id="row_label.id"
                                                t-att-data-matrix-type="question.matrix_subtype"
                                                t-att-data-selection-key="letters[item_idx] if useKeySelection else ''"
-                                               t-att-data-question-type="question.matrix_subtype"
-                                        />
+                                               t-att-data-question-type="question.matrix_subtype"/>
                                     </div>
                                 </t>
                                 <t t-if="col_label.answer_type == 'color'">
@@ -580,16 +581,20 @@
                 </select>
             </t>
             <t t-if="answer_lines">
-                <option t-att-value="answer_lines[0].value_many2many"
-                        selected="1">
-                    <t t-out="answer_lines[0].value_many2many"/>
-                </option>
+                <t t-set="selected_vals"
+                   t-value="[val.strip() for val in (answer_lines[0].value_many2many or '').split(',') if val.strip()]"/>
+                <select class="form-control" multiple="multiple" disabled="disabled">
+                    <t t-foreach="selected_vals" t-as="selected_val">
+                        <option t-att-value="selected_val" selected="1">
+                            <t t-out="selected_val"/>
+                        </option>
+                    </t>
+                </select>
             </t>
             <br/>
             <t t-if="not answer_lines">
                 <span>Press CTRL and Select</span>
             </t>
-
         </div>
     </template>
     <!-- Question: Selection Template -->
@@ -624,10 +629,11 @@
         </t>
         <t t-else="">
             <div>
-                <input type="text" style="width:33%;float:left; "
+                <input type="text" style="width:33%;float:left;"
                        class="form-control datetimepicker-input
                 o_survey_question_date bg-transparent text-dark rounded-0 p-0"
                        t-att-name="question.id" placeholder="Barcode"
+                       t-att-value="answer_lines[0].value_barcode if answer_lines else None"
                        t-att-data-question-type="question.question_type"/>
                 <button type="button" style="margin-left: 10px;"
                         class="btn btn-info fa fa-barcode"/>

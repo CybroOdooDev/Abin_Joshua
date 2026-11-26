@@ -1,112 +1,121 @@
-# -*- coding: utf-8 -*-
-###############################################################################
+#############################################################################
 #
 #    Cybrosys Technologies Pvt. Ltd.
-#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>).
+#
+#    Copyright (C) 2026-TODAY Cybrosys Technologies(<https://www.cybrosys.com>)
 #    Author: Cybrosys Techno Solutions(<https://www.cybrosys.com>)
 #
-#    This program is free software: you can modify
-#    it under the terms of the GNU LESSER GENERAL PUBLIC LICENSE (LGPL) as
-#    published by the Free Software Foundation, either version 3 of the
-#    License, or (at your option) any later version.
+#    You can modify it under the terms of the GNU LESSER
+#    GENERAL PUBLIC LICENSE (LGPL v3), Version 3.
 #
 #    This program is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#    GNU LESSER GENERAL PUBLIC LICENSE for more details.
+#    GNU LESSER GENERAL PUBLIC LICENSE (LGPL v3) for more details.
 #
 #    You should have received a copy of the GNU LESSER GENERAL PUBLIC LICENSE
-#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#    (LGPL v3) along with this program.
+#    If not, see <http://www.gnu.org/licenses/>.
 #
-###############################################################################
+#############################################################################
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
 
 
 class SurveyQuestion(models.Model):
-    """ Inherited survey.question to add custom question type"""
+    """Inherited survey.question to add custom question types."""
+
     _inherit = 'survey.question'
 
     selection_ids = fields.One2many(
         'question.selection',
         'question_id',
         string='Select',
-        help="""Field used to create selection type questions"""
+        help="Options displayed for selection-type questions.",
     )
-    question_type = fields.Selection(selection_add=[
-        ('time', 'Time'),
-        ('month', 'Month'),
-        ('name', 'Name'),
-        ('address', 'Address'),
-        ('email', 'Email'),
-        ('password', 'Password'),
-        ('qr', 'Qrcode'),
-        ('url', 'URL'),
-        ('week', 'Week'),
-        ('color', 'Color'),
-        ('range', 'Range'),
-        ('many2one', 'Many2one'),
-        ('file', 'Upload File'),
-        ('many2many', 'Many2many'),
-        ('selection', 'Selection'),
-        ('barcode', 'Barcode')
-    ], help="Survey supported question types")
+    question_type = fields.Selection(
+        selection_add=[
+            ('time', 'Time'),
+            ('month', 'Month'),
+            ('name', 'Name'),
+            ('address', 'Address'),
+            ('email', 'Email'),
+            ('password', 'Password'),
+            ('qr', 'QR Code'),
+            ('url', 'URL'),
+            ('week', 'Week'),
+            ('color', 'Color'),
+            ('range', 'Range'),
+            ('many2one', 'Many2one'),
+            ('file', 'Upload File'),
+            ('many2many', 'Many2many'),
+            ('selection', 'Selection'),
+            ('barcode', 'Barcode'),
+        ],
+        help="Survey supported question types.",
+    )
     matrix_subtype = fields.Selection(
         selection_add=[('custom', 'Custom Matrix')],
-        help="""Matrix selection type question""")
+        help="Matrix selection type for the question.",
+    )
     model_id = fields.Many2one(
         'ir.model',
         domain=[('transient', '=', False)],
-        help="Many2one type question"
+        help="Target model for Many2one and Many2many questions.",
     )
     range_min = fields.Integer(
         string='Min',
-        help='Minimum range,range type question'
+        help="Minimum range value for range questions.",
     )
     range_max = fields.Integer(
         string='Max',
-        help='Maximum range,range type question'
+        help="Maximum range value for range questions.",
     )
-    qrcode = fields.Text(help='Show qrcode in survey')
-    qrcode_png = fields.Binary(help="Qrcode PNG")
-    barcode = fields.Char(help="Barcode number")
-    barcode_png = fields.Binary(help="Saves barcode png file")
+    qrcode = fields.Text(help="Value encoded into the survey QR code.")
+    barcode = fields.Char(help="12-digit EAN-13 barcode number.")
 
     @api.constrains('barcode')
     def _check_barcode(self):
-        """Constraint function to restrict barcode to exactly 12 digits"""
+        """Restrict barcode to exactly 12 numeric digits."""
         for record in self:
             if record.barcode:
                 if len(record.barcode) < 12:
                     raise ValidationError(
-                        self.env._("Make sure barcode is at least 12 letters"))
+                        self.env._("Barcode must be at least 12 digits."),
+                    )
                 if len(record.barcode) > 12:
                     raise ValidationError(
-                        self.env._("There should not be more than 12 "
-                                  "characters in a barcode"))
+                        self.env._("Barcode cannot exceed 12 digits."),
+                    )
                 if not record.barcode.isdigit():
                     raise ValidationError(
-                        self.env._("Only digits are allowed."))
+                        self.env._("Only digits are allowed."),
+                    )
 
     def _onchange_barcode(self):
-        """Compatibility method for barcode validation"""
+        """Compatibility method for barcode validation."""
         self._check_barcode()
 
     def get_selection_values(self):
-        """Function return options for selection type question"""
+        """Return options for selection-type questions."""
         return self.selection_ids
 
     def prepare_model_id(self, model):
-        """Function to return options for many2one question"""
+        """Return selectable record options for Many2one and Many2many questions."""
         target_model_name = model.model if model else (
             self.model_id.model if self.model_id else False
         )
         if not target_model_name or target_model_name not in self.env:
             return []
 
-        Model = self.env[target_model_name]
-        if Model._abstract:
+        target_model = self.env[target_model_name]
+        if target_model._abstract:
             return []
 
-        model_data = Model.sudo().search([], limit=100)
-        return [rec.read([model_data._rec_name])[0] for rec in model_data]
+        rec_field = (
+            target_model._rec_name
+            if target_model._rec_name in target_model._fields
+            else 'display_name'
+        )
+        records = target_model.sudo().search_read([], [rec_field], limit=100)
+        return [{'id': rec['id'], 'name': rec[rec_field]} for rec in records]

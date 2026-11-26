@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates id="template" xml:space="preserve">
     <t t-name="owl.AdvancedDynamicDashboard">
-        <div t-ref="root" t-attf-class="container o_advanced_dynamic_dashboard {{ this.state.isDarkMode ? 'o_dark_mode' : '' }}" style="min-height:-webkit-fill-available;">
+        <div t-ref="this.rootRef" t-attf-class="container o_advanced_dynamic_dashboard {{ this.state.isDarkMode ? 'o_dark_mode' : '' }}" style="min-height:-webkit-fill-available;">
             <div class="navbar navbar-style border-bottom" role="navigation">
                 <!-- Left Toolbar: Add Items, Edit/Save Layout, View Mode, Theme -->
                 <div class="dashboard-toolbar-left">
@@ -11,41 +11,34 @@
                                 data-bs-toggle="dropdown"
                                 aria-haspopup="true" aria-expanded="false">
                             <i class="fa fa-plus-circle me-1"/>
-                            <span id="text_add" t-translation="on">Add Items</span>
+                            <span id="text_add">Add Items</span>
                         </button>
                         <div class="dropdown-menu dropdown-addblock"
                              aria-labelledby="dropdownMenuButton">
                             <a class="dropdown-item add_block"
                                data-type="tile"
-                               t-on-click="(ev) => this.onClickAddItem(ev)"
-                               t-translation="on">Tile</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)">Tile</a>
                             <a class="dropdown-item add_block"
                                data-type="graph" data-chart_type="bar"
-                               t-on-click="(ev) => this.onClickAddItem(ev)"
-                               t-translation="on">Bar Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)">Bar Chart</a>
                             <a class="dropdown-item add_block"
                                data-type="graph" data-chart_type="doughnut"
-                               t-on-click="(ev) => this.onClickAddItem(ev)"
-                               t-translation="on">Doughnut Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)">Doughnut Chart</a>
                             <a class="dropdown-item add_block"
                                data-type="graph"
                                data-chart_type="line"
-                               t-on-click="(ev) => this.onClickAddItem(ev)"
-                               t-translation="on">Line Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)">Line Chart</a>
                             <a class="dropdown-item add_block"
                                data-type="graph" data-chart_type="pie"
-                               t-on-click="(ev) => this.onClickAddItem(ev)"
-                               t-translation="on">Pie Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)">Pie Chart</a>
                             <a class="dropdown-item add_block"
                                data-type="graph"
                                data-chart_type="polarArea"
-                               t-on-click="(ev) => this.onClickAddItem(ev)"
-                               t-translation="on">Polar Area Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)">Polar Area Chart</a>
                             <a class="dropdown-item add_block"
                                data-type="graph"
                                data-chart_type="radar"
-                               t-on-click="(ev) => this.onClickAddItem(ev)"
-                               t-translation="on">Radar Chart</a>
+                               t-on-click="(ev) => this.onClickAddItem(ev)">Radar Chart</a>
                         </div>
                     </div>
 
@@ -54,13 +47,11 @@
                                 class="navbar-items btn-search_edit btn-align-items btn btn-primary"
                                 type="button"
                                 id="edit_layout"
-                                t-translation="on"
                                 t-on-click="(ev) => this.editLayout(ev)">Edit Layout</button>
                         <button t-if="this.state.isEditingLayout"
                                 class="navbar-items btn-search_edit btn btn-primary"
                                 type="button"
                                 id="save_layout"
-                                t-translation="on"
                                 t-on-click="(ev) => this.saveLayout(ev)">Save Layout</button>
                         <label for="view_mode"
                                class="view-mode-toggle"
@@ -77,9 +68,9 @@
 
                     <div t-if="!this.state.isDarkMode" class="o-dropdown dropdown theme">
                         <select class="form-select theme-select"
-                                t-ref="themeSelector"
+                                t-ref="this.themeSelectorRef"
                                 t-on-change="(ev) => this.onChangeTheme(ev)">
-                            <option value="0" t-translation="on">Select Theme</option>
+                            <option value="0">Select Theme</option>
                             <t t-foreach="this.state.themes" t-as="theme" t-key="theme.id or theme.name">
                                 <option t-att-value="theme.style" t-out="theme.name"/>
                             </t>
@@ -92,25 +83,25 @@
                     <!-- Date Inputs -->
                     <div class="date-inputs">
                         <div class="date-item">
-                            <label for="start-date" class="date-label" t-translation="on">Start Date:</label>
+                            <label for="start-date" class="date-label">Start Date:</label>
                             <input type="date" id="start-date" name="start-date"
-                                   t-ref="startDate"
+                                   t-ref="this.startDateRef"
                                    t-on-change="(ev) => this.dateFilter(ev)"/>
                         </div>
                         <div class="date-item">
-                            <label for="end-date" class="date-label" t-translation="on">End Date:</label>
+                            <label for="end-date" class="date-label">End Date:</label>
                             <input type="date" id="end-date" name="end-date"
-                                   t-ref="endDate"
+                                   t-ref="this.endDateRef"
                                    t-on-change="(ev) => this.dateFilter(ev)"/>
                         </div>
                     </div>
 
                     <!-- Action Icons -->
                     <div class="dashboard-icons-group">
-                        <div class="dashboard_pdf" t-on-click="(ev) => this.printPdf(ev)" title="Print PDF" t-translation="on">
+                        <div class="dashboard_pdf" t-on-click="(ev) => this.printPdf(ev)" title="Print PDF">
                             <i class="bi bi-filetype-pdf"/>
                         </div>
-                        <div class="dashboard_mail" t-on-click="(ev) => this.sendMail(ev)" title="Send Mail" t-translation="on">
+                        <div class="dashboard_mail" t-on-click="(ev) => this.sendMail(ev)" title="Send Mail">
                             <i class="bi bi-envelope-fill"/>
                         </div>
                     </div>
@@ -121,22 +112,20 @@
                             <input class="form-control search-input-chart" type="text"
                                    placeholder="Search" t-on-change="(ev) => this.input_change(ev)"
                                    id="search-input-chart" aria-label="Search"
-                                   t-ref="searchInput"
-                                   t-translation="on"/>
-                            <span id="searchclear" t-on-click="(ev) => this.clearSearch(ev)" title="Clear" t-translation="on">
+                                   t-ref="this.searchInputRef"/>
+                            <span id="searchclear" t-on-click="(ev) => this.clearSearch(ev)" title="Clear">
                                 <i class="fa fa-times search-clear"/>
                             </span>
                         </div>
                         <button class="btn btn-outline-success btn-search-submit"
                                 t-on-click="(ev) => this.clickSearch(ev)"
-                                type="button"
-                                t-translation="on">Search
+                                type="button">Search
                         </button>
                     </div>
                 </div>
             </div>
             <div class="all_items">
-                <div class="items" t-ref="items">
+                <div class="items" t-ref="this.itemsRef">
                     <t t-foreach="this.state.blocks" t-as="block" t-key="block.id">
                         <DynamicDashboardTile t-if="block.type === 'tile'" widget="block" doAction="this.action" dialog="this.dialog" orm="this.orm"/>
                         <DynamicDashboardChart t-else="" widget="block" doAction="this.action" dialog="this.dialog" orm="this.orm"/>

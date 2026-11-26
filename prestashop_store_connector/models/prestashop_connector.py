@@ -60,7 +60,7 @@ class PrestashopConnector(models.Model):
         help="PrestaShop Webservice API URL.",
     )
     api_key = fields.Char(
-        string="API KEY",
+        string="API Key",
         required=True,
         groups='base.group_system',
         help="PrestaShop Webservice API key.",
@@ -141,7 +141,7 @@ class PrestashopConnector(models.Model):
         }
 
     def _not_connected_notification(self):
-        """Return a standard warning notification for disconnected instances."""
+        """Return a warning notification for disconnected instances."""
         return self._notify(
             self.env._("Instance is not connected with PrestaShop!"),
             notification_type='danger',
@@ -273,13 +273,13 @@ class PrestashopConnector(models.Model):
         presta.add('addresses', address_payload)
 
     def _sync_order_delivery_and_discount(self, sale_order, shipping, discount):
-        """Attach PrestaShop shipping and discount lines to an imported sale order."""
+        """Attach shipping and discount lines to an imported sale order."""
         shipping_amount = float(shipping or 0.0)
         if shipping_amount > 0.0:
             carrier = self.env['delivery.carrier'].search(
                 [
                     ('is_prestashop_carrier', '=', True),
-                    ('name', '=', 'Delivery(Prestashop)'),
+                    ('name', '=', 'Delivery (Prestashop)'),
                 ],
                 limit=1,
             )
@@ -300,7 +300,7 @@ class PrestashopConnector(models.Model):
                         'is_delivery_product': True,
                     })
                 carrier = self.env['delivery.carrier'].create({
-                    'name': 'Delivery(Prestashop)',
+                    'name': 'Delivery (Prestashop)',
                     'product_id': delivery_product.id,
                     'is_prestashop_carrier': True,
                 })
@@ -611,7 +611,7 @@ class PrestashopConnector(models.Model):
             ) from error
 
     def _get_or_create_order_product(self, presta, product_presta_id, reference=""):
-        """Find or import a product referenced by an imported PrestaShop order."""
+        """Find or import a product from an imported PrestaShop order."""
         presta_id_int = int(product_presta_id) if str(product_presta_id).isdigit() else 0
         prod = self.env['product.product'].search(
             [('prestashop', '=', presta_id_int)],
@@ -640,7 +640,7 @@ class PrestashopConnector(models.Model):
         return prod.id
 
     def _get_or_create_order_partner(self, presta, customer_id):
-        """Find or import a customer referenced by an imported PrestaShop order."""
+        """Find or import a customer from an imported PrestaShop order."""
         cust_id_int = int(customer_id) if str(customer_id).isdigit() else 0
         partner = self.env['res.partner'].search(
             [('prestashop', '=', cust_id_int)],
@@ -746,7 +746,7 @@ class PrestashopConnector(models.Model):
             ) from error
 
     def _ensure_partner_for_order_export(self, presta, partner):
-        """Ensure the customer exists on PrestaShop and return its external ID."""
+        """Ensure the customer exists in PrestaShop and return its ID."""
         if not partner.prestashop:
             if partner.email:
                 email_clean = partner.email.strip()
@@ -799,7 +799,7 @@ class PrestashopConnector(models.Model):
         return id_address
 
     def _check_delivery_country_active(self, presta, sale_order, id_address):
-        """Return a skip reason if the PrestaShop delivery country is disabled."""
+        """Return a skip reason if the delivery country is disabled."""
         try:
             address_detail = presta.get('addresses', id_address[0])
             id_country = address_detail['address'].get('id_country', 0)

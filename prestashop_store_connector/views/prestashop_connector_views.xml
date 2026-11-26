@@ -60,7 +60,7 @@
                             <field name="name" placeholder="e.g. Shop 1"/>
                         </h1>
                     </div>
-                    <group string="INSTANCE DETAILS">
+                    <group string="Instance Details">
                         <field name="api_url"/>
                         <field name="api_key" password="True"/>
                     </group>

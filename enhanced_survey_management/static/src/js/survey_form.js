@@ -1,7 +1,8 @@
 /** @odoo-module **/
 
-import { patch } from "@web/core/utils/patch";
+import { _t } from "@web/core/l10n/translation";
 import { rpc } from "@web/core/network/rpc";
+import { patch } from "@web/core/utils/patch";
 import { SurveyForm } from "@survey/interactions/survey_form";
 
 patch(SurveyForm.prototype, {
@@ -24,13 +25,10 @@ patch(SurveyForm.prototype, {
     _onSelectCountry(ev) {
         const select = ev.target;
         rpc("/survey/load_country").then((result) => {
-            select.innerHTML = `<option value="">Country</option>`;
-            if (result && result.id) {
-                result.id.forEach((_, i) => {
-                    select.insertAdjacentHTML(
-                        "beforeend",
-                        `<option value="${result.name[i]}">${result.name[i]}</option>`
-                    );
+            select.replaceChildren(new Option(_t("Country"), ""));
+            if (result && result.name) {
+                result.name.forEach((countryName) => {
+                    select.add(new Option(countryName, countryName));
                 });
             }
         });
@@ -49,24 +47,29 @@ patch(SurveyForm.prototype, {
             if (!stateSelect) {
                 return;
             }
-
-            stateSelect.innerHTML = `<option value="">State</option>`;
-            if (result && result.id) {
-                result.id.forEach((_, i) => {
-                    stateSelect.insertAdjacentHTML(
-                        "beforeend",
-                        `<option value="${result.name[i]}">${result.name[i]}</option>`
-                    );
+            stateSelect.replaceChildren(new Option(_t("State"), ""));
+            if (result && result.name) {
+                result.name.forEach((stateName) => {
+                    stateSelect.add(new Option(stateName, stateName));
                 });
             }
         });
     },
 
-    _onSelectMany2many() {
-        const target = this.el.querySelector(".o_select_many2many_text");
-        const source = this.el.querySelector(".o_select_many2many");
-        if (target && source) {
-            target.value = source.value;
+    _onSelectMany2many(ev) {
+        const source = ev?.target || this.el.querySelector(".o_select_many2many");
+        if (!source) {
+            return;
+        }
+        const wrapper = source.closest(".oe_empty");
+        const target =
+            wrapper?.querySelector(".o_select_many2many_text") ||
+            (source.name ? this.el.querySelector(`.${CSS.escape(source.name)}`) : null);
+        if (target) {
+            target.value = Array.from(source.selectedOptions)
+                .map((opt) => opt.value)
+                .filter(Boolean)
+                .join(", ");
         }
     },
 });
